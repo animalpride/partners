@@ -1,0 +1,78 @@
+name: partners-development
+services:
+
+  auth:
+    image: registry.octagon.home/base-images/golang-base-image:latest
+    working_dir: /app
+    volumes:
+      - ../services/auth:/app
+      - ../services/shared:/shared
+      - ./main-config.yml:/app/config.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - partners
+
+  core:
+    image: registry.octagon.home/base-images/golang-base-image:latest
+    working_dir: /app
+    volumes:
+      - ../services/core:/app
+      - ../services/shared:/shared
+      - ./main-config.yml:/app/config.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - partners
+
+  
+
+  ui:
+    image: registry.octagon.home/base-images/react-base-image:latest
+    volumes:
+      - ../services/ui:/app
+    command: sh -c "npm install && npm run dev -- --host --port 3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -v -f http://localhost:3000/ || (echo 'Healthcheck failed' && exit 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - partners
+    environment:
+      - NODE_OPTIONS=--openssl-legacy-provider
+      - HOST=0.0.0.0   # Add this line
+      - VITE_API_BASE=/api/auth/v1
+
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      auth:
+        condition: service_healthy
+      ui:
+        condition: service_healthy
+      core:
+        condition: service_healthy
+    networks:
+      - partners
+
+
+
+
+networks:
+  partners:
+    driver: bridge

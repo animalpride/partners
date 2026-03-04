@@ -1,0 +1,1040 @@
+{
+    "general": {
+        "password_page": {
+            "login_form_heading": "Enter store using password:",
+            "login_password_button": "Enter using password",
+            "login_form_password_label": "Password",
+            "login_form_password_placeholder": "Your password",
+            "login_form_error": "Wrong password!",
+            "login_form_submit": "Enter",
+            "admin_link_html": "Are you the store owner? <a href=\"\/admin\" class=\"link underlined-link\">Log in here<\/a>",
+            "powered_by_shopify_html": "This shop will be powered by {{ shopify }}"
+        },
+        "social": {
+            "alt_text": {
+                "share_on_facebook": "Share on Facebook",
+                "share_on_twitter": "Tweet on Twitter",
+                "share_on_pinterest": "Pin on Pinterest"
+            },
+            "links": {
+                "twitter": "Twitter",
+                "facebook": "Facebook",
+                "pinterest": "Pinterest",
+                "instagram": "Instagram",
+                "tumblr": "Tumblr",
+                "snapchat": "Snapchat",
+                "youtube": "YouTube",
+                "vimeo": "Vimeo",
+                "tiktok": "TikTok"
+            }
+        },
+        "continue_shopping": "Continue shopping",
+        "pagination": {
+            "label": "Pagination",
+            "page": "Page {{ number }}",
+            "next": "Next page",
+            "previous": "Previous page"
+        },
+        "search": {
+            "search": "Search",
+            "reset": "Clear search term"
+        },
+        "cart": {
+            "view": "View cart ({{ count }})",
+            "view_empty_cart": "View cart",
+            "item_added": "Item added to your cart"
+        },
+        "share": {
+            "close": "Close share",
+            "copy_to_clipboard": "Copy link",
+            "share_url": "Link",
+            "success_message": "Link copied to clipboard"
+        },
+        "slider": {
+            "of": "of",
+            "next_slide": "Slide right",
+            "previous_slide": "Slide left",
+            "name": "Slider"
+        }
+    },
+    "newsletter": {
+        "label": "Email",
+        "success": "Thanks for subscribing",
+        "button_label": "Subscribe"
+    },
+    "accessibility": {
+        "skip_to_text": "Skip to content",
+        "skip_to_product_info": "Skip to product information",
+        "close": "Close",
+        "unit_price_separator": "per",
+        "vendor": "Vendor:",
+        "error": "Error",
+        "refresh_page": "Choosing a selection results in a full page refresh.",
+        "link_messages": {
+            "new_window": "Opens in a new window.",
+            "external": "Opens external website."
+        },
+        "loading": "Loading...",
+        "total_reviews": "total reviews",
+        "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars",
+        "collapsible_content_title": "Collapsible content",
+        "complementary_products": "Complementary products"
+    },
+    "blogs": {
+        "article": {
+            "blog": "Blog",
+            "read_more_title": "Read more: {{ title }}",
+            "comments": {
+                "one": "{{ count }} comment",
+                "other": "{{ count }} comments"
+            },
+            "moderated": "Please note, comments need to be approved before they are published.",
+            "comment_form_title": "Leave a comment",
+            "name": "Name",
+            "email": "Email",
+            "message": "Comment",
+            "post": "Post comment",
+            "back_to_blog": "Back to blog",
+            "share": "Share this article",
+            "success": "Your comment was posted successfully! Thank you!",
+            "success_moderated": "Your comment was posted successfully. We will publish it in a little while, as our blog is moderated."
+        }
+    },
+    "onboarding": {
+        "product_title": "Example product title",
+        "collection_title": "Your collection's name"
+    },
+    "products": {
+        "product": {
+            "add_to_cart": "Add to cart",
+            "choose_options": "Choose options",
+            "choose_product_options": "Choose options for {{ product_name }}",
+            "description": "Description",
+            "inventory_in_stock": "In stock",
+            "inventory_in_stock_show_count": "{{ quantity }} in stock",
+            "inventory_low_stock": "Low stock",
+            "inventory_low_stock_show_count": "Low stock: {{ quantity }} left",
+            "inventory_out_of_stock": "Out of stock",
+            "inventory_out_of_stock_continue_selling": "In stock",
+            "sku": "SKU",
+            "on_sale": "Sale",
+            "product_variants": "Product variants",
+            "media": {
+                "gallery_viewer": "Gallery Viewer",
+                "load_image": "Load image {{ index }} in gallery view",
+                "load_model": "Load 3D Model {{ index }} in gallery view",
+                "load_video": "Play video {{ index }} in gallery view",
+                "image_available": "Image {{ index }} is now available in gallery view",
+                "open_media": "Open media {{ index }} in modal",
+                "play_model": "Play 3D Viewer",
+                "play_video": "Play video"
+            },
+            "quantity": {
+                "label": "Quantity",
+                "input_label": "Quantity for {{ product }}",
+                "increase": "Increase quantity for {{ product }}",
+                "decrease": "Decrease quantity for {{ product }}",
+                "minimum_of": "Minimum of {{ quantity }}",
+                "maximum_of": "Maximum of {{ quantity }}",
+                "multiples_of": "Increments of {{ quantity }}",
+                "in_cart_html": "<span class=\"quantity-cart\">{{ quantity }}<\/span> in cart",
+                "note": "View quantity rules"
+            },
+            "volume_pricing": {
+                "title": "Volume Pricing",
+                "note": "Volume pricing available",
+                "minimum": "{{ quantity }}+",
+                "price_at_each": "at {{ price }}\/ea",
+                "price_range": "{{ minimum }} - {{ maximum }}"
+            },
+            "pickup_availability": {
+                "view_store_info": "View store information",
+                "check_other_stores": "Check availability at other stores",
+                "pick_up_available": "Pickup available",
+                "pick_up_available_at_html": "Pickup available at <span class=\"color-foreground\">{{ location_name }}<\/span>",
+                "pick_up_unavailable_at_html": "Pickup currently unavailable at <span class=\"color-foreground\">{{ location_name }}<\/span>",
+                "unavailable": "Couldn't load pickup availability",
+                "refresh": "Refresh"
+            },
+            "price": {
+                "from_price_html": "From {{ price }}",
+                "regular_price": "Regular price",
+                "sale_price": "Sale price",
+                "unit_price": "Unit price"
+            },
+            "share": "Share this product",
+            "sold_out": "Sold out",
+            "unavailable": "Unavailable",
+            "vendor": "Vendor",
+            "value_unavailable": "{{ option_value }} - Unavailable",
+            "variant_sold_out_or_unavailable": "Variant sold out or unavailable",
+            "video_exit_message": "{{ title }} opens full screen video in same window.",
+            "view_full_details": "View full details",
+            "xr_button": "View in your space",
+            "xr_button_label": "View in your space, loads item in augmented reality window",
+            "include_taxes": "Tax included.",
+            "shipping_policy_html": "Taxes, Discounts and <a href=\"https:\/\/animalpride.com\/pages\/new-shipping\">Shipping<\/a> calculated at checkout."
+        },
+        "modal": {
+            "label": "Media gallery"
+        },
+        "facets": {
+            "filter_and_operator_subtitle": "Match all",
+            "apply": "Apply",
+            "clear": "Clear",
+            "clear_all": "Remove all",
+            "from": "From",
+            "filter_and_sort": "Filter and sort",
+            "filter_by_label": "Filter:",
+            "filter_button": "Filter",
+            "filters_selected": {
+                "one": "{{ count }} selected",
+                "other": "{{ count }} selected"
+            },
+            "filter_selected_accessibility": "{{ type }} ({{ count }} filters selected)",
+            "show_more": "Show more",
+            "show_less": "Show less",
+            "max_price": "The highest price is {{ price }}",
+            "product_count": {
+                "one": "{{ product_count }} of {{ count }} product",
+                "other": "{{ product_count }} of {{ count }} products"
+            },
+            "product_count_simple": {
+                "one": "{{ count }} product",
+                "other": "{{ count }} products"
+            },
+            "reset": "Reset",
+            "sort_button": "Sort",
+            "sort_by_label": "Sort by:",
+            "to": "To",
+            "clear_filter": "Remove filter"
+        }
+    },
+    "templates": {
+        "404": {
+            "title": "Page not found",
+            "subtext": "404"
+        },
+        "search": {
+            "no_results": "No results found for \u201c{{ terms }}\u201d. Check the spelling or use a different word or phrase.",
+            "page": "Page",
+            "products": "Products",
+            "results_pages_with_count": {
+                "one": "{{ count }} page",
+                "other": "{{ count }} pages"
+            },
+            "results_suggestions_with_count": {
+                "one": "{{ count }} suggestion",
+                "other": "{{ count }} suggestions"
+            },
+            "results_products_with_count": {
+                "one": "{{ count }} product",
+                "other": "{{ count }} products"
+            },
+            "results_with_count": {
+                "one": "{{ count }} result",
+                "other": "{{ count }} results"
+            },
+            "results_with_count_and_term": {
+                "one": "{{ count }} result found for \u201c{{ terms }}\u201d",
+                "other": "{{ count }} results found for \u201c{{ terms }}\u201d"
+            },
+            "title": "Search results",
+            "search_for": "Search for \u201c{{ terms }}\u201d",
+            "suggestions": "Suggestions",
+            "pages": "Pages"
+        },
+        "cart": {
+            "cart": "Cart"
+        },
+        "contact": {
+            "form": {
+                "title": "Contact form",
+                "name": "Name",
+                "email": "Email",
+                "phone": "Phone number",
+                "comment": "Comment",
+                "send": "Send",
+                "post_success": "Thanks for contacting us. We'll get back to you as soon as possible.",
+                "error_heading": "Please adjust the following:"
+            }
+        }
+    },
+    "sections": {
+        "announcements": {
+            "previous_announcement": "Previous announcement",
+            "next_announcement": "Next announcement",
+            "carousel": "Carousel",
+            "announcement": "Announcement",
+            "announcement_bar": "Announcement bar"
+        },
+        "header": {
+            "announcement": "Announcement",
+            "menu": "Menu",
+            "cart_count": {
+                "one": "{{ count }} item",
+                "other": "{{ count }} items"
+            }
+        },
+        "cart": {
+            "title": "Your cart",
+            "caption": "Cart items",
+            "remove_title": "Remove {{ title }}",
+            "estimated_total": "Estimated total",
+            "new_estimated_total": "New estimated total",
+            "note": "Order special instructions",
+            "checkout": "Check out",
+            "empty": "Your cart is empty",
+            "cart_error": "There was an error while updating your cart. Please try again.",
+            "cart_quantity_error_html": "You can only add {{ quantity }} of this item to your cart.",
+            "taxes_and_shipping_policy_at_checkout_html": "Taxes, Discounts and <a href=\"https:\/\/animalpride.com\/pages\/new-shipping\">shipping<\/a> calculated at checkout",
+            "taxes_included_but_shipping_at_checkout": "Tax included and shipping and discounts calculated at checkout",
+            "taxes_included_and_shipping_policy_html": "Tax included. <a href=\"https:\/\/animalpride.com\/pages\/new-shipping\">Shipping<\/a> and discounts calculated at checkout.",
+            "taxes_and_shipping_at_checkout": "Taxes, discounts and shipping calculated at checkout",
+            "headings": {
+                "product": "Product",
+                "price": "Price",
+                "total": "Total",
+                "quantity": "Quantity",
+                "image": "Product image"
+            },
+            "update": "Update",
+            "login": {
+                "title": "Have an account?",
+                "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Log in<\/a> to check out faster."
+            }
+        },
+        "footer": {
+            "payment": "Payment methods"
+        },
+        "featured_blog": {
+            "view_all": "View all",
+            "onboarding_title": "Blog post",
+            "onboarding_content": "Give your customers a summary of your blog post"
+        },
+        "featured_collection": {
+            "view_all": "View all",
+            "view_all_label": "View all products in the {{ collection_name }} collection"
+        },
+        "collection_list": {
+            "view_all": "View all"
+        },
+        "collection_template": {
+            "empty": "No products found",
+            "title": "Collection",
+            "use_fewer_filters_html": "Use fewer filters or <a class=\"{{ class }}\" href=\"{{ link }}\">remove all<\/a>"
+        },
+        "video": {
+            "load_video": "Load video: {{ description }}"
+        },
+        "slideshow": {
+            "load_slide": "Load slide",
+            "previous_slideshow": "Previous slide",
+            "next_slideshow": "Next slide",
+            "pause_slideshow": "Pause slideshow",
+            "play_slideshow": "Play slideshow",
+            "carousel": "Carousel",
+            "slide": "Slide"
+        },
+        "page": {
+            "title": "Page title"
+        },
+        "quick_order_list": {
+            "product_total": "Product subtotal",
+            "view_cart": "View cart",
+            "each": "{{ money }}\/ea",
+            "product": "Product",
+            "variant": "Variant",
+            "variant_total": "Variant total",
+            "items_added": {
+                "one": "{{ quantity }} item added",
+                "other": "{{ quantity }} items added"
+            },
+            "items_removed": {
+                "one": "{{ quantity }} item removed",
+                "other": "{{ quantity }} items removed"
+            },
+            "product_variants": "Product variants",
+            "total_items": "Total items",
+            "remove_all_single_item_confirmation": "Remove 1 item from your cart?",
+            "remove_all_items_confirmation": "Remove all {{ quantity }} items from your cart?",
+            "remove_all": "Remove all",
+            "cancel": "Cancel"
+        },
+        "ecom-preview-product-product": {
+            "product_single_sale_text_ybkg9moqgji_html": "{price}% OFF",
+            "product_single_sold_text_ybkg9moqgji_html": "Sold out",
+            "instock_text_gdd93j57l9b_html": "26 items left in stock",
+            "outstock_text_gdd93j57l9b_html": "Outstock",
+            "inventory_text_gdd93j57l9b_html": "{quantity} items left in stock",
+            "preorder_text_gdd93j57l9b_html": "Preorder text",
+            "product_option_swatch_1tb6kqtxhc1_html": "Color",
+            "lightbox_button_title_k3c3b9t8v7c_html": "Size guide",
+            "UnderstandaboutEComposer_k3c3b9t8v7c_html": "Understand about EComposer",
+            "s001p0l2hycpSwwapkW8dea5ttnltwycbDEfftasbtsyaw_k3c3b9t8v7c_html": "<h2 style=\"margin: 0px 0px 10px; padding: 0px; line-height: 24px;\">EComposer helps you create professional Shopify websites without any programming knowledge. With 80+ design elements and 50+ templates, there\u2019s no limit to what you can build. Download EComposer for free today and start building the store you\u2019ve always wanted<\/h2>",
+            "view_more_text_xtxowoaufb9_html": "View more",
+            "view_less_text_xtxowoaufb9_html": "View less",
+            "product_option_swatch_d66h9ou2ad_html": "Color",
+            "view_more_text_d66h9ou2ad_html": "View More",
+            "add_to_cart_d66h9ou2ad_html": "Add To Cart",
+            "product_unavailable_d66h9ou2ad_html": "Unavailable",
+            "product_soldout_d66h9ou2ad_html": "Sold out",
+            "added_cart_text_d66h9ou2ad_html": "Added to cart",
+            "added_cart_message_d66h9ou2ad_html": "Added to cart",
+            "sold_out_text_d66h9ou2ad_html": "Sold out",
+            "quick_shop_text_d66h9ou2ad_html": "Quick Shop",
+            "sale_badge_d66h9ou2ad_html": "-{{sale}}%",
+            "countdown_title_d66h9ou2ad_html": "Hurry up! The sale will end on",
+            "no_product_item_d66h9ou2ad_html": "There are no product yet!",
+            "Emailladress_m165nb5p3lf_html": "Emaill adress",
+            "whv011xfd1171061_m165nb5p3lf_html": "<svg width=\"16\" height=\"12\" viewBox=\"0 0 16 12\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" fill=\"currentColor\"><path d=\"M10 12L8.6 10.55L12.15 7H0V5H12.15L8.6 1.45L10 0L16 6L10 12Z\"><\/path><\/svg>",
+            "success_message_m165nb5p3lf_html": "Subscribed successfully!",
+            "error_title_m165nb5p3lf_html": "Opps!. An error has occurred",
+            "error_already_m165nb5p3lf_html": "Email have already subscribed!",
+            "product_sold_text_khoyputijr_html": "{sold}k sold",
+            "textcontent_if4tupywr6b_html": "(100+ rating)",
+            "personalization_label_6itl6hydqg5_html": "Add your personalization",
+            "personalization_placeholder_6itl6hydqg5_html": "I love my mother",
+            "personalization_description_6itl6hydqg5_html": "Please note the font size and color in parentheses after your text.\nE.g. My BFF (30, Black)",
+            "headingtext_8hogqr1uv1g_html": "Upload your favorite photo",
+            "headingtext_t5wb8khfao9_html": "Drag a photo to this area or browse your device",
+            "textcontent_1yqqlt8lodc_html": "Recommended resolution: At lease 300dpi",
+            "headingtext_20a6doo66mb_html": "<b>Amzing<\/b> <i>Gift For<\/i>",
+            "ecomiconlisttitle0_ecom4lax60xrze4_4lax60xrze4_html": "Versatile for any occasion",
+            "ecomiconlisttitle1_ecom4lax60xrze4_4lax60xrze4_html": "Ideal for dressing up",
+            "ecomiconlisttitle2_ecom4lax60xrze4_4lax60xrze4_html": "Perfect gift for loved ones' special celebrations",
+            "headingtext_x0vts1hiw0i_html": "<b>Buy more<\/b> <i>save more<\/i>",
+            "headingtext_krtcru0kozn_html": "10% OFF",
+            "textcontent_zmlnx2pkrk_html": "Buy 2 items",
+            "headingtext_4hhrjq3p5wu_html": "20% OFF",
+            "textcontent_qb3vhfgxdbh_html": "Buy 3 items",
+            "headingtext_im6v9g05vmk_html": "30% OFF",
+            "textcontent_xzbaii0v2f_html": "Buy 4 items and more",
+            "add_to_cart_4jz1s8boinl_html": "Add to cart",
+            "pre_order_4jz1s8boinl_html": "Pre Order",
+            "product_unavailable_4jz1s8boinl_html": "Unavailable",
+            "out_stock_4jz1s8boinl_html": "Out stock",
+            "added_cart_text_4jz1s8boinl_html": "Added to cart",
+            "added_cart_message_4jz1s8boinl_html": "Added to cart",
+            "delivery_text_l04cnxzy9n_html": "Estimated Delivery:<br> [date_start] - [date_end]",
+            "hour_l04cnxzy9n_html": "hour",
+            "delivery_minute_l04cnxzy9n_html": "minute(s)",
+            "delivery_hours_l04cnxzy9n_html": "hour(s)",
+            "delivery_text_01f0taadua9m_html": "Free Shipping:<br> <b>On all orders over $75<\/b>",
+            "hour_01f0taadua9m_html": "hour",
+            "delivery_minute_01f0taadua9m_html": "minute(s)",
+            "delivery_hours_01f0taadua9m_html": "hour(s)",
+            "headingtext_m2xs6mgebup_html": "<b>Guarantee safe<\/b> <i>&amp; secure checkout<\/i>",
+            "headingtext_je2l5os99pj_html": "Share:",
+            "item_title_0_ytu5zjmjzqi_html": "Product Description",
+            "item_title_1_ytu5zjmjzqi_html": "Size Chart",
+            "item_title_2_ytu5zjmjzqi_html": "Shipping Info",
+            "item_title_3_ytu5zjmjzqi_html": "Return",
+            "textcontent_9abewryk7p9_html": "Ready to ship:<div><b>1\u20132 business days&nbsp;<\/b><\/div><div><br><div>Etsy offsets carbon emissions from shipping and packaging on this purchase.<\/div><div><br><\/div><\/div><div>Etsy Purchase Protection: Shop confidently on Etsy knowing if something goes wrong with an order, we've got your back for all eligible purchases <br><\/div>",
+            "textcontent_fsspk2u3jb_html": "<b>Not accepted&nbsp;<\/b><div>But please contact me if you have problems with your order<br><\/div>",
+            "headingtext_oitrvv569fb_html": "<i>Designed for<\/i> <b>comfort<\/b>&nbsp;<div><b>and style.<\/b><br><\/div>",
+            "title0_3lneriwvxyx_html": "High Quality",
+            "text0_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title1_3lneriwvxyx_html": "Worldwide Shipping",
+            "text1_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title2_3lneriwvxyx_html": "Flexible Returns",
+            "text2_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title3_3lneriwvxyx_html": "Eco-Friendly Packaging",
+            "text3_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "headingtext_qkdtdcbabxe_html": "<div><b>Print your<\/b> <i>design on<\/i>&nbsp;<\/div><div><i>a t-shirt<\/i><br><\/div>",
+            "headingtext_kanfpdlvjg_html": "Step 1",
+            "headingtext_92iykthbk8g_html": "Customize your shirt",
+            "ecomiconlisttitle0_ecomrs31gviglae_rs31gviglae_html": "Choose the color, size and your favorite photo.",
+            "ecomiconlisttitle1_ecomrs31gviglae_rs31gviglae_html": "Input your chosen text to make the hoodie more special.",
+            "ecomiconlisttitle2_ecomrs31gviglae_rs31gviglae_html": "Add product to cart and proceed to payment.",
+            "headingtext_rhd5mztuqv_html": "STEP 2",
+            "headingtext_ho76g3en6hg_html": "Confirm your design",
+            "ecomiconlisttitle0_ecomexys4juomcb_exys4juomcb_html": "We will design your print in detail.",
+            "ecomiconlisttitle1_ecomexys4juomcb_exys4juomcb_html": "A preview will be sent to your email for confirmation.",
+            "ecomiconlisttitle2_ecomexys4juomcb_exys4juomcb_html": "If there is no reply, your print will be auto-finalized.",
+            "headingtext_mwzx9il3pcb_html": "STEP3",
+            "headingtext_kd3zvmalnwo_html": "Print and deliver",
+            "ecomiconlisttitle0_ecomrgblg30c9c_rgblg30c9c_html": "We will print the item and do a quality check.",
+            "ecomiconlisttitle1_ecomrgblg30c9c_rgblg30c9c_html": "The item will be sealed, packaged and couriered.",
+            "ecomiconlisttitle2_ecomrgblg30c9c_rgblg30c9c_html": "You will receive the tracking number.",
+            "headingtext_myop4aibzok_html": "<div><b>Hear From Our<\/b> <i>Amazing<\/i>&nbsp;<\/div><div>&nbsp;<i>Customers<\/i><br><\/div>",
+            "text0_qxpssoa87t_html": "\u201cI searched high and low for a cute sweatshirt for the upcoming game\nand couldn\u2019t find one! Decided to take the leap and order from this shop and I couldn\u2019t be happier!!! \u201d<br>",
+            "name0_qxpssoa87t_html": "Rachel",
+            "title0_qxpssoa87t_html": "<strong>Purchased item:<\/strong> Custom embroidered teacher sweatshirt",
+            "text1_qxpssoa87t_html": "\"I love the quality of these rings! I\u2019ve ordered ring stacks from another shop and they felt (and looked) like they were made from simple jewelry wire, and these already feel much better. I should\u2019ve ordered a size down because I have tiny hands but I overall love it!\"",
+            "name1_qxpssoa87t_html": "Lauren",
+            "title1_qxpssoa87t_html": "<strong>Purchased item:<\/strong> 10 Piece Dainty Gold Ring Set",
+            "headingtext_eutkfm1hq2l_html": "<div><b>For<\/b> <i>Head-to-Toe<\/i> <b>Matching<\/b><br><\/div>",
+            "text_week_d66h9ou2ad_html": "[%-W] week%!W",
+            "text_day_d66h9ou2ad_html": "[%-d] day%!D",
+            "text_hour_d66h9ou2ad_html": "[%-H] hr%!H",
+            "text_minute_d66h9ou2ad_html": "[%-M] min%!M",
+            "text_second_d66h9ou2ad_html": "[%-S] sec%!S",
+            "sale_d66h9ou2ad_html": "-{{sale}}%",
+            "headingtext_xk9ojsmj35e_html": "<div><b><\/b><b><\/b><b>Frequently Asked<\/b> <i>Questions<\/i><i><\/i><b><\/b><br><\/div>",
+            "item_title_0_x6u8ux8cq6p_html": "How to Search for Items and Shops?",
+            "item_title_1_x6u8ux8cq6p_html": "How to Contact a Shop?",
+            "item_title_2_x6u8ux8cq6p_html": "How do I cancel a gift card?",
+            "item_title_3_x6u8ux8cq6p_html": "How to change your shipping address during checkout?",
+            "item_title_4_x6u8ux8cq6p_html": "How Do I Update My Shipping Address?",
+            "textcontent_7mzool90sdh_html": "After you search for something, click Custom under Shop location. Type in your city, town, state, or country and select your location from the dropdown. Your search results will refresh and only show you items from shops in the location you chose.<br>",
+            "textcontent_55uqnxw9d7j_html": "If you contacted the seller more than 48 hours ago, choose Open a case so Etsy can help you. For qualifying orders, you\u2019ll receive a refund for any item that doesn\u2019t arrive, arrives damaged, or doesn\u2019t match the item description or photos.&nbsp;<div><br><div>The shop is an independent business. Etsy shops are run by sellers who create or curate their own inventory and manage their own orders. <br><\/div><\/div>",
+            "textcontent_dz00jece56_html": "An Etsy gift card can only be canceled and refunded if the balance hasn\u2019t been used on a purchase. To request a gift card cancellation, go to Contact support at the bottom of this page and include your order number in your request.<br>",
+            "textcontent_ao6h6c8xdnd_html": "If you haven't placed your order yet, you can change your shipping address when you check out:<ol><li>Add an item(s) to your cart.&nbsp;<\/li><li>Go to your Cart.&nbsp;<\/li><li>Choose how you\u2019ll pay.&nbsp;<\/li><li>Go to Proceed to checkout.&nbsp;<\/li><li>Sign in to your Etsy account if you haven\u2019t already, or select Continue as a guest.&nbsp;<\/li><li>Under Shipping address, check that the address you want your order shipped to is correct. If it isn\u2019t correct, select Change.&nbsp;<\/li><li>Select a shipping address or choose Add an address to enter a new address.&nbsp;<\/li><li>Select Ship here once you have the right address.\nSelect Place your order.<br><\/li><\/ol>",
+            "textcontent_tymqgq03bpe_html": "Depending on where you are in the order process, your seller may be able to help you change your shipping address.<br><div><div><\/div><\/div>",
+            "headingtext_5at3i95irer_html": "<div><b><\/b><b>Follow us<\/b> <i>on instagram<\/i><b><\/b><br><\/div>",
+            "headingtext_tbojadmj22_html": "Contact",
+            "textcontent_pijbdinocjj_html": "79 South Street&nbsp;<div>Tasmania(TAS), 7054&nbsp;<\/div><div><a href=\"mailto:support@ecomposer.com\">support@ecomposer.com&nbsp;<\/a><\/div><div>(03) 6257 6883<\/div>",
+            "headingtext_vqn3r21ajo_html": "Customer service",
+            "headingtext_v8mh74vqe_html": "Shop",
+            "headingtext_ac7sdwrxhhf_html": "Stay in touch",
+            "textcontent_wsi5iwouslp_html": "Sign up to our newsletter and get monthly\nupdates on products,",
+            "textcontent_ajy1nhcj6n7_html": "\u00a9 EC \u2022 Powered by Shopify"
+        },
+        "ecom-mainproductpage-product": {
+            "product_single_sale_text_ybkg9moqgji_html": "{price}% OFF",
+            "product_single_sold_text_ybkg9moqgji_html": "Sold out",
+            "instock_text_gdd93j57l9b_html": "26 items left in stock",
+            "outstock_text_gdd93j57l9b_html": "Outstock",
+            "inventory_text_gdd93j57l9b_html": "{quantity} items left in stock",
+            "preorder_text_gdd93j57l9b_html": "Preorder text",
+            "product_option_swatch_1tb6kqtxhc1_html": "Color",
+            "lightbox_button_title_k3c3b9t8v7c_html": "Size guide",
+            "UnderstandaboutEComposer_k3c3b9t8v7c_html": "Understand about EComposer",
+            "s001p0l2hycpSwwapkW8dea5ttnltwycbDEfftasbtsyaw_k3c3b9t8v7c_html": "<h2 style=\"margin: 0px 0px 10px; padding: 0px; line-height: 24px;\">EComposer helps you create professional Shopify websites without any programming knowledge. With 80+ design elements and 50+ templates, there\u2019s no limit to what you can build. Download EComposer for free today and start building the store you\u2019ve always wanted<\/h2>",
+            "view_more_text_xtxowoaufb9_html": "View more",
+            "view_less_text_xtxowoaufb9_html": "View less",
+            "product_option_swatch_d66h9ou2ad_html": "Color",
+            "view_more_text_d66h9ou2ad_html": "View More",
+            "add_to_cart_d66h9ou2ad_html": "Add To Cart",
+            "product_unavailable_d66h9ou2ad_html": "Unavailable",
+            "product_soldout_d66h9ou2ad_html": "Sold out",
+            "added_cart_text_d66h9ou2ad_html": "Added to cart",
+            "added_cart_message_d66h9ou2ad_html": "Added to cart",
+            "sold_out_text_d66h9ou2ad_html": "Sold out",
+            "quick_shop_text_d66h9ou2ad_html": "Quick Shop",
+            "sale_badge_d66h9ou2ad_html": "-{{sale}}%",
+            "countdown_title_d66h9ou2ad_html": "Hurry up! The sale will end on",
+            "no_product_item_d66h9ou2ad_html": "There are no product yet!",
+            "Emailladress_m165nb5p3lf_html": "Emaill adress",
+            "whv011xfd1171061_m165nb5p3lf_html": "<svg width=\"16\" height=\"12\" viewBox=\"0 0 16 12\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" fill=\"currentColor\"><path d=\"M10 12L8.6 10.55L12.15 7H0V5H12.15L8.6 1.45L10 0L16 6L10 12Z\"><\/path><\/svg>",
+            "success_message_m165nb5p3lf_html": "Subscribed successfully!",
+            "error_title_m165nb5p3lf_html": "Opps!. An error has occurred",
+            "error_already_m165nb5p3lf_html": "Email have already subscribed!",
+            "product_sold_text_khoyputijr_html": "{sold}k sold",
+            "textcontent_if4tupywr6b_html": "(100+ rating)",
+            "personalization_label_6itl6hydqg5_html": "Add your personalization",
+            "personalization_placeholder_6itl6hydqg5_html": "I love my mother",
+            "personalization_description_6itl6hydqg5_html": "Please note the font size and color in parentheses after your text.\nE.g. My BFF (30, Black)",
+            "headingtext_8hogqr1uv1g_html": "Upload your favorite photo",
+            "headingtext_t5wb8khfao9_html": "Drag a photo to this area or browse your device",
+            "textcontent_1yqqlt8lodc_html": "Recommended resolution: At lease 300dpi",
+            "headingtext_20a6doo66mb_html": "<b>Amzing<\/b> <i>Gift For<\/i>",
+            "ecomiconlisttitle0_ecom4lax60xrze4_4lax60xrze4_html": "Versatile for any occasion",
+            "ecomiconlisttitle1_ecom4lax60xrze4_4lax60xrze4_html": "Ideal for dressing up",
+            "ecomiconlisttitle2_ecom4lax60xrze4_4lax60xrze4_html": "Perfect gift for loved ones' special celebrations",
+            "headingtext_x0vts1hiw0i_html": "<b>Buy more<\/b> <i>save more<\/i>",
+            "headingtext_krtcru0kozn_html": "10% OFF",
+            "textcontent_zmlnx2pkrk_html": "Buy 2 items",
+            "headingtext_4hhrjq3p5wu_html": "20% OFF",
+            "textcontent_qb3vhfgxdbh_html": "Buy 3 items",
+            "headingtext_im6v9g05vmk_html": "30% OFF",
+            "textcontent_xzbaii0v2f_html": "Buy 4 items and more",
+            "add_to_cart_4jz1s8boinl_html": "Add to cart",
+            "pre_order_4jz1s8boinl_html": "Pre Order",
+            "product_unavailable_4jz1s8boinl_html": "Unavailable",
+            "out_stock_4jz1s8boinl_html": "Out stock",
+            "added_cart_text_4jz1s8boinl_html": "Added to cart",
+            "added_cart_message_4jz1s8boinl_html": "Added to cart",
+            "delivery_text_l04cnxzy9n_html": "Estimated Delivery:<br> [date_start] - [date_end]",
+            "hour_l04cnxzy9n_html": "hour",
+            "delivery_minute_l04cnxzy9n_html": "minute(s)",
+            "delivery_hours_l04cnxzy9n_html": "hour(s)",
+            "delivery_text_01f0taadua9m_html": "Free Shipping:<br> <b>On all orders over $75<\/b>",
+            "hour_01f0taadua9m_html": "hour",
+            "delivery_minute_01f0taadua9m_html": "minute(s)",
+            "delivery_hours_01f0taadua9m_html": "hour(s)",
+            "headingtext_m2xs6mgebup_html": "<b>Guarantee safe<\/b> <i>&amp; secure checkout<\/i>",
+            "headingtext_je2l5os99pj_html": "Share:",
+            "item_title_0_ytu5zjmjzqi_html": "Product Description",
+            "item_title_1_ytu5zjmjzqi_html": "Size Chart",
+            "item_title_2_ytu5zjmjzqi_html": "Shipping Info",
+            "item_title_3_ytu5zjmjzqi_html": "Return",
+            "textcontent_9abewryk7p9_html": "Ready to ship:<div><b>1\u20132 business days&nbsp;<\/b><\/div><div><br><div>Etsy offsets carbon emissions from shipping and packaging on this purchase.<\/div><div><br><\/div><\/div><div>Etsy Purchase Protection: Shop confidently on Etsy knowing if something goes wrong with an order, we've got your back for all eligible purchases <br><\/div>",
+            "textcontent_fsspk2u3jb_html": "<b>Not accepted&nbsp;<\/b><div>But please contact me if you have problems with your order<br><\/div>",
+            "headingtext_oitrvv569fb_html": "<i>Designed for<\/i> <b>comfort<\/b>&nbsp;<div><b>and style.<\/b><br><\/div>",
+            "title0_3lneriwvxyx_html": "High Quality",
+            "text0_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title1_3lneriwvxyx_html": "Worldwide Shipping",
+            "text1_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title2_3lneriwvxyx_html": "Flexible Returns",
+            "text2_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "title3_3lneriwvxyx_html": "Eco-Friendly Packaging",
+            "text3_3lneriwvxyx_html": "Prints that last a long time.\nAt GemCustom, we take product quality very seriously.",
+            "headingtext_qkdtdcbabxe_html": "<div><b>Print your<\/b> <i>design on<\/i>&nbsp;<\/div><div><i>a t-shirt<\/i><br><\/div>",
+            "headingtext_kanfpdlvjg_html": "Step 1",
+            "headingtext_92iykthbk8g_html": "Customize your shirt",
+            "ecomiconlisttitle0_ecomrs31gviglae_rs31gviglae_html": "Choose the color, size and your favorite photo.",
+            "ecomiconlisttitle1_ecomrs31gviglae_rs31gviglae_html": "Input your chosen text to make the hoodie more special.",
+            "ecomiconlisttitle2_ecomrs31gviglae_rs31gviglae_html": "Add product to cart and proceed to payment.",
+            "headingtext_rhd5mztuqv_html": "STEP 2",
+            "headingtext_ho76g3en6hg_html": "Confirm your design",
+            "ecomiconlisttitle0_ecomexys4juomcb_exys4juomcb_html": "We will design your print in detail.",
+            "ecomiconlisttitle1_ecomexys4juomcb_exys4juomcb_html": "A preview will be sent to your email for confirmation.",
+            "ecomiconlisttitle2_ecomexys4juomcb_exys4juomcb_html": "If there is no reply, your print will be auto-finalized.",
+            "headingtext_mwzx9il3pcb_html": "STEP3",
+            "headingtext_kd3zvmalnwo_html": "Print and deliver",
+            "ecomiconlisttitle0_ecomrgblg30c9c_rgblg30c9c_html": "We will print the item and do a quality check.",
+            "ecomiconlisttitle1_ecomrgblg30c9c_rgblg30c9c_html": "The item will be sealed, packaged and couriered.",
+            "ecomiconlisttitle2_ecomrgblg30c9c_rgblg30c9c_html": "You will receive the tracking number.",
+            "headingtext_myop4aibzok_html": "<div><b>Hear From Our<\/b> <i>Amazing<\/i>&nbsp;<\/div><div>&nbsp;<i>Customers<\/i><br><\/div>",
+            "text0_qxpssoa87t_html": "\u201cI searched high and low for a cute sweatshirt for the upcoming game\nand couldn\u2019t find one! Decided to take the leap and order from this shop and I couldn\u2019t be happier!!! \u201d<br>",
+            "name0_qxpssoa87t_html": "Rachel",
+            "title0_qxpssoa87t_html": "<strong>Purchased item:<\/strong> Custom embroidered teacher sweatshirt",
+            "text1_qxpssoa87t_html": "\"I love the quality of these rings! I\u2019ve ordered ring stacks from another shop and they felt (and looked) like they were made from simple jewelry wire, and these already feel much better. I should\u2019ve ordered a size down because I have tiny hands but I overall love it!\"",
+            "name1_qxpssoa87t_html": "Lauren",
+            "title1_qxpssoa87t_html": "<strong>Purchased item:<\/strong> 10 Piece Dainty Gold Ring Set",
+            "headingtext_eutkfm1hq2l_html": "<div><b>For<\/b> <i>Head-to-Toe<\/i> <b>Matching<\/b><br><\/div>",
+            "text_week_d66h9ou2ad_html": "[%-W] week%!W",
+            "text_day_d66h9ou2ad_html": "[%-d] day%!D",
+            "text_hour_d66h9ou2ad_html": "[%-H] hr%!H",
+            "text_minute_d66h9ou2ad_html": "[%-M] min%!M",
+            "text_second_d66h9ou2ad_html": "[%-S] sec%!S",
+            "sale_d66h9ou2ad_html": "-{{sale}}%",
+            "headingtext_xk9ojsmj35e_html": "<div><b><\/b><b><\/b><b>Frequently Asked<\/b> <i>Questions<\/i><i><\/i><b><\/b><br><\/div>",
+            "item_title_0_x6u8ux8cq6p_html": "How to Search for Items and Shops?",
+            "item_title_1_x6u8ux8cq6p_html": "How to Contact a Shop?",
+            "item_title_2_x6u8ux8cq6p_html": "How do I cancel a gift card?",
+            "item_title_3_x6u8ux8cq6p_html": "How to change your shipping address during checkout?",
+            "item_title_4_x6u8ux8cq6p_html": "How Do I Update My Shipping Address?",
+            "textcontent_7mzool90sdh_html": "After you search for something, click Custom under Shop location. Type in your city, town, state, or country and select your location from the dropdown. Your search results will refresh and only show you items from shops in the location you chose.<br>",
+            "textcontent_55uqnxw9d7j_html": "If you contacted the seller more than 48 hours ago, choose Open a case so Etsy can help you. For qualifying orders, you\u2019ll receive a refund for any item that doesn\u2019t arrive, arrives damaged, or doesn\u2019t match the item description or photos.&nbsp;<div><br><div>The shop is an independent business. Etsy shops are run by sellers who create or curate their own inventory and manage their own orders. <br><\/div><\/div>",
+            "textcontent_dz00jece56_html": "An Etsy gift card can only be canceled and refunded if the balance hasn\u2019t been used on a purchase. To request a gift card cancellation, go to Contact support at the bottom of this page and include your order number in your request.<br>",
+            "textcontent_ao6h6c8xdnd_html": "If you haven't placed your order yet, you can change your shipping address when you check out:<ol><li>Add an item(s) to your cart.&nbsp;<\/li><li>Go to your Cart.&nbsp;<\/li><li>Choose how you\u2019ll pay.&nbsp;<\/li><li>Go to Proceed to checkout.&nbsp;<\/li><li>Sign in to your Etsy account if you haven\u2019t already, or select Continue as a guest.&nbsp;<\/li><li>Under Shipping address, check that the address you want your order shipped to is correct. If it isn\u2019t correct, select Change.&nbsp;<\/li><li>Select a shipping address or choose Add an address to enter a new address.&nbsp;<\/li><li>Select Ship here once you have the right address.\nSelect Place your order.<br><\/li><\/ol>",
+            "textcontent_tymqgq03bpe_html": "Depending on where you are in the order process, your seller may be able to help you change your shipping address.<br><div><div><\/div><\/div>",
+            "headingtext_5at3i95irer_html": "<div><b><\/b><b>Follow us<\/b> <i>on instagram<\/i><b><\/b><br><\/div>",
+            "headingtext_tbojadmj22_html": "Contact",
+            "textcontent_pijbdinocjj_html": "79 South Street&nbsp;<div>Tasmania(TAS), 7054&nbsp;<\/div><div><a href=\"mailto:support@ecomposer.com\">support@ecomposer.com&nbsp;<\/a><\/div><div>(03) 6257 6883<\/div>",
+            "headingtext_vqn3r21ajo_html": "Customer service",
+            "headingtext_v8mh74vqe_html": "Shop",
+            "headingtext_ac7sdwrxhhf_html": "Stay in touch",
+            "textcontent_wsi5iwouslp_html": "Sign up to our newsletter and get monthly\nupdates on products,",
+            "textcontent_ajy1nhcj6n7_html": "\u00a9 EC \u2022 Powered by Shopify"
+        },
+        "ecom-partner-collection-collection": {
+            "filter_title_98okihlemv4_html": "Filter ",
+            "product_option_swatch_j4dujrwopxo_html": "Color",
+            "added_cart_text_j4dujrwopxo_html": "Added to cart",
+            "added_cart_message_j4dujrwopxo_html": "Added to cart",
+            "pre_order_j4dujrwopxo_html": "Pre order",
+            "add_to_cart_j4dujrwopxo_html": "Add to cart",
+            "sold_text_j4dujrwopxo_html": "Sold",
+            "sale_text_j4dujrwopxo_html": "Sale",
+            "sale_badge_j4dujrwopxo_html": "-{{sale}}%",
+            "countdown_title_j4dujrwopxo_html": "Hurry up! The sale will end on",
+            "no_product_item_j4dujrwopxo_html": "There are no product yet!",
+            "text_week_j4dujrwopxo_html": "[%-W] week%!W",
+            "text_day_j4dujrwopxo_html": "[%-d] day%!D",
+            "text_hour_j4dujrwopxo_html": "[%-H] hr%!H",
+            "text_minute_j4dujrwopxo_html": "[%-M] min%!M",
+            "text_second_j4dujrwopxo_html": "[%-S] sec%!S",
+            "sale_j4dujrwopxo_html": "-{{sale}}%"
+        },
+        "ecom-new-zoo-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b>New Zoo &amp; Adventure Park Online Store<\/b>"
+        },
+        "ecom-partner-footer-footer": {
+            "headingtext_xdyyqlpql3s_html": "This store is powered by",
+            "headingtext_3l2sr0rujxs_html": "For questions about this store, products or orders, email us at support@animalpride.com",
+            "textcontent_goqt8menfwv_html": "\u00a9 2024 <a href=\"http:\/\/www.animalpride.com\" title=\"Animal Pride\">Animal Pride<\/a>\n| All Rights Reserved  <br>"
+        },
+        "ecom-partner-footer-section": {
+            "textcontent_54ct38cy40u_html": "This store is powered by",
+            "textcontent_rrjxw4t9e7r_html": "\u00a9 2024 <a href=\"http:\/\/www.animalpride.com\" title=\"Animal Pride\">Animal Pride<\/a>\n| All Rights Reserved  <br>"
+        },
+        "ecom-new-about-us-page": {
+            "textcontent_hncijef8pyo_html": "ABOUT US",
+            "textcontent_l43gjokd7a_html": "Our Values",
+            "textcontent_fbxcsdr13ui_html": "At Animal Pride\u2122 we love animals! We are a collection of pet parents who put an equal amount of passion and dedication into our business as we do with our pets, aiming to offer the largest selection of high quality pet &amp; animal inspired apparel for people.<div><br><div>&nbsp;A percentage of the sales from AnimalPride.com are donated to support various animal causes.&nbsp;<\/div><div><br><\/div><div>&nbsp;We also support artists. We source many of our amazing graphics from artists and believe that by focusing on quality apparel and partnering with great artists we will be able to create inspiring products that people love and remember.<\/div><\/div>",
+            "buttoncontent_dzhi1bs38si_html": "BACK TO THE STORE",
+            "textcontent_lozr9axbf0n_html": "Our Mission",
+            "textcontent_ekdc5shtk4t_html": "Our mission is simple. We want to build that same level of trust and love with our customers by always considering the customer first and striving to do more, everyday.<div><div><\/div><\/div>",
+            "buttoncontent_wn1uj948xco_html": "BACK TO THE STORE",
+            "textcontent_l0v1r86gxc_html": "Our Vision",
+            "textcontent_8kvemlmxtw5_html": "We strive to offer the best selection of animal inspired apparel for people at our website, AnimalPride.com, and to be a major supporter of animal welfare organizations.<div><div><\/div><\/div>",
+            "buttoncontent_zc4n3juyc2_html": "BACK TO THE STORE",
+            "textcontent_79g5zt0ucm4_html": "Animal Pride\u2122 is headquartered in Jacksonville, Florida. To reach us, please email <a href=\"mailto:support@animalpride.com\">support@animalpride.com<\/a>.\n\n"
+        },
+        "ecom-new-contact-us-page": {
+            "success_message_vnekdvt3u5i_html": "Successfully message",
+            "error_title_vnekdvt3u5i_html": "Oops!. An error has occured",
+            "textcontent_ggmjugdjng_html": "CONTACT US",
+            "headingtext_d4pyyjpkhdd_html": "Get in Touch",
+            "textcontent_pdkp3fs58gl_html": "Need to get in touch? Please fill out the form and we will get back to you promptly. Our business days are Monday-Friday, excluding holidays.",
+            "ecomiconlisttitle0_ecomwfm359ebawc_wfm359ebawc_html": "Email us Directly",
+            "ecomiconlistdes_0_ecomwfm359ebawc_wfm359ebawc_html": "<div><a href=\"mailto:support@animalpride.com\">support@animalpride.com<\/a><div><\/div><\/div>",
+            "buttoncontent_qigng6cz22_html": "BACK TO THE STORE",
+            "yourname0_placeholder_vnekdvt3u5i_html": "Your Name",
+            "email1_placeholder_vnekdvt3u5i_html": "Email Address",
+            "message2_placeholder_vnekdvt3u5i_html": "Message",
+            "button_title_vnekdvt3u5i_html": "Submit"
+        },
+        "ecom-new-shipping-page": {
+            "textcontent_hncijef8pyo_html": "SHIPPING &amp; RETURNS",
+            "textcontent_l43gjokd7a_html": "Shipping",
+            "textcontent_fbxcsdr13ui_html": "AnimalPride.com offers FREE shipping on all orders over $35! We ship all orders within 1 business day, and we use priority shipping with USPS or UPS to ensure you have tracking on your order.<div><br><\/div><div>Our dedicated staff located in Jacksonville, FL takes pride in getting your order shipped to you as fast as possible with the utmost care. Our business days are Monday-Friday, excluding holidays.<\/div><div><br><\/div><div>We also offer expedited shipping options (2nd Day Air, Next Day Air) through UPS, which is available for purchase during checkout.<\/div><div><br><\/div><div>We currently ship only within the United States. We do not ship internationally at this time.<div><div><\/div><\/div><\/div>",
+            "buttoncontent_dzhi1bs38si_html": "BACK TO THE STORE",
+            "textcontent_lozr9axbf0n_html": "Returns &amp; Refunds",
+            "textcontent_ekdc5shtk4t_html": "We want you to love your purchase! Animal Pride\u2122 is 100% committed to your satisfaction and is happy to offer a hassle-free return process.<div><br><\/div><div>If you are not completely satisfied, please let us know and we'll work with you to make it right.<\/div><div><br><\/div><div>To initiate a return, exchange, or cancellation, please email <a href=\"mailto:support@animalpride.com\">support@animalpride.com<\/a> and write your order number in the subject line (for example please write: \"Return Request for 2102-AP\"). You will receive further instructions within one business day. Our business days are Monday-Friday, excluding holidays.<\/div><div><br><\/div><div>&nbsp;Please keep in mind, returned items should be unused and in the same condition that you received them. We do offer refunds.<div><div><\/div><\/div><\/div>",
+            "buttoncontent_wn1uj948xco_html": "BACK TO THE STORE"
+        },
+        "ecom-new-privacy-page": {
+            "textcontent_hncijef8pyo_html": "Privacy Policy",
+            "buttoncontent_wn1uj948xco_html": "BACK TO THE STORE",
+            "textcontent_fbxcsdr13ui_html": "This Privacy Policy describes how your personal information is collected, used, and shared when you visit or make a purchase from AnimalPride.com (the \u201cSite\u201d), which is operated by Bear &amp; Bear, a Florida Limited Liability Corporation.<div><div><div><\/div><\/div><\/div>",
+            "textcontent_l43gjokd7a_html": "PERSONAL INFORMATION WE COLLECT \n",
+            "buttoncontent_dzhi1bs38si_html": "BACK TO THE STORE",
+            "textcontent_oei31z8dmem_html": "HOW DO WE USE YOUR PERSONAL INFORMATION? \n",
+            "textcontent_jatvms5bxe_html": "We use the Order Information that we collect generally to fulfill any orders placed through the Site (including processing your payment information, arranging for shipping, and providing you with invoices and\/or order confirmations). Additionally, we use this Order Information to:<ul><li>Communicate with you;<\/li><li>Screen our orders for potential risk or fraud; and<\/li><li>When in line with the preferences you have shared with us, provide you with information or advertising relating to our products or services.<\/li><\/ul> \nWe use the Device Information that we collect to help us screen for potential risk and fraud (in particular, your IP address), and more generally to improve and optimize our Site (for example, by generating analytics about how our customers browse and interact with the Site, and to assess the success of our marketing and advertising campaigns).<div> <div><div><div><\/div><\/div><\/div><\/div>",
+            "textcontent_imfidoesum_html": "SHARING YOUR PERSONAL INFORMATION \n",
+            "textcontent_7vzyjv67bwb_html": "We share your Personal Information with third parties to help us use your Personal Information, as described above. For example, we use Shopify to power our online store--you can read more about how Shopify uses your Personal Information here: https:\/\/www.shopify.com\/legal\/privacy. We also use Google Analytics to help us understand how our customers use the Site -- you can read more about how Google uses your Personal Information here: https:\/\/www.google.com\/intl\/en\/policies\/privacy\/. You can also opt-out of Google Analytics here: https:\/\/tools.google.com\/dlpage\/gaoptout.&nbsp;<div><br><\/div><div>&nbsp;Finally, we may also share your Personal Information to comply with applicable laws and regulations, to respond to a subpoena, search warrant or other lawful request for information we receive, or to otherwise protect our rights.<div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_w0k06c06w8h_html": "BACK TO THE STORE",
+            "textcontent_vehkoa7rke_html": "BEHAVIORAL ADVERTISING \n",
+            "textcontent_aewh4satluq_html": "As described above, we use your Personal Information to provide you with targeted advertisements or marketing communications we believe may be of interest to you. For more information about how targeted advertising works, you can visit the Network Advertising Initiative\u2019s (\u201cNAI\u201d) educational page at http:\/\/www.networkadvertising.org\/understanding-online-advertising\/how-does-it-work.<div><br><\/div><div>You can opt out of targeted advertising by using the links below: \n<ul><li>Facebook: https:\/\/www.facebook.com\/settings\/?tab=ads<\/li><li>Google: https:\/\/www.google.com\/settings\/ads\/anonymous<\/li><li>Bing: https:\/\/advertise.bingads.microsoft.com\/en-us\/resources\/policies\/personalized-ads<\/li><\/ul>\n\nAdditionally, you can opt out of some of these services by visiting the Digital Advertising Alliance\u2019s opt-out portal at: http:\/\/optout.aboutads.info\/.<div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_z5sarytze2_html": "DO NOT TRACK \n",
+            "textcontent_lzwfxauogtn_html": "Please note that we do not alter our Site\u2019s data collection and use practices when we see a Do Not Track signal from your browser.<div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_jcl76qnvwe_html": "YOUR RIGHTS \n",
+            "textcontent_0mt30ptyu3m_html": "If you are a European resident, you have the right to access personal information we hold about you and to ask that your personal information be corrected, updated, or deleted. If you would like to exercise this right, please contact us through the contact information below.<div><br><\/div><div>Additionally, if you are a European resident we note that we are processing your information in order to fulfill contracts we might have with you (for example if you make an order through the Site), or otherwise to pursue our legitimate business interests listed above. Additionally, please note that your information will be transferred outside of Europe, including to Canada and the United States.<div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_nwrdra66pga_html": "BACK TO THE STORE",
+            "textcontent_ncwn1jdoegk_html": "DATA RETENTION \n",
+            "textcontent_nfaagmc3408_html": "When you place an order through the Site, we will maintain your Order Information for our records unless and until you ask us to delete this information.<div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_ulldi7a4ubg_html": "CHANGES \n",
+            "textcontent_jrt8tgv7oom_html": "We may update this privacy policy from time to time in order to reflect, for example, changes to our practices or for other operational, legal or regulatory reasons.<div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_p0hin3o33ph_html": "MINORS \n",
+            "textcontent_xsexmtjoo9j_html": "The Site is not intended for individuals under the age of 18.<div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_3vdjee05bn9_html": "CONTACT US",
+            "textcontent_n7tb36oxxl9_html": "For more information about our privacy practices, if you have questions, or if you would like to make a complaint, please contact us by e\u2011mail at or by mail using the details provided below:<div><br><\/div><div>Animal Pride\u2122<\/div><div>1363 Ingleside Ave.<\/div><div>Jacksonville, FL 32205<\/div><div><br><\/div><div><a href=\"mailto:support@animalpride.com\">support@animalpride.com<\/a><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_telu1y0nams_html": "BACK TO THE STORE"
+        },
+        "ecom-new-terms-page": {
+            "textcontent_hncijef8pyo_html": "Terms of Service",
+            "buttoncontent_wn1uj948xco_html": "BACK TO THE STORE",
+            "textcontent_l43gjokd7a_html": "OVERVIEW \n",
+            "buttoncontent_dzhi1bs38si_html": "BACK TO THE STORE",
+            "textcontent_oei31z8dmem_html": "SECTION 1 - ONLINE STORE TERMS \n",
+            "textcontent_jatvms5bxe_html": "By agreeing to these Terms of Service, you represent that you are at least the age of majority in your state or province of residence, or that you are the age of majority in your state or province of residence and you have given us your consent to allow any of your minor dependents to use this site.<div>You may not use our products for any illegal or unauthorized purpose nor may you, in the use of the Service, violate any laws in your jurisdiction (including but not limited to copyright laws). \nYou must not transmit any worms or viruses or any code of a destructive nature.<div>A breach or violation of any of the Terms will result in an immediate termination of your Services.<div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_imfidoesum_html": "SECTION 2 - GENERAL CONDITIONS\n\n \n",
+            "textcontent_7vzyjv67bwb_html": "We reserve the right to refuse service to anyone for any reason at any time.<div>You understand that your content (not including credit card information), may be transferred unencrypted and involve (a) transmissions over various networks; and (b) changes to conform and adapt to technical requirements of connecting networks or devices. Credit card information is always encrypted during transfer over networks.<\/div><div>You agree not to reproduce, duplicate, copy, sell, resell or exploit any portion of the Service, use of the Service, or access to the Service or any contact on the website through which the service is provided, without express written permission by us.<\/div><div>The headings used in this agreement are included for convenience only and will not limit or otherwise affect these Terms.<div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_vehkoa7rke_html": "SECTION 3 - ACCURACY, COMPLETENESS AND TIMELINESS OF INFORMATION \n",
+            "textcontent_aewh4satluq_html": "We are not responsible if information made available on this site is not accurate, complete or current. The material on this site is provided for general information only and should not be relied upon or used as the sole basis for making decisions without consulting primary, more accurate, more complete or more timely sources of information. Any reliance on the material on this site is at your own risk.<div>This site may contain certain historical information. Historical information, necessarily, is not current and is provided for your reference only. We reserve the right to modify the contents of this site at any time, but we have no obligation to update any information on our site. You agree that it is your responsibility to monitor changes to our site.<div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_z5sarytze2_html": "SECTION 4 - MODIFICATIONS TO THE SERVICE AND PRICES \n",
+            "textcontent_lzwfxauogtn_html": "Prices for our products are subject to change without notice. \nWe reserve the right at any time to modify or discontinue the Service (or any part or content thereof) without notice at any time.<div>We shall not be liable to you or to any third-party for any modification, price change, suspension or discontinuance of the Service.<div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_w0k06c06w8h_html": "BACK TO THE STORE",
+            "textcontent_jcl76qnvwe_html": "SECTION 5 - PRODUCTS OR SERVICES (if applicable) \n",
+            "textcontent_ncwn1jdoegk_html": "SECTION 6 - ACCURACY OF BILLING AND ACCOUNT INFORMATION \n",
+            "textcontent_ulldi7a4ubg_html": "SECTION 7 - OPTIONAL TOOLS \n",
+            "textcontent_jrt8tgv7oom_html": "We may provide you with access to third-party tools over which we neither monitor nor have any control nor input.<div>You acknowledge and agree that we provide access to such tools \u201das is\u201d and \u201cas available\u201d without any warranties, representations or conditions of any kind and without any endorsement. We shall have no liability whatsoever arising from or relating to your use of optional third-party tools.<\/div><div>Any use by you of optional tools offered through the site is entirely at your own risk and discretion and you should ensure that you are familiar with and approve of the terms on which tools are provided by the relevant third-party provider(s).<\/div><div>We may also, in the future, offer new services and\/or features through the website (including, the release of new tools and resources). Such new features and\/or services shall also be subject to these Terms of Service.<div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_nwrdra66pga_html": "BACK TO THE STORE",
+            "textcontent_kg7ed5yq9nq_html": "SECTION 8 - THIRD-PARTY LINKS \n",
+            "textcontent_p0hin3o33ph_html": "SECTION 9 - USER COMMENTS, FEEDBACK AND OTHER SUBMISSIONS \n",
+            "textcontent_bmfwqstgjje_html": "SECTION 10 - PERSONAL INFORMATION\n\n \n",
+            "textcontent_v6cb7f4waj_html": "Your submission of personal information through the store is governed by our Privacy Policy. To view our Privacy Policy.<div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_yvf1sxczqar_html": "SECTION 11 - ERRORS, INACCURACIES AND OMISSIONS\n\n\n\n \n",
+            "buttoncontent_nphtoxowr68_html": "BACK TO THE STORE",
+            "textcontent_txc3sppu0sr_html": "SECTION 12 - PROHIBITED USES\n\n\n\n \n",
+            "textcontent_3vdjee05bn9_html": "SECTION 13 - DISCLAIMER OF WARRANTIES; LIMITATION OF LIABILITY",
+            "textcontent_20ncqvx9x2y_html": "SECTION 14 - INDEMNIFICATION\n\n",
+            "textcontent_287h4zxdva6_html": "You agree to indemnify, defend and hold harmless Bear &amp; Bear. and our parent, subsidiaries, affiliates, partners, officers, directors, agents, contractors, licensors, service providers, subcontractors, suppliers, interns and employees, harmless from any claim or demand, including reasonable attorneys\u2019 fees, made by any third-party due to or arising out of your breach of these Terms of Service or the documents they incorporate by reference, or your violation of any law or the rights of a third-party.<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_68wra6dabsq_html": "SECTION 15 - SEVERABILITY\n\n\n\n",
+            "textcontent_mxf1whqncfo_html": "In the event that any provision of these Terms of Service is determined to be unlawful, void or unenforceable, such provision shall nonetheless be enforceable to the fullest extent permitted by applicable law, and the unenforceable portion shall be deemed to be severed from these Terms of Service, such determination shall not affect the validity and enforceability of any other remaining provisions.\n\n<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_b7jaoym7by_html": "BACK TO THE STORE",
+            "textcontent_7kivw9zq2ed_html": "SECTION 16 - TERMINATION\n\n\n\n\n\n",
+            "textcontent_tg1vbn3g3h_html": "The obligations and liabilities of the parties incurred prior to the termination date shall survive the termination of this agreement for all purposes.<div>These Terms of Service are effective unless and until terminated by either you or us. You may terminate these Terms of Service at any time by notifying us that you no longer wish to use our Services, or when you cease using our site.<\/div><div>If in our sole judgment you fail, or we suspect that you have failed, to comply with any term or provision of these Terms of Service, we also may terminate this agreement at any time without notice and you will remain liable for all amounts due up to and including the date of termination; and\/or accordingly may deny you access to our Services (or any part thereof).\n\n<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_j2ssbyktxfb_html": "SECTION 17 - ENTIRE AGREEMENT\n\n\n\n\n\n\n\n",
+            "textcontent_fytl8t4j1kq_html": "The failure of us to exercise or enforce any right or provision of these Terms of Service shall not constitute a waiver of such right or provision.<div>These Terms of Service and any policies or operating rules posted by us on this site or in respect to The Service constitutes the entire agreement and understanding between you and us and govern your use of the Service, superseding any prior or contemporaneous agreements, communications and proposals, whether oral or written, between you and us (including, but not limited to, any prior versions of the Terms of Service).<\/div><div>Any ambiguities in the interpretation of these Terms of Service shall not be construed against the drafting party.<div>\n\n<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_6e5z9omzlmv_html": "SECTION 18 - GOVERNING LAW\n\n\n\n\n\n\n\n\n\n",
+            "textcontent_onnjssf1gn_html": "These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of United States.\n\n<div><div>\n\n<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_swfe69y25a_html": "SECTION 19 - CHANGES TO TERMS OF SERVICE\n\n",
+            "textcontent_1jcczw4mbvi_html": "You can review the most current version of the Terms of Service at any time at this page.<div>We reserve the right, at our sole discretion, to update, change or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes. Your continued use of or access to our website or the Service following the posting of any changes to these Terms of Service constitutes acceptance of those changes.\n\n\n\n<div><div>\n\n<div><div><div><div><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "textcontent_bmzlf1bqy8t_html": "SECTION 20 - CONTACT INFORMATION\n\n",
+            "textcontent_n7tb36oxxl9_html": "Questions about the Terms of Service should be sent to us at:\n\n<div><br><\/div><div>Bear &amp; Bear LLC<\/div><div>1363 Ingleside Ave.<\/div><div>Jacksonville, FL 32205<\/div><div><br><\/div><div><a href=\"mailto:support@animalpride.com\">support@animalpride.com<\/a><div><div><div><div><div><div> <div><div><div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div><\/div>",
+            "buttoncontent_telu1y0nams_html": "BACK TO THE STORE"
+        },
+        "ecom-jax-humane-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b>Jacksonville Humane Society Online Store<\/b>"
+        },
+        "ecom-agk-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b>Adopt a Golden Knoxville Online Store<\/b>"
+        },
+        "ecom-brooke-davis-header-section": {
+            "headingtext_c9vz5cb6tzj_html": "<b>Brooke Davis Angel Fund Online Store<\/b>"
+        },
+        "ecom-dfwlrrc-header-section": {
+            "headingtext_n695bdd5wgh_html": "<b><font color=\"#ffffff\">DFW<\/font> <font color=\"#d1d1d1\"><\/font><font color=\"#d1d1d1\">LABRADOR RETRIEVER<\/font> <font color=\"#969595\">RESCUE CLUB ONLINE STORE&nbsp;&nbsp;<\/font><\/b>"
+        },
+        "ecom-grfr-header-section": {
+            "headingtext_ybb521ou1ns_html": "GOLDEN RETRIEVER",
+            "headingtext_vq82odjial_html": "FREEDOM RESCUE, INC. ONLINE STORE"
+        },
+        "ecom-grrom-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#032552\"><b>GOLDEN RETRIEVER RESCUE<\/b><\/font><div><b style=\"color: rgb(3, 37, 82);\">OF MICHIGAN ONLINE STORE<\/b><\/div>"
+        },
+        "ecom-mayor-max-header-section": {
+            "headingtext_vq82odjial_html": "Online Store<br>"
+        },
+        "ecom-grrmf-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b>Golden Retriever Rescue<\/b><div><b>of Mid-Florida Online Store<\/b><\/div>"
+        },
+        "ecom-grrr-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\">Golden Retriever Rescue of the Rockies Online Store<\/font>"
+        },
+        "ecom-grrswfl-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\"><\/font><div><span style=\"background-color: rgba(255, 255, 255, 0);\"><font color=\"#521900\">Golden Retriever Rescue<\/font><\/span><\/div><div><span style=\"background-color: rgba(255, 255, 255, 0);\"><font color=\"#521900\">of Southwest Florida Online Store<\/font><\/span><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>"
+        },
+        "ecom-grrswfl-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\"><\/font><div><\/div><font color=\"#000000\"><div>Golden Retriever Rescue<br><\/div><div><\/div><\/font><div><font color=\"#000000\">of Southwest Florida Online Store<\/font><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>"
+        },
+        "ecom-ggrlc-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\"><\/font><div><font color=\"#424f82\">Grateful Goldens Rescue<\/font><\/div><div><font color=\"#424f82\">of the Low Country Online Store<\/font><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>"
+        },
+        "ecom-great-rescue-ne-fl-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\"><\/font><div><font color=\"#ffffff\">G.R.E.A.T. RESCUE<\/font><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>",
+            "headingtext_edpj00rg2u_html": "<font color=\"#1d2877\"><\/font><div><span style=\"color: rgb(66, 79, 130);\"><font color=\"#ffffff\">of NE Florida, Inc. Online Store<\/font><\/span><br><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>"
+        },
+        "ecom-parker-paws-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b><\/b><font color=\"#03a5e8\">Online Store<\/font><div><b><\/b><\/div>"
+        },
+        "ecom-seva-grreat-header-section": {
+            "headingtext_ybb521ou1ns_html": "<b>Southeastern Virginia Golden Retriever Rescue, Education &amp; Training Online Store<\/b>"
+        },
+        "ecom-scdr-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#e31f21\">Southern California Dachshund Relief Online Store<\/font>"
+        },
+        "ecom-lrc-header-section": {
+            "headingtext_ybb521ou1ns_html": "Labrador Retriever Club, Inc. Online Store"
+        },
+        "ecom-wclrr-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#ffffff\">West Coast Labrador Retriever Rescue<\/font>"
+        },
+        "ecom-6617009c3a90d83651068294-section": "",
+        "ecom-parter-with-us-page": "",
+        "ecom-666bc2da5974447f7d0358ff-section": "",
+        "ecom-default-template-quickview": {
+            "textcontent_hej9vk0uggt_html": "(100+ rating)",
+            "product_single_sale_text_igi21p1nxm_html": "{price}% OFF",
+            "product_single_sold_text_igi21p1nxm_html": "Sold out",
+            "instock_text_phpd2kxein8_html": "26 items left in stock",
+            "outstock_text_phpd2kxein8_html": "Outstock",
+            "inventory_text_phpd2kxein8_html": "{quantity} items left in stock",
+            "preorder_text_phpd2kxein8_html": "Preorder text",
+            "product_option_swatch_mopm0qumv6_html": "Color",
+            "add_to_cart_boa4cnsk0z_html": "Add to cart",
+            "pre_order_boa4cnsk0z_html": "Pre Order",
+            "product_unavailable_boa4cnsk0z_html": "Unavailable",
+            "out_stock_boa4cnsk0z_html": "Out stock",
+            "added_cart_text_boa4cnsk0z_html": "Added to cart",
+            "added_cart_message_boa4cnsk0z_html": "Added to cart",
+            "headingtext_ke5l5ure39_html": "<b>Guarantee safe<\/b> <i>&amp; secure checkout<\/i>",
+            "headingtext_qx9733j8ss_html": "Share:"
+        },
+        "ecom-gold-ribbon-rescue-header-section": {
+            "headingtext_n695bdd5wgh_html": "<font color=\"#1d2877\"><\/font><div><font color=\"#424f82\">Gold Ribbon Rescue Online Store<\/font><\/div><div><div><font color=\"#1d2877\"><\/font><\/div><\/div>"
+        }
+    },
+    "localization": {
+        "country_label": "Country\/region",
+        "language_label": "Language",
+        "update_language": "Update language",
+        "update_country": "Update country\/region",
+        "search": "Search",
+        "popular_countries_regions": "Popular countries\/regions",
+        "country_results_count": "{{ count }} countries\/regions found"
+    },
+    "customer": {
+        "account": {
+            "title": "Account",
+            "details": "Account details",
+            "view_addresses": "View addresses",
+            "return": "Return to Account details"
+        },
+        "account_fallback": "Account",
+        "activate_account": {
+            "title": "Activate account",
+            "subtext": "Create your password to activate your account.",
+            "password": "Password",
+            "password_confirm": "Confirm password",
+            "submit": "Activate account",
+            "cancel": "Decline invitation"
+        },
+        "addresses": {
+            "title": "Addresses",
+            "default": "Default",
+            "add_new": "Add a new address",
+            "edit_address": "Edit address",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "company": "Company",
+            "address1": "Address 1",
+            "address2": "Address 2",
+            "city": "City",
+            "country": "Country\/region",
+            "province": "Province",
+            "zip": "Postal\/ZIP code",
+            "phone": "Phone",
+            "set_default": "Set as default address",
+            "add": "Add address",
+            "update": "Update address",
+            "cancel": "Cancel",
+            "edit": "Edit",
+            "delete": "Delete",
+            "delete_confirm": "Are you sure you wish to delete this address?"
+        },
+        "log_in": "Log in",
+        "log_out": "Log out",
+        "login_page": {
+            "cancel": "Cancel",
+            "create_account": "Create account",
+            "email": "Email",
+            "forgot_password": "Forgot your password?",
+            "guest_continue": "Continue",
+            "guest_title": "Continue as a guest",
+            "password": "Password",
+            "title": "Login",
+            "sign_in": "Sign in",
+            "submit": "Submit"
+        },
+        "order": {
+            "title": "Order {{ name }}",
+            "date_html": "Placed on {{ date }}",
+            "cancelled_html": "Order Cancelled on {{ date }}",
+            "cancelled_reason": "Reason: {{ reason }}",
+            "billing_address": "Billing Address",
+            "payment_status": "Payment Status",
+            "shipping_address": "Shipping Address",
+            "fulfillment_status": "Fulfillment Status",
+            "discount": "Discount",
+            "shipping": "Shipping",
+            "tax": "Tax",
+            "product": "Product",
+            "sku": "SKU",
+            "price": "Price",
+            "quantity": "Quantity",
+            "total": "Total",
+            "total_refunded": "Refunded",
+            "fulfilled_at_html": "Fulfilled {{ date }}",
+            "track_shipment": "Track shipment",
+            "tracking_url": "Tracking link",
+            "tracking_company": "Carrier",
+            "tracking_number": "Tracking number",
+            "subtotal": "Subtotal",
+            "total_duties": "Duties"
+        },
+        "orders": {
+            "title": "Order history",
+            "order_number": "Order",
+            "order_number_link": "Order number {{ number }}",
+            "date": "Date",
+            "payment_status": "Payment status",
+            "fulfillment_status": "Fulfillment status",
+            "total": "Total",
+            "none": "You haven't placed any orders yet."
+        },
+        "recover_password": {
+            "title": "Reset your password",
+            "subtext": "We will send you an email to reset your password",
+            "success": "We've sent you an email with a link to update your password."
+        },
+        "register": {
+            "title": "Create account",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "email": "Email",
+            "password": "Password",
+            "submit": "Create"
+        },
+        "reset_password": {
+            "title": "Reset account password",
+            "subtext": "Enter a new password",
+            "password": "Password",
+            "password_confirm": "Confirm password",
+            "submit": "Reset password"
+        }
+    },
+    "gift_cards": {
+        "issued": {
+            "how_to_use_gift_card": "Use the gift card code online or QR code in-store",
+            "title": "Here's your {{ value }} gift card balance for {{ shop }}!",
+            "subtext": "Your gift card",
+            "gift_card_code": "Gift card code",
+            "shop_link": "Visit online store",
+            "add_to_apple_wallet": "Add to Apple Wallet",
+            "qr_image_alt": "QR code \u2014 scan to redeem gift card",
+            "copy_code": "Copy gift card code",
+            "expiration_date": "Expires {{ expires_on }}",
+            "copy_code_success": "Code copied successfully",
+            "expired": "Expired"
+        }
+    },
+    "recipient": {
+        "form": {
+            "checkbox": "I want to send this as a gift",
+            "expanded": "Gift card recipient form expanded",
+            "collapsed": "Gift card recipient form collapsed",
+            "email_label": "Recipient email",
+            "email_label_optional_for_no_js_behavior": "Recipient email (optional)",
+            "email": "Email",
+            "name_label": "Recipient name (optional)",
+            "name": "Name",
+            "message_label": "Message (optional)",
+            "message": "Message",
+            "max_characters": "{{ max_chars }} characters max",
+            "send_on": "YYYY-MM-DD",
+            "send_on_label": "Send on (optional)"
+        }
+    },
+    "pagefly": {
+        "products": {
+            "product": {
+                "regular_price": "Regular price",
+                "sold_out": "Sold out",
+                "unavailable": "Unavailable",
+                "on_sale": "Sale",
+                "quantity": "Quantity",
+                "add_to_cart": "Add to cart",
+                "back_to_collection": "Back to {{ title }}",
+                "view_details": "View details"
+            }
+        },
+        "article": {
+            "tags": "Tags:",
+            "all_topics": "All topics",
+            "by_author": "by {{ author }}",
+            "posted_in": "Posted in",
+            "read_more": "Read more",
+            "back_to_blog": "Back to {{ title }}"
+        },
+        "comments": {
+            "title": "Leave a comment",
+            "name": "Name",
+            "email": "Email",
+            "message": "Message",
+            "post": "Post comment",
+            "moderated": "Please note, comments must be approved before they are published",
+            "success_moderated": "Your comment was posted successfully. We will publish it in a little while, as our blog is moderated.",
+            "success": "Your comment was posted successfully! Thank you!",
+            "comments_with_count": {
+                "one": "{{ count }} comment",
+                "other": "{{ count }} comments"
+            }
+        },
+        "password_page": {
+            "login_form_message": "Enter store using password:",
+            "login_form_password_label": "Password",
+            "login_form_password_placeholder": "Your password",
+            "login_form_submit": "Enter",
+            "signup_form_email_label": "Email",
+            "signup_form_success": "We will send you an email right before we open!",
+            "password_link": "Enter using password"
+        }
+    }
+}

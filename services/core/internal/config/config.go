@@ -1,0 +1,68 @@
+package config
+
+import (
+	"os"
+
+	sharedconfig "github.com/animalpride/animalpride-core/services/shared/config"
+	"gopkg.in/yaml.v3"
+)
+
+type Server struct {
+	Port int    `yaml:"port"`
+	Host string `yaml:"host"`
+}
+
+type Database struct {
+	Host     string       `yaml:"host"`
+	Port     int          `yaml:"port"`
+	User     string       `yaml:"user"`
+	Password string       `yaml:"password"`
+	DBName   string       `yaml:"coredbname"`
+	Pool     DatabasePool `yaml:"pool"`
+}
+
+type DatabasePool = sharedconfig.DatabasePool
+
+type Auth struct {
+	BaseURL string `yaml:"base_url"`
+}
+
+type Email struct {
+	SMTPHost       string `yaml:"smtp_host"`
+	SMTPPort       int    `yaml:"smtp_port"`
+	SMTPTLS        bool   `yaml:"smtp_tls"`
+	SMTPAuth       bool   `yaml:"smtp_auth"`
+	SMTPUser       string `yaml:"smtp_user"`
+	SMTPPassword   string `yaml:"smtp_password"`
+	FromEmail      string `yaml:"from_email"`
+	FromName       string `yaml:"from_name"`
+	PartnerLeadsTo string `yaml:"partner_leads_to"`
+}
+
+type Config struct {
+	Server       Server   `yaml:"server"`
+	Database     Database `yaml:"database"`
+	Auth         Auth     `yaml:"auth"`
+	Email        Email    `yaml:"email"`
+	InternalAuth struct {
+		Token string `yaml:"token"`
+	} `yaml:"internal_auth"`
+}
+
+func LoadConfig(path string) (*Config, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var cfg Config
+	decoder := yaml.NewDecoder(file)
+	if err := decoder.Decode(&cfg); err != nil {
+		return nil, err
+	}
+
+	cfg.Database.Password = sharedconfig.ResolveSecret("DENOPS_CORE_DB_PASSWORD", cfg.Database.Password)
+	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("DENOPS_CORE_SMTP_PASSWORD", cfg.Email.SMTPPassword)
+	return &cfg, nil
+}

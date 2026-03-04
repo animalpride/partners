@@ -1,0 +1,32 @@
+# Air configuration file
+
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ./cmd/main.go"
+bin = "tmp/main"
+full_bin = "tmp/main"
+include_ext = ["go", "tpl", "tmpl", "html"]
+exclude_dir = ["assets", "tmp", "test"]
+exclude_file = []
+follow_symlink = false
+
+[color]
+main = "yellow"
+watcher = "cyan"
+build = "green"
+runner = "magenta"
+
+[log]
+time = true
+
+[run]
+cmd = ""
+args = []
+env = ["PORT=8080", "ENV=development"]
+env_file = ".env"
+delay = 1000                           # ms
+
+[misc]
+  clean_on_exit = true

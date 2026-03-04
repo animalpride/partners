@@ -1,0 +1,44 @@
+server:
+  port: 8080
+  host: 0.0.0.0
+jwt_secret: your-secret-key-here
+port: 8080
+env: "development"
+
+auth_session:
+  access_token_ttl: "15m"
+  refresh_token_ttl: "720h"
+  refresh_rotation_interval: "24h"
+
+auth:
+  base_url: "http://auth:8080/"
+internal_auth:
+  token: "replace-with-internal-token"
+core:
+  base_url: "http://core:8080"
+
+database:
+  host: 192.168.1.190
+  port: 3306
+  user: jauchter
+  password: replace-with-db-password
+  authdbname: denops_qa_auth
+  coredbname: denops_qa_core
+  eventsdbname: denops_qa_events
+  assetdbname: denops_qa_asset_source
+  inventorydbname: denops_qa_inventory
+  saleschanneldbname: denops_qa_sales_channel
+
+email:
+  smtp_host: "smtp-relay.gmail.com"
+  smtp_port: 587
+  smtp_tls: true
+  smtp_auth: false
+  from_email: "noreply@animalpride.com"
+  from_name: "DenOps"
+  partner_leads_to: "partners@animalpride.com"
+  links:
+    invite_base_url: "https://denops.octagon.home/accept-invitation"
+    reset_base_url: "https://denops.octagon.home/reset-password"
+  smtp_user: "your-email@gmail.com"
+  smtp_password: "your-app-password"

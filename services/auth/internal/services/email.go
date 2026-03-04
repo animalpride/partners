@@ -1,0 +1,386 @@
+package services
+
+import (
+	"bytes"
+	"crypto/tls"
+	"fmt"
+	"html/template"
+	"log"
+	"net/smtp"
+	"net/url"
+	"strings"
+
+	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
+)
+
+type EmailService struct {
+	config *config.Config
+}
+
+func NewEmailService(cfg *config.Config) *EmailService {
+	return &EmailService{
+		config: cfg,
+	}
+}
+
+// InvitationEmailData contains data for invitation email template
+type InvitationEmailData struct {
+	RecipientName   string
+	InviterName     string
+	ApplicationName string
+	CompanyName     string
+	InviteLink      string
+	SupportEmail    string
+}
+
+type PasswordResetEmailData struct {
+	ApplicationName string
+	CompanyName     string
+	ResetLink       string
+	SupportEmail    string
+}
+
+type PasswordChangedEmailData struct {
+	ApplicationName string
+	CompanyName     string
+	SupportEmail    string
+}
+
+// SendInvitationEmail sends an invitation email to a new user
+func (s *EmailService) SendInvitationEmail(to, recipientName, invitationToken string) error {
+	inviteLink := s.buildInviteLink(invitationToken)
+
+	// Email template data
+	data := InvitationEmailData{
+		RecipientName:   recipientName,
+		InviterName:     "DenOps Team",
+		ApplicationName: "DenOps",
+		CompanyName:     "Animal Pride",
+		InviteLink:      inviteLink,
+		SupportEmail:    s.config.Email.FromEmail,
+	}
+
+	// HTML email template
+	htmlTemplate := `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+		<title>You're Invited to Join {{.ApplicationName}}</title>
+    <style>
+		body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2f3d; background-color: #f2f6f9; }
+		.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+		.panel { border: 1px solid #d3dee8; border-radius: 12px; overflow: hidden; background-color: #e9eff4; }
+		.header { background-color: #00698f; color: #ffffff; padding: 20px; text-align: center; }
+		.content { padding: 30px 20px; background-color: #f2f6f9; }
+        .button { 
+            display: inline-block; 
+			background-color: #00698f; 
+			color: #ffffff; 
+            padding: 12px 30px; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            margin: 20px 0;
+			font-weight: 600;
+			letter-spacing: 0.2px;
+        }
+		.footer { text-align: center; padding: 20px; font-size: 12px; color: #53677a; }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="panel">
+			<div class="header">
+				<h1>Welcome to {{.ApplicationName}}</h1>
+			</div>
+			<div class="content">
+				<h2>Hello{{if .RecipientName}} {{.RecipientName}}{{end}}!</h2>
+				<p>You have been invited to join <strong>{{.ApplicationName}}</strong>, the {{.CompanyName}} operations platform.</p>
+				<p>The {{.InviterName}} has created an invitation for you.</p>
+				<p>To complete your registration, click the button below:</p>
+				<div style="text-align: center;">
+					<a href="{{.InviteLink}}" class="button" style="color: #ffffff !important; text-decoration: none;">Complete Registration</a>
+				</div>
+				<p><strong>What's next?</strong></p>
+				<ul>
+					<li>Open the invitation link above</li>
+					<li>Set your name and password</li>
+					<li>Start using {{.ApplicationName}} workflows</li>
+				</ul>
+				<p>If you have any questions, feel free to reach out to our support team at <a href="mailto:{{.SupportEmail}}">{{.SupportEmail}}</a>.</p>
+				<p>Welcome aboard!</p>
+				<p>Best regards,<br>The {{.CompanyName}} Team</p>
+			</div>
+			<div class="footer">
+				<p>This invitation link will expire in 48 hours for security reasons.</p>
+				<p>If you didn't expect this invitation, you can safely ignore this email.</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>`
+
+	// Parse and execute template
+	tmpl, err := template.New("invitation").Parse(htmlTemplate)
+	if err != nil {
+		log.Printf("SendInvitationEmail: parse template failed: %v", err)
+		return fmt.Errorf("failed to parse email template: %v", err)
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("SendInvitationEmail: execute template failed: %v", err)
+		return fmt.Errorf("failed to execute email template: %v", err)
+	}
+
+	subject := fmt.Sprintf("You're invited to join %s", data.ApplicationName)
+	return s.sendHTML(to, subject, body.String())
+}
+
+func (s *EmailService) buildInviteLink(token string) string {
+	base := strings.TrimSpace(s.config.Email.InviteBaseURL)
+	if base == "" {
+		base = "http://localhost:3000/accept-invitation"
+	}
+	parsed, err := url.Parse(base)
+	if err != nil {
+		log.Printf("buildInviteLink: parse failed: %v", err)
+		return base + "?token=" + url.QueryEscape(token)
+	}
+	query := parsed.Query()
+	query.Set("token", token)
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
+}
+
+func (s *EmailService) buildResetLink(token string) string {
+	base := strings.TrimSpace(s.config.Email.ResetBaseURL)
+	if base == "" {
+		base = "http://localhost:3000/reset-password"
+	}
+	parsed, err := url.Parse(base)
+	if err != nil {
+		log.Printf("buildResetLink: parse failed: %v", err)
+		return base + "?token=" + url.QueryEscape(token)
+	}
+	query := parsed.Query()
+	query.Set("token", token)
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
+}
+
+// SendPasswordResetEmail sends a password reset email with a single-use link.
+func (s *EmailService) SendPasswordResetEmail(to, resetToken string) error {
+	resetLink := s.buildResetLink(resetToken)
+
+	data := PasswordResetEmailData{
+		ApplicationName: "DenOps",
+		CompanyName:     "Animal Pride",
+		ResetLink:       resetLink,
+		SupportEmail:    s.config.Email.FromEmail,
+	}
+
+	htmlTemplate := `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+		<title>Reset your {{.ApplicationName}} password</title>
+    <style>
+		body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2f3d; background-color: #f2f6f9; }
+		.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+		.panel { border: 1px solid #d3dee8; border-radius: 12px; overflow: hidden; background-color: #e9eff4; }
+		.header { background-color: #00698f; color: #ffffff; padding: 20px; text-align: center; }
+		.content { padding: 30px 20px; background-color: #f2f6f9; }
+        .button {
+            display: inline-block;
+			background-color: #00698f;
+			color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+			font-weight: 600;
+			letter-spacing: 0.2px;
+        }
+		.footer { text-align: center; padding: 20px; font-size: 12px; color: #53677a; }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="panel">
+			<div class="header">
+				<h1>{{.ApplicationName}} Password Reset</h1>
+			</div>
+			<div class="content">
+				<p>We received a request to reset your <strong>{{.ApplicationName}}</strong> password.</p>
+				<p>Click the button below to choose a new password:</p>
+				<div style="text-align: center;">
+					<a href="{{.ResetLink}}" class="button" style="color: #ffffff !important; text-decoration: none;">Reset password</a>
+				</div>
+				<p>This link expires in 15 minutes and can only be used once.</p>
+				<p>If you did not request a password reset, you can safely ignore this email.</p>
+				<p>If you have questions, contact us at <a href="mailto:{{.SupportEmail}}">{{.SupportEmail}}</a>.</p>
+				<p>Thanks,<br>The {{.CompanyName}} Team</p>
+			</div>
+			<div class="footer">
+				<p>For your security, never share reset links with anyone.</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>`
+
+	tmpl, err := template.New("password_reset").Parse(htmlTemplate)
+	if err != nil {
+		log.Printf("SendPasswordResetEmail: parse template failed: %v", err)
+		return fmt.Errorf("failed to parse email template: %v", err)
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("SendPasswordResetEmail: execute template failed: %v", err)
+		return fmt.Errorf("failed to execute email template: %v", err)
+	}
+
+	subject := fmt.Sprintf("Reset your %s password", data.ApplicationName)
+	return s.sendHTML(to, subject, body.String())
+}
+
+// SendPasswordChangedEmail notifies the user of a successful password change.
+func (s *EmailService) SendPasswordChangedEmail(to string) error {
+	data := PasswordChangedEmailData{
+		ApplicationName: "DenOps",
+		CompanyName:     "Animal Pride",
+		SupportEmail:    s.config.Email.FromEmail,
+	}
+
+	htmlTemplate := `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+		<title>Your {{.ApplicationName}} password was changed</title>
+    <style>
+		body { font-family: Arial, sans-serif; line-height: 1.6; color: #1f2f3d; background-color: #f2f6f9; }
+		.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+		.panel { border: 1px solid #d3dee8; border-radius: 12px; overflow: hidden; background-color: #e9eff4; }
+		.header { background-color: #00698f; color: #ffffff; padding: 20px; text-align: center; }
+		.content { padding: 30px 20px; background-color: #f2f6f9; }
+		.footer { text-align: center; padding: 20px; font-size: 12px; color: #53677a; }
+    </style>
+</head>
+<body>
+	<div class="container">
+		<div class="panel">
+			<div class="header">
+				<h1>Password Updated</h1>
+			</div>
+			<div class="content">
+				<p>Your <strong>{{.ApplicationName}}</strong> password was changed successfully.</p>
+				<p>If you did not make this change, please reset your password immediately or contact us at <a href="mailto:{{.SupportEmail}}">{{.SupportEmail}}</a>.</p>
+				<p>Thanks,<br>The {{.CompanyName}} Team</p>
+			</div>
+			<div class="footer">
+				<p>This is an automated notification. No reply is necessary.</p>
+			</div>
+		</div>
+	</div>
+</body>
+</html>`
+
+	tmpl, err := template.New("password_changed").Parse(htmlTemplate)
+	if err != nil {
+		log.Printf("SendPasswordChangedEmail: parse template failed: %v", err)
+		return fmt.Errorf("failed to parse email template: %v", err)
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Printf("SendPasswordChangedEmail: execute template failed: %v", err)
+		return fmt.Errorf("failed to execute email template: %v", err)
+	}
+
+	subject := fmt.Sprintf("Your %s password was changed", data.ApplicationName)
+	return s.sendHTML(to, subject, body.String())
+}
+
+func (s *EmailService) sendHTML(to, subject, htmlBody string) error {
+	headers := map[string]string{
+		"From":         fmt.Sprintf("%s <%s>", s.config.Email.FromName, s.config.Email.FromEmail),
+		"To":           to,
+		"Subject":      subject,
+		"MIME-Version": "1.0",
+		"Content-Type": "text/html; charset=UTF-8",
+	}
+
+	message := ""
+	for k, v := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	message += "\r\n" + htmlBody
+
+	smtpAddr := fmt.Sprintf("%s:%d", s.config.Email.SMTPHost, s.config.Email.SMTPPort)
+	client, err := smtp.Dial(smtpAddr)
+	if err != nil {
+		log.Printf("Failed to connect to SMTP server: %v", err)
+		return fmt.Errorf("failed to connect to smtp server: %v", err)
+	}
+	defer client.Close()
+
+	hostname := "denops.animalpride.com"
+	if err := client.Hello(hostname); err != nil {
+		log.Printf("sendHTML: smtp hello failed: %v", err)
+		return fmt.Errorf("failed to say hello: %w", err)
+	}
+
+	if s.config.Email.SMTPTLS {
+		if ok, _ := client.Extension("STARTTLS"); !ok {
+			log.Printf("SMTP server does not support STARTTLS")
+			return fmt.Errorf("smtp server does not support STARTTLS")
+		}
+		tlsConfig := &tls.Config{ServerName: s.config.Email.SMTPHost}
+		if err := client.StartTLS(tlsConfig); err != nil {
+			log.Printf("Failed to start TLS: %v", err)
+			return fmt.Errorf("failed to start tls: %v", err)
+		}
+	}
+
+	if s.config.Email.SMTPAuth {
+		auth := smtp.PlainAuth("", s.config.Email.SMTPUser, s.config.Email.SMTPPassword, s.config.Email.SMTPHost)
+		if err := client.Auth(auth); err != nil {
+			log.Printf("Failed to authenticate with SMTP server: %v", err)
+			return fmt.Errorf("failed to authenticate with smtp server: %v", err)
+		}
+	}
+
+	if err := client.Mail(s.config.Email.FromEmail); err != nil {
+		log.Printf("Failed to set from address: %v", err)
+		return fmt.Errorf("failed to set from address: %v", err)
+	}
+	if err := client.Rcpt(to); err != nil {
+		log.Printf("Failed to set recipient: %v", err)
+		return fmt.Errorf("failed to set recipient: %v", err)
+	}
+
+	dataWriter, err := client.Data()
+	if err != nil {
+		log.Printf("Failed to get data writer: %v", err)
+		return fmt.Errorf("failed to send email data: %v", err)
+	}
+	if _, err := dataWriter.Write([]byte(message)); err != nil {
+		log.Printf("Failed to write email data: %v", err)
+		return fmt.Errorf("failed to write email data: %v", err)
+	}
+	if err := dataWriter.Close(); err != nil {
+		log.Printf("Failed to close data writer: %v", err)
+		return fmt.Errorf("failed to finalize email data: %v", err)
+	}
+
+	if err := client.Quit(); err != nil {
+		log.Printf("Failed to close smtp session: %v", err)
+		return fmt.Errorf("failed to close smtp session: %v", err)
+	}
+
+	return nil
+}

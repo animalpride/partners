@@ -1,0 +1,31 @@
+{% assign rpsMetafields = shop.metafields['rapid-search'] %}
+{% assign rpsSettings = rpsMetafields.rpsSettings %}
+
+{% assign themeSettings = rpsSettings.shopify_public_settings.filters_on_collection_themes
+  | where: 'theme_id', theme.id
+  | first
+%}
+
+{% if content_for_header contains rpsMetafields.storeFrontScriptDomain
+  and themeSettings.enabled == true
+  and rpsSettings.enabled == true
+  and rpsSettings.limit_exceeded == false
+  and rpsSettings.last_import != false
+  and rpsSettings.last_import != null
+%}
+  {% assign focIsEnabled = true %}
+
+  {% render 'rapid-search-results-skeleton' %}
+
+  <script>
+    window.RapidSearchCollectionInfo = {{ collection | json }}
+  </script>
+
+  <style>
+    .rps-foc-container {
+      display: none !important;
+    }
+  </style>
+
+  <div class="rps-foc-container">
+{% endif %}
