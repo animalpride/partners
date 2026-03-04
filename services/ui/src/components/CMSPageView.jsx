@@ -7,7 +7,8 @@ import { getContrastTextColor, normalizeSections } from '../cmsTypes'
 
 
 const OVERLAY_JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' }
-const BTN_ROW_JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' }
+const BTN_ROW_JUSTIFY  = { left: 'flex-start', center: 'center', right: 'flex-end' }
+const BULLET_ALIGN     = { left: 'flex-start', center: 'center', right: 'flex-end' }
 
 export function CMSContentRenderer({ sections }) {
   if (!sections.length) {
@@ -110,11 +111,11 @@ export function CMSContentRenderer({ sections }) {
               className={`cms-section cms-section--bullets${hasColor ? ' cms-section--colored' : ''}`}
               style={{ backgroundColor: bg || undefined, color: textColor }}
             >
-              <div className="cms-section-inner" style={innerStyle}>
+              <div className="cms-section-inner" style={{ ...innerStyle, ...(section.heading ? {} : { marginLeft: 0 }) }}>
                 {section.heading ? (
                   <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
                 ) : null}
-                <ul className="cms-bullets" style={{ display: 'grid' }}>
+                <ul className="cms-bullets" style={{ alignItems: BULLET_ALIGN[alignment] || 'flex-start' }}>
                   {(section.items || []).filter(Boolean).map((item, itemIndex) => (
                     <li key={`bullet-${itemIndex}`} className="cms-bullet-item" style={{ color: textColor }}>
                       <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>

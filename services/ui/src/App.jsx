@@ -55,13 +55,10 @@ function PublicLayout({ canEdit, isAuthenticated, onLogin, onLogout, logoutLoadi
       <Layout.Header className="app-header">
         <div className="app-shell app-header-inner">
           <div className="site-brand">
-            <div className="site-brand-logo">AP</div>
-            <div>
-              <Typography.Title level={3} className="site-title">
-                Animal Pride Partners
-              </Typography.Title>
-              <span className="site-subtitle">Mission-aligned commerce for partner organizations</span>
-            </div>
+            <img src="/AnimalPridePartnerLogotrans.png" alt="Animal Pride Partners" className="site-brand-logo" />
+            <Typography.Title level={3} className="site-title">
+              Partners
+            </Typography.Title>
           </div>
           <Space>
             {canEdit ? (

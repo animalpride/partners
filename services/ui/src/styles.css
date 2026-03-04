@@ -52,18 +52,10 @@ body {
 }
 
 .site-brand-logo {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #00698f 0%, #00a8c6 100%);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 800;
-  font-size: 18px;
+  height: 44px;
+  width: auto;
   flex-shrink: 0;
-  letter-spacing: -0.5px;
+  display: block;
 }
 
 .site-title {
@@ -222,7 +214,8 @@ body {
 .cms-hero-img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 6;
+  height: auto;
+  max-height: 620px;
   object-fit: cover;
   object-position: center;
   opacity: 0.9;
@@ -356,7 +349,9 @@ a.cms-grid-card:hover .cms-grid-img {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 12px;
 }
 
