@@ -2,10 +2,13 @@ import { MenuOutlined } from '@ant-design/icons'
 import { Alert, Button, Drawer, Form, Grid, Input, Layout, Menu, Modal, Space, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
-import { getAuthState, login, logout } from './api'
+import { getAuthState, getComingSoonState, login, logout, unlockComingSoonPreview } from './api'
 import { AdminPanel } from './components/AdminPanel'
 import { ApplicationPage } from './components/ApplicationPage'
 import { CMSPageView } from './components/CMSPageView'
+import { ComingSoonPage } from './components/ComingSoonPage'
+
+const PREVIEW_PREFIX = '/preview/'
 
 const NAV_ITEMS = [
   { key: '/', label: 'Partnership Overview' },
@@ -115,12 +118,20 @@ function PublicLayout({ canEdit, isAuthenticated, onLogin, onLogout, logoutLoadi
 }
 
 export default function App() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [canEdit, setCanEdit] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [logoutLoading, setLogoutLoading] = useState(false)
+  const [bootLoading, setBootLoading] = useState(true)
+  const [comingSoonState, setComingSoonState] = useState({
+    enabled: false,
+    preview_unlocked: false,
+    message: '',
+  })
 
   async function refreshAuth() {
     try {
@@ -133,9 +144,80 @@ export default function App() {
     }
   }
 
+  async function refreshSiteState() {
+    const state = await getComingSoonState()
+    setComingSoonState(state)
+  }
+
+  function getPreviewToken(pathname) {
+    if (!pathname.startsWith(PREVIEW_PREFIX)) {
+      return ''
+    }
+
+    return pathname.slice(PREVIEW_PREFIX.length).trim()
+  }
+
   useEffect(() => {
-    refreshAuth()
+    let cancelled = false
+
+    async function bootstrap() {
+      await Promise.all([refreshAuth(), refreshSiteState()])
+
+      if (!cancelled) {
+        setBootLoading(false)
+      }
+    }
+
+    bootstrap()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
+
+  useEffect(() => {
+    const previewToken = getPreviewToken(location.pathname)
+    if (!previewToken) {
+      return
+    }
+
+    let cancelled = false
+
+    async function unlockPreview() {
+      try {
+        await unlockComingSoonPreview(previewToken)
+      } catch {
+        // best-effort: keep gate closed for invalid tokens
+      }
+
+      await Promise.all([refreshAuth(), refreshSiteState()])
+
+      if (!cancelled) {
+        setBootLoading(false)
+        navigate('/', { replace: true })
+      }
+    }
+
+    unlockPreview()
+
+    return () => {
+      cancelled = true
+    }
+  }, [location.pathname, navigate])
+
+  useEffect(() => {
+    if (bootLoading) {
+      return
+    }
+
+    if (!comingSoonState.enabled || comingSoonState.preview_unlocked) {
+      return
+    }
+
+    if (location.pathname !== '/' && !location.pathname.startsWith(PREVIEW_PREFIX)) {
+      navigate('/', { replace: true })
+    }
+  }, [bootLoading, comingSoonState.enabled, comingSoonState.preview_unlocked, location.pathname, navigate])
 
   async function onLogin(values) {
     setLoginLoading(true)
@@ -164,6 +246,14 @@ export default function App() {
   }
 
   const publicProps = { canEdit, isAuthenticated, onLogin, onLogout, logoutLoading, loginOpen, setLoginOpen, loginLoading, loginError, setLoginError }
+
+  if (bootLoading) {
+    return null
+  }
+
+  if (comingSoonState.enabled && !comingSoonState.preview_unlocked) {
+    return <ComingSoonPage message={comingSoonState.message} />
+  }
 
   return (
     <Routes>
