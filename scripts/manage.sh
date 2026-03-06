@@ -41,9 +41,9 @@ SERVICES=(
 MIGRATE_SERVICES=("auth" "core")
 
 QA_SWARM_CONTEXT="octagon-swarm"
-PROD_SWARM_CONTEXT="denops-prod"
+PROD_SWARM_CONTEXT="ingenforge-prod"
 DEFAULT_CONTEXT="default"
-STACK_NAME="denops"
+STACK_NAME="partners"
 CONFIG_KEEP_DEFAULT=2
 MIGRATE_ENV_DEV_FILE="development/.env"
 MIGRATE_ENV_QA_FILE="deployment/qa/.env"
@@ -505,10 +505,10 @@ create_swarm_config() {
   fi
 
   docker --context "$context" config create \
-    --label "denops.config=true" \
-    --label "denops.env=$env" \
-    --label "denops.role=$role" \
-    --label "denops.version=$version" \
+    --label "partners.config=true" \
+    --label "partners.env=$env" \
+    --label "partners.role=$role" \
+    --label "partners.version=$version" \
     "$name" "$file_path"
 }
 
@@ -522,9 +522,9 @@ cleanup_swarm_configs() {
 
   mapfile -t ids < <(
     docker --context "$context" config ls \
-      --filter "label=denops.config=true" \
-      --filter "label=denops.env=$env" \
-      --filter "label=denops.role=$role" \
+      --filter "label=partners.config=true" \
+      --filter "label=partners.env=$env" \
+      --filter "label=partners.role=$role" \
       --format '{{.ID}}'
   )
 
@@ -721,12 +721,12 @@ deploy_services() {
   if [ "$target_env" == "qa" ]; then
     deploy_compose_file="$QA_COMPOSE_FILE"
     swarm_context="$QA_SWARM_CONTEXT"
-    config_file="$REPO_ROOT/deployment/qa/denops-core.yml"
+    config_file="$REPO_ROOT/deployment/qa/partners-core.yml"
     nginx_file="$REPO_ROOT/deployment/nginx.conf"
   elif [ "$target_env" == "prod" ]; then
     deploy_compose_file="$PROD_COMPOSE_FILE"
     swarm_context="$PROD_SWARM_CONTEXT"
-    config_file="$REPO_ROOT/deployment/prod/denops-core.yml"
+    config_file="$REPO_ROOT/deployment/prod/partners-core.yml"
     nginx_file="$REPO_ROOT/deployment/nginx.conf"
   else
     echo "Error: Missing or invalid deploy target. Use 'qa' or 'prod'."
@@ -746,8 +746,8 @@ deploy_services() {
   config_keep="${CONFIG_KEEP:-$CONFIG_KEEP_DEFAULT}"
   config_version_app=$(compute_config_hash "$config_file")
   config_version_nginx=$(compute_config_hash "$nginx_file")
-  config_name="denops-config-$config_version_app"
-  nginx_name="denops-nginx-$config_version_nginx"
+  config_name="partners-config-$config_version_app"
+  nginx_name="partners-nginx-$config_version_nginx"
 
   # --- Swarm Deployment Logic (runs in all cases) ---
   echo "--- Deploying to Swarm ($target_env) ---"

@@ -11,7 +11,7 @@ version: '3.8'
 #   docker stack deploy \
 #     -c deployment/base/docker-compose.yml \
 #     -c deployment/<env>/docker-compose.override.yml \
-#     --with-registry-auth denops
+#     --with-registry-auth partners
 #
 # Environment-specific overrides (networks, Traefik labels, volume names)
 # live in deployment/qa/docker-compose.override.yml and
@@ -24,7 +24,7 @@ services:
   nginx:
     image: nginx:alpine
     configs:
-      - source: denops-nginx
+      - source: partners-nginx
         target: /etc/nginx/nginx.conf
     deploy:
       replicas: 2
@@ -36,10 +36,10 @@ services:
         condition: on-failure
 
   auth:
-    image: registry.octagon.home/animal-pride/denops-auth:${IMAGE_TAG}
+    image: registry.octagon.home/animal-pride/partners-auth:${IMAGE_TAG}
     configs:
-      - source: denops-config
-        target: /opt/denops-auth/config.yml
+      - source: partners-config
+        target: /opt/partners-auth/config.yml
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
@@ -47,12 +47,12 @@ services:
       retries: 10
       start_period: 60s
     secrets:
-      - denops_auth_db_password
-      - denops_auth_jwt_secret
+      - partners_auth_db_password
+      - partners_auth_jwt_secret
     environment:
       - GIN_MODE=release
-      - DENOPS_AUTH_DB_PASSWORD_FILE=/run/secrets/denops_auth_db_password
-      - DENOPS_AUTH_JWT_SECRET_FILE=/run/secrets/denops_auth_jwt_secret
+      - PARTNERS_AUTH_DB_PASSWORD_FILE=/run/secrets/partners_auth_db_password
+      - PARTNERS_AUTH_JWT_SECRET_FILE=/run/secrets/partners_auth_jwt_secret
     deploy:
       replicas: 2
       update_config:
@@ -64,10 +64,10 @@ services:
         delay: 5s
         max_attempts: 3
       labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
+        - "partners.config.version=${CONFIG_VERSION_APP}"
 
   core:
-    image: registry.octagon.home/animal-pride/denops-core:${IMAGE_TAG}
+    image: registry.octagon.home/animal-pride/partners-core:${IMAGE_TAG}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
       interval: 10s
@@ -75,15 +75,15 @@ services:
       retries: 5
       start_period: 30s
     configs:
-      - source: denops-config
-        target: /opt/denops-core/config.yml
+      - source: partners-config
+        target: /opt/partners-core/config.yml
     environment:
       - GIN_MODE=release
-      - DENOPS_CORE_DB_PASSWORD_FILE=/run/secrets/denops_core_db_password
-      - DENOPS_INTERNAL_TOKEN_FILE=/run/secrets/denops_internal_token
+      - PARTNERS_CORE_DB_PASSWORD_FILE=/run/secrets/partners_core_db_password
+      - PARTNERS_INTERNAL_TOKEN_FILE=/run/secrets/partners_internal_token
     secrets:
-      - denops_core_db_password
-      - denops_internal_token
+      - partners_core_db_password
+      - partners_internal_token
     deploy:
       replicas: 2
       update_config:
@@ -93,135 +93,10 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
-
-  events:
-    image: registry.octagon.home/animal-pride/denops-events:${IMAGE_TAG}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    configs:
-      - source: denops-config
-        target: /opt/denops-events/config.yml
-    environment:
-      - GIN_MODE=release
-      - DENOPS_EVENTS_DB_USER_FILE=/run/secrets/denops_events_db_user
-      - DENOPS_EVENTS_DB_PASSWORD_FILE=/run/secrets/denops_events_db_password
-      - DENOPS_INTERNAL_TOKEN_FILE=/run/secrets/denops_internal_token
-      - DENOPS_EVENTS_RABBITMQ_USER_FILE=/run/secrets/denops_events_rabbitmq_user
-      - DENOPS_EVENTS_RABBITMQ_PASSWORD_FILE=/run/secrets/denops_events_rabbitmq_password
-    secrets:
-      - denops_events_db_user
-      - denops_events_db_password
-      - denops_internal_token
-      - denops_events_rabbitmq_user
-      - denops_events_rabbitmq_password
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
-
-  assets:
-    image: registry.octagon.home/animal-pride/assets:${IMAGE_TAG}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    configs:
-      - source: denops-config
-        target: /opt/assets/config.yml
-    environment:
-      - GIN_MODE=release
-      - DENOPS_ASSETS_DB_PASSWORD_FILE=/run/secrets/denops_assets_db_password
-    secrets:
-      - denops_assets_db_password
-    deploy:
-      replicas: 6
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
-
-  inventory:
-    image: registry.octagon.home/animal-pride/inventory:${IMAGE_TAG}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    configs:
-      - source: denops-config
-        target: /opt/inventory/config.yml
-    environment:
-      - GIN_MODE=release
-      - DENOPS_INVENTORY_DB_PASSWORD_FILE=/run/secrets/denops_inventory_db_password
-      - DENOPS_INTERNAL_TOKEN_FILE=/run/secrets/denops_internal_token
-    secrets:
-      - denops_inventory_db_password
-      - denops_internal_token
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
-
-  sales-channel:
-    image: registry.octagon.home/animal-pride/sales-channel:${IMAGE_TAG}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    configs:
-      - source: denops-config
-        target: /opt/sales-channel/config.yml
-    environment:
-      - GIN_MODE=release
-      - DENOPS_SALES_CHANNEL_DB_PASSWORD_FILE=/run/secrets/denops_sales_channel_db_password
-      - DENOPS_INTERNAL_TOKEN_FILE=/run/secrets/denops_internal_token
-      - DENOPS_SC_SHOPIFY_DENOPS_INTEGRATION_CLIENT_ID_FILE=/run/secrets/denops_sc_shopify_denops_client_id
-      - DENOPS_SC_SHOPIFY_DENOPS_INTEGRATION_CLIENT_SECRET_FILE=/run/secrets/denops_sc_shopify_denops_client_secret
-    secrets:
-      - denops_sales_channel_db_password
-      - denops_internal_token
-      - denops_sc_shopify_denops_client_id
-      - denops_sc_shopify_denops_client_secret
-
-    deploy:
-      replicas: 2
-      update_config:
-        parallelism: 1
-        delay: 10s
-        failure_action: rollback
-      restart_policy:
-        condition: on-failure
-      labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
+        - "partners.config.version=${CONFIG_VERSION_APP}"
 
   ui:
-    image: registry.octagon.home/animal-pride/denops-ui:${IMAGE_TAG}
+    image: registry.octagon.home/animal-pride/partners-ui:${IMAGE_TAG}
     healthcheck:
       test: ["CMD-SHELL", "curl -v -f http://localhost/ || (echo 'Healthcheck failed' && exit 1)"]
       interval: 10s
@@ -237,41 +112,41 @@ services:
       restart_policy:
         condition: on-failure
       labels:
-        - "denops.config.version=${CONFIG_VERSION_APP}"
+        - "partners.config.version=${CONFIG_VERSION_APP}"
 
 configs:
-  denops-config:
-    name: denops-config-${CONFIG_VERSION_APP}
+  partners-config:
+    name: partners-config-${CONFIG_VERSION_APP}
     external: true
-  denops-nginx:
-    name: denops-nginx-${CONFIG_VERSION_NGINX}
+  partners-nginx:
+    name: partners-nginx-${CONFIG_VERSION_NGINX}
     external: true
 
 secrets:
-  denops_auth_db_password:
+  partners_auth_db_password:
     external: true
-  denops_auth_jwt_secret:
+  partners_auth_jwt_secret:
     external: true
-  denops_assets_db_password:
+  partners_assets_db_password:
     external: true
-  denops_core_db_password:
+  partners_core_db_password:
     external: true
-  denops_internal_token:
+  partners_internal_token:
     external: true
-  denops_events_db_user:
+  partners_events_db_user:
     external: true
-  denops_events_db_password:
+  partners_events_db_password:
     external: true
-  denops_events_rabbitmq_user:
+  partners_events_rabbitmq_user:
     external: true
-  denops_events_rabbitmq_password:
+  partners_events_rabbitmq_password:
     external: true
-  denops_inventory_db_password:
+  partners_inventory_db_password:
     external: true
-  denops_sales_channel_db_password:
+  partners_sales_channel_db_password:
     external: true
-  denops_sc_shopify_denops_client_id:
+  partners_sc_shopify_partners_client_id:
     external: true
-  denops_sc_shopify_denops_client_secret:
+  partners_sc_shopify_partners_client_secret:
     external: true
 

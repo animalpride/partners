@@ -10,7 +10,7 @@ version: '3.8'
 #   docker stack deploy \
 #     -c deployment/base/docker-compose.yml \
 #     -c deployment/prod/docker-compose.override.yml \
-#     --with-registry-auth denops
+#     --with-registry-auth partners
 # ==============================================================================
 
 services:
@@ -20,18 +20,18 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.swarm.network=edge_public"
-        - "traefik.http.routers.denopslocal.rule=Host(`denops.internal`)"
-        - "traefik.http.routers.denopslocal.entrypoints=websecure"
-        - "traefik.http.routers.denopslocal.tls=true"
-        - "traefik.http.routers.denopslocal.middlewares=sec@swarm"
-        - "traefik.http.services.denopslocal.loadbalancer.server.port=80"
+        - "traefik.http.routers.partners.rule=Host(`partners.animalpride.com`)"
+        - "traefik.http.routers.partners.entrypoints=websecure"
+        - "traefik.http.routers.partners.tls=true"
+        - "traefik.http.routers.partners.middlewares=sec@swarm"
+        - "traefik.http.services.partners.loadbalancer.server.port=80"
         - "traefik.http.middlewares.sec.headers.framedeny=true"
         - "traefik.http.middlewares.sec.headers.stsseconds=63072000"
         - "traefik.http.middlewares.sec.headers.stsincludesubdomains=true"
         - "traefik.http.middlewares.sec.headers.stspreload=true"
         - "traefik.http.middlewares.sec.headers.contenttypenosniff=true"
         - "traefik.http.middlewares.sec.headers.browserxssfilter=true"
-        - "denops.config.version=${CONFIG_VERSION_NGINX}"
+        - "partners.config.version=${CONFIG_VERSION_NGINX}"
     networks:
       - edge_public
       - backend
