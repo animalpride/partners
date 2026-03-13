@@ -333,3 +333,59 @@ export async function removeRole(userId, roleId) {
   }
   return response.json()
 }
+
+// ── Password Reset (public — no auth required) ────────────────────────────────
+
+export async function requestPasswordReset(email) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/request`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ email }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Request failed')
+  }
+  return response.json()
+}
+
+export async function validatePasswordResetToken(token) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/validate`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ token }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Reset link is invalid or expired')
+  }
+  return response.json()
+}
+
+export async function completePasswordReset(token, password, passwordConfirm) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/complete`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ token, password, password_confirm: passwordConfirm }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Password reset failed')
+  }
+  return response.json()
+}
