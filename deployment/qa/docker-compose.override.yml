@@ -17,6 +17,14 @@ services:
 
   nginx:
     deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+        limits:
+          cpus: '0.10'
+          memory: 96M
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.partners.rule=Host(`partners.octagon.home`)"
@@ -36,14 +44,41 @@ services:
       - backend
 
   auth:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+        limits:
+          cpus: '0.30'
+          memory: 256M
     networks:
       - backend
 
   core:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.15'
+          memory: 160M
+        limits:
+          cpus: '0.35'
+          memory: 320M
     networks:
       - backend
 
   ui:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.10'
+          memory: 96M
+        limits:
+          cpus: '0.15'
+          memory: 160M
     networks:
       - backend
 

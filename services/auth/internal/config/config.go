@@ -68,9 +68,9 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	// Pull secrets from Docker/Kubernetes secret mounts/env, fall back to config file.
-	cfg.Database.Password = sharedconfig.ResolveSecret("DENOPS_AUTH_DB_PASSWORD", cfg.Database.Password)
-	cfg.JWTSecret = sharedconfig.ResolveSecret("DENOPS_AUTH_JWT_SECRET", cfg.JWTSecret)
-	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("DENOPS_AUTH_SMTP_PASSWORD", cfg.Email.SMTPPassword)
+	cfg.Database.Password = sharedconfig.ResolveSecret("PARTNERS_AUTH_DB_PASSWORD", cfg.Database.Password)
+	cfg.JWTSecret = sharedconfig.ResolveSecret("PARTNERS_AUTH_JWT_SECRET", cfg.JWTSecret)
+	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("PARTNERS_AUTH_SMTP_PASSWORD", cfg.Email.SMTPPassword)
 	if cfg.AuthSession.AccessTokenTTL == 0 {
 		cfg.AuthSession.AccessTokenTTL = 15 * time.Minute
 	}

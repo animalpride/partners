@@ -31,12 +31,8 @@ database:
   port: 3306
   user: jauchter
   password: replace-with-db-password
-  authdbname: denops_qa_auth
-  coredbname: denops_qa_core
-  eventsdbname: denops_qa_events
-  assetdbname: denops_qa_asset_source
-  inventorydbname: denops_qa_inventory
-  saleschanneldbname: denops_qa_sales_channel
+  authdbname: partners_qa_auth
+  coredbname: partners_qa_core
 
 email:
   smtp_host: "smtp-relay.gmail.com"
@@ -47,7 +43,7 @@ email:
   from_name: "DenOps"
   partner_leads_to: "partners@animalpride.com"
   links:
-    invite_base_url: "https://denops.octagon.home/accept-invitation"
-    reset_base_url: "https://denops.octagon.home/reset-password"
+    invite_base_url: "https://partners.octagon.home/accept-invitation"
+    reset_base_url: "https://partners.octagon.home/reset-password"
   smtp_user: "your-email@gmail.com"
   smtp_password: "your-app-password"

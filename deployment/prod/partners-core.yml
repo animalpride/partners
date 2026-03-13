@@ -27,9 +27,9 @@ core:
   base_url: "http://core:8080"
 
 database:
-  host: denops-db
-  port: 3306
-  user: denops
+  host: private-dbaas-db-6148925-do-user-34469262-0.g.db.ondigitalocean.com
+  port: 25060
+  user: ap-partners
   password: replace-with-db-password
   authdbname: auth
   coredbname: core
@@ -46,7 +46,7 @@ email:
   smtp_auth: false
   from_email: "noreply@animalpride.com"
   from_name: "AnimalPride"
-  partner_leads_to: "partners@animalpride.com"
+  partner_leads_to: "support@animalpride.com"
   links:
     invite_base_url: "https://partners.animalpride.com/accept-invitation"
     reset_base_url: "https://partners.animalpride.com/reset-password"

@@ -41,7 +41,7 @@ SERVICES=(
 MIGRATE_SERVICES=("auth" "core")
 
 QA_SWARM_CONTEXT="octagon-swarm"
-PROD_SWARM_CONTEXT="ingenforge-prod"
+PROD_SWARM_CONTEXT="partners-animalpride-prod"
 DEFAULT_CONTEXT="default"
 STACK_NAME="partners"
 CONFIG_KEEP_DEFAULT=2

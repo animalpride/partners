@@ -84,7 +84,7 @@ func LoadConfig(path string) (*Config, error) {
 		cfg.Site.ComingSoon.PreviewCookieTTLHour = 48
 	}
 
-	cfg.Database.Password = sharedconfig.ResolveSecret("DENOPS_CORE_DB_PASSWORD", cfg.Database.Password)
-	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("DENOPS_CORE_SMTP_PASSWORD", cfg.Email.SMTPPassword)
+	cfg.Database.Password = sharedconfig.ResolveSecret("PARTNERS_CORE_DB_PASSWORD", cfg.Database.Password)
+	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("PARTNERS_CORE_SMTP_PASSWORD", cfg.Email.SMTPPassword)
 	return &cfg, nil
 }

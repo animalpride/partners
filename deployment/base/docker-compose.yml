@@ -39,7 +39,7 @@ services:
     image: registry.octagon.home/animal-pride/partners-auth:${IMAGE_TAG}
     configs:
       - source: partners-config
-        target: /opt/partners-auth/config.yml
+        target: /opt/auth/config.yml
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
@@ -76,7 +76,7 @@ services:
       start_period: 30s
     configs:
       - source: partners-config
-        target: /opt/partners-core/config.yml
+        target: /opt/core/config.yml
     environment:
       - GIN_MODE=release
       - PARTNERS_CORE_DB_PASSWORD_FILE=/run/secrets/partners_core_db_password
@@ -133,20 +133,4 @@ secrets:
     external: true
   partners_internal_token:
     external: true
-  partners_events_db_user:
-    external: true
-  partners_events_db_password:
-    external: true
-  partners_events_rabbitmq_user:
-    external: true
-  partners_events_rabbitmq_password:
-    external: true
-  partners_inventory_db_password:
-    external: true
-  partners_sales_channel_db_password:
-    external: true
-  partners_sc_shopify_partners_client_id:
-    external: true
-  partners_sc_shopify_partners_client_secret:
-    external: true
-
+ 
