@@ -13,10 +13,11 @@ import (
 
 func NewDB(cfg *config.Config) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s)/%s?parseTime=true",
+		"%s:%s@tcp(%s:%d)/%s?parseTime=true",
 		cfg.Database.User,
 		cfg.Database.Password,
 		cfg.Database.Host,
+		cfg.Database.Port,
 		cfg.Database.DBName,
 	)
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

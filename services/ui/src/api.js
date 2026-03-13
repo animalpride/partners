@@ -116,3 +116,32 @@ export async function submitApplication(payload) {
 
   return response.json()
 }
+
+export async function getComingSoonState() {
+  const response = await fetch(`${CORE_BASE}/site/coming-soon`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    return {
+      enabled: false,
+      preview_unlocked: false,
+      message: '',
+    }
+  }
+
+  return response.json()
+}
+
+export async function unlockComingSoonPreview(token) {
+  const response = await fetch(`${CORE_BASE}/site/coming-soon/unlock/${encodeURIComponent(token)}`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error('Preview unlock failed')
+  }
+
+  return response.json()
+}

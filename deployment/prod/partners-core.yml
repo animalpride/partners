@@ -1,0 +1,54 @@
+server:
+  port: 8080
+  host: 0.0.0.0
+jwt_secret: replaced-by-production-secret-key
+port: 8080
+env: "production"
+
+site:
+  coming_soon:
+    enabled: true
+    message: "The partners.animalpride.com experience is being redesigned to better serve you. We look forward to sharing the new site shortly. Check back soon!"
+    preview_path: "preview-prod-rotate-me"
+    preview_cookie_name: "ap_preview_access"
+    preview_cookie_ttl_hours: 72
+    preview_cookie_secure: true
+
+auth_session:
+  access_token_ttl: "15m"
+  refresh_token_ttl: "720h"
+  refresh_rotation_interval: "24h"
+
+auth:
+  base_url: "http://auth:8080/"
+internal_auth:
+  token: "replace-with-internal-token"
+core:
+  base_url: "http://core:8080"
+
+database:
+  host: private-dbaas-db-6148925-do-user-34469262-0.g.db.ondigitalocean.com
+  port: 25060
+  user: ap-partners
+  password: replace-with-db-password
+  authdbname: auth
+  coredbname: core
+  pool:
+    max_open_conns: 10
+    max_idle_conns: 5
+    conn_max_lifetime_minutes: 30
+    conn_max_idle_minutes: 5
+
+email:
+  smtp_host: "smtp-relay.gmail.com"
+  smtp_port: 587
+  smtp_tls: true
+  smtp_auth: false
+  from_email: "noreply@animalpride.com"
+  from_name: "AnimalPride"
+  partner_leads_to: "support@animalpride.com"
+  links:
+    invite_base_url: "https://partners.animalpride.com/accept-invitation"
+    reset_base_url: "https://partners.animalpride.com/reset-password"
+  smtp_user: "your-email@gmail.com"
+  smtp_password: "your-app-password"

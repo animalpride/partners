@@ -10,72 +10,82 @@ version: '3.8'
 #   docker stack deploy \
 #     -c deployment/base/docker-compose.yml \
 #     -c deployment/prod/docker-compose.override.yml \
-#     --with-registry-auth denops
+#     --with-registry-auth partners
 # ==============================================================================
 
 services:
 
   nginx:
     deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+        limits:
+          cpus: '0.10'
+          memory: 96M
       labels:
         - "traefik.enable=true"
-        - "traefik.swarm.network=edge_public"
-        - "traefik.http.routers.denopslocal.rule=Host(`denops.internal`)"
-        - "traefik.http.routers.denopslocal.entrypoints=websecure"
-        - "traefik.http.routers.denopslocal.tls=true"
-        - "traefik.http.routers.denopslocal.middlewares=sec@swarm"
-        - "traefik.http.services.denopslocal.loadbalancer.server.port=80"
+        - "traefik.swarm.network=traefik_network"
+        - "traefik.http.routers.partners.rule=Host(`partners.animalpride.com`)"
+        - "traefik.http.routers.partners.entrypoints=websecure"
+        - "traefik.http.routers.partners.tls.certresolver=godaddyhttp"
+        - "traefik.http.routers.partners.tls=true"
+        - "traefik.http.routers.partners.middlewares=sec@swarm"
+        - "traefik.http.services.partners.loadbalancer.server.port=80"
         - "traefik.http.middlewares.sec.headers.framedeny=true"
         - "traefik.http.middlewares.sec.headers.stsseconds=63072000"
         - "traefik.http.middlewares.sec.headers.stsincludesubdomains=true"
         - "traefik.http.middlewares.sec.headers.stspreload=true"
         - "traefik.http.middlewares.sec.headers.contenttypenosniff=true"
         - "traefik.http.middlewares.sec.headers.browserxssfilter=true"
-        - "denops.config.version=${CONFIG_VERSION_NGINX}"
+        - "partners.config.version=${CONFIG_VERSION_NGINX}"
     networks:
-      - edge_public
+      - traefik_network
       - backend
 
   auth:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+        limits:
+          cpus: '0.30'
+          memory: 256M
     networks:
       - backend
-      - infra_internal
 
   core:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.15'
+          memory: 160M
+        limits:
+          cpus: '0.35'
+          memory: 320M
     networks:
       - backend
-      - infra_internal
-
-  events:
-    networks:
-      - backend
-      - infra_internal
-
-  assets:
-    volumes:
-      - assets:/asset_source
-    networks:
-      - backend
-      - infra_internal
-
-  inventory:
-    networks:
-      - backend
-      - infra_internal
-
-  sales-channel:
-    networks:
-      - backend
-      - infra_internal
 
   ui:
+    deploy:
+      replicas: 1
+      resources:
+        reservations:
+          cpus: '0.10'
+          memory: 96M
+        limits:
+          cpus: '0.15'
+          memory: 160M
     networks:
       - backend
 
 networks:
-  edge_public:
-    external: true
-  infra_internal:
+  traefik_network:
     external: true
   backend:
     driver: overlay

@@ -23,6 +23,7 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 
 	cmsHandler := handlers.NewCMSHandler(cmsRepo, leadRepo)
 	partnerHandler := handlers.NewPartnerHandler(leadRepo, leadEmailService)
+	siteHandler := handlers.NewSiteHandler(cfg)
 
 	router := gin.New()
 	router.Use(gin.Recovery(), sharedmw.ErrorLogger())
@@ -36,6 +37,9 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	public.GET("/pages", cmsHandler.GetAllPages)
 	public.GET("/pages/:slug", cmsHandler.GetPageBySlug)
 	public.POST("/application", cmsHandler.SubmitLead)
+
+	router.GET("/site/coming-soon", siteHandler.GetComingSoonState)
+	router.POST("/site/coming-soon/unlock/:token", siteHandler.UnlockPreview)
 	router.POST("/partners/leads", partnerHandler.SubmitLead)
 
 	admin := router.Group("/cms/admin")
