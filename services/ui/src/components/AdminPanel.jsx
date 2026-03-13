@@ -6,9 +6,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPage, updatePage } from '../api'
 import {
-  CMS_PAGES, FIELD_TYPE_OPTIONS, IMAGE_POSITION_OPTIONS, SECTION_ALIGNMENT_OPTIONS,
-  SECTION_BACKGROUND_OPTIONS, SECTION_TYPES,
-  makeDefaultSection, normalizeField, normalizeGridItem,
+  CMS_PAGES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
+  SECTION_ALIGNMENT_OPTIONS, SECTION_BACKGROUND_OPTIONS, SECTION_TYPES,
+  TWO_COLUMN_IMAGE_SIDE_OPTIONS, TWO_COLUMN_VARIANT_OPTIONS,
+  makeDefaultSection, normalizeComparisonRow, normalizeField, normalizeGridItem, normalizeIconItem,
   normalizeSections, toContentJSON,
 } from '../cmsTypes'
 import { CMSContentRenderer } from './CMSPageView'
@@ -34,14 +35,14 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
       </div>
 
       <Form layout="vertical" size="small">
+        <Form.Item label="Type" style={{ marginBottom: 8 }}>
+          <Select
+            value={section.type}
+            options={SECTION_TYPES}
+            onChange={(v) => update(makeDefaultSection(v))}
+          />
+        </Form.Item>
         <div className="admin-form-row">
-          <Form.Item label="Type" style={{ flex: 1, marginBottom: 8 }}>
-            <Select
-              value={section.type}
-              options={SECTION_TYPES}
-              onChange={(v) => update(makeDefaultSection(v))}
-            />
-          </Form.Item>
           <Form.Item label="Background" style={{ flex: 1, marginBottom: 8 }}>
             <Select
               value={section.background || ''}
@@ -75,19 +76,16 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
         {/* ── Text ── */}
         {section.type === 'text' ? (
           <Form.Item label="Body" style={{ marginBottom: 8 }}>
-            <Input.TextArea rows={4} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
+            <Input.TextArea autoSize={{ minRows: 3, maxRows: 12 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
           </Form.Item>
         ) : null}
 
         {/* ── Bullets ── */}
         {section.type === 'bullets' ? (
-          <Form.Item label="Bullet points (one per line)" style={{ marginBottom: 8 }}>
-            <Input.TextArea
-              rows={5}
-              value={(section.items || []).join('\n')}
-              onChange={(e) =>
-                update({ items: e.target.value.split('\n').map((l) => l.trim()).filter(Boolean) })
-              }
+          <Form.Item label="Bullet points" style={{ marginBottom: 8 }}>
+            <BulletsEditor
+              items={section.items || []}
+              onChange={(newItems) => update({ items: newItems })}
             />
           </Form.Item>
         ) : null}
@@ -101,7 +99,7 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
         {section.type === 'form_cta' ? (
           <>
             <Form.Item label="Description" style={{ marginBottom: 8 }}>
-              <Input.TextArea rows={3} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
+              <Input.TextArea autoSize={{ minRows: 2, maxRows: 8 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
             </Form.Item>
             <div className="admin-form-row">
               <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
@@ -125,11 +123,14 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
             <Form.Item label="Image URL" style={{ marginBottom: 8 }}>
               <Input value={section.image_url || ''} onChange={(e) => update({ image_url: e.target.value })} />
             </Form.Item>
+            <Form.Item label="Image Label (placeholder text, shown when no URL)" style={{ marginBottom: 8 }}>
+              <Input value={section.image_label || ''} onChange={(e) => update({ image_label: e.target.value })} placeholder="Describes the intended image" />
+            </Form.Item>
             <Form.Item label="Alt Text" style={{ marginBottom: 8 }}>
               <Input value={section.image_alt || ''} onChange={(e) => update({ image_alt: e.target.value })} />
             </Form.Item>
             <Form.Item label="Caption / Body" style={{ marginBottom: 8 }}>
-              <Input.TextArea rows={2} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
+              <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
             </Form.Item>
             <div className="admin-form-row">
               <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
@@ -145,6 +146,21 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
         {/* ── Image Grid ── */}
         {section.type === 'image_grid' ? (
           <ImageGridEditor section={section} sectionIndex={index} onChange={onChange} />
+        ) : null}
+
+        {/* ── Two Column ── */}
+        {section.type === 'two_column' ? (
+          <TwoColumnEditor section={section} sectionIndex={index} onChange={onChange} />
+        ) : null}
+
+        {/* ── Comparison Table ── */}
+        {section.type === 'comparison_table' ? (
+          <ComparisonTableEditor section={section} sectionIndex={index} onChange={onChange} />
+        ) : null}
+
+        {/* ── Icon Grid ── */}
+        {section.type === 'icon_grid' ? (
+          <IconGridEditor section={section} sectionIndex={index} onChange={onChange} />
         ) : null}
       </Form>
     </div>
@@ -299,6 +315,184 @@ function ImageGridEditor({ section, sectionIndex, onChange }) {
   )
 }
 
+function BulletsEditor({ items = [], onChange }) {
+  function addItem() { onChange([...items, '']) }
+  function updateItem(i, val) { onChange(items.map((x, j) => (j === i ? val : x))) }
+  function removeItem(i) { onChange(items.filter((_, j) => j !== i)) }
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          <Input
+            size="small"
+            value={item}
+            placeholder={`Bullet ${i + 1}`}
+            onChange={(e) => updateItem(i, e.target.value)}
+            style={{ flex: 1, minWidth: 0 }}
+          />
+          <Button size="small" danger type="text" onClick={() => removeItem(i)} style={{ flexShrink: 0 }}>✕</Button>
+        </div>
+      ))}
+      <Button size="small" style={{ alignSelf: 'flex-start', marginTop: 2 }} onClick={addItem}>+ Add Bullet</Button>
+    </div>
+  )
+}
+
+function TwoColumnEditor({ section, sectionIndex, onChange }) {
+  function update(patch) { onChange(sectionIndex, patch) }
+  return (
+    <>
+      <div className="admin-form-row">
+        <Form.Item label="Image Side" style={{ flex: 1, marginBottom: 8 }}>
+          <Select
+            value={section.image_side || 'right'}
+            options={TWO_COLUMN_IMAGE_SIDE_OPTIONS}
+            onChange={(v) => update({ image_side: v })}
+          />
+        </Form.Item>
+        <Form.Item label="Variant" style={{ flex: 1, marginBottom: 8 }}>
+          <Select
+            value={section.variant || 'default'}
+            options={TWO_COLUMN_VARIANT_OPTIONS}
+            onChange={(v) => update({ variant: v })}
+          />
+        </Form.Item>
+      </div>
+      <Form.Item label="Image Aspect Ratio" style={{ marginBottom: 8 }}>
+        <Select
+          value={section.image_aspect_ratio || '16/9'}
+          options={IMAGE_ASPECT_RATIO_OPTIONS}
+          onChange={(v) => update({ image_aspect_ratio: v })}
+        />
+      </Form.Item>
+      <Form.Item label="Body" style={{ marginBottom: 8 }}>
+        <Input.TextArea autoSize={{ minRows: 2, maxRows: 8 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
+      </Form.Item>
+      <Form.Item label="Bullet points" style={{ marginBottom: 8 }}>
+        <BulletsEditor
+          items={section.bullets || []}
+          onChange={(newBullets) => update({ bullets: newBullets })}
+        />
+      </Form.Item>
+      <Form.Item label="Pull Quote" style={{ marginBottom: 8 }}>
+        <Input value={section.pull_quote || ''} onChange={(e) => update({ pull_quote: e.target.value })} placeholder="Optional callout quote" />
+      </Form.Item>
+      <div className="admin-form-row">
+        <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.button_label || ''} onChange={(e) => update({ button_label: e.target.value })} />
+        </Form.Item>
+        <Form.Item label="Button Link" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.button_link || ''} onChange={(e) => update({ button_link: e.target.value })} />
+        </Form.Item>
+      </div>
+      <Form.Item label="Image Label (placeholder text)" style={{ marginBottom: 8 }}>
+        <Input value={section.image_label || ''} onChange={(e) => update({ image_label: e.target.value })} placeholder="Describes the intended image" />
+      </Form.Item>
+      <div className="admin-form-row">
+        <Form.Item label="Image URL (leave empty to show placeholder)" style={{ flex: 2, marginBottom: 8 }}>
+          <Input value={section.image_url || ''} onChange={(e) => update({ image_url: e.target.value })} />
+        </Form.Item>
+        <Form.Item label="Image Alt" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.image_alt || ''} onChange={(e) => update({ image_alt: e.target.value })} />
+        </Form.Item>
+      </div>
+    </>
+  )
+}
+
+function ComparisonTableEditor({ section, sectionIndex, onChange }) {
+  function update(patch) { onChange(sectionIndex, patch) }
+  function addRow() {
+    onChange(sectionIndex, { rows: [...(section.rows || []), { left: '', right: '' }] })
+  }
+  function updateRow(ri, patch) {
+    onChange(sectionIndex, {
+      rows: (section.rows || []).map((r, i) => (i === ri ? normalizeComparisonRow({ ...r, ...patch }) : r)),
+    })
+  }
+  function removeRow(ri) {
+    onChange(sectionIndex, { rows: (section.rows || []).filter((_, i) => i !== ri) })
+  }
+  return (
+    <>
+      <div className="admin-form-row">
+        <Form.Item label="Left Column Label" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.left_label || ''} onChange={(e) => update({ left_label: e.target.value })} />
+        </Form.Item>
+        <Form.Item label="Right Column Label" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.right_label || ''} onChange={(e) => update({ right_label: e.target.value })} />
+        </Form.Item>
+      </div>
+      {(section.rows || []).map((row, ri) => (
+        <Card
+          key={ri}
+          size="small"
+          className="admin-sub-card"
+          title={`Row ${ri + 1}`}
+          extra={<Button size="small" danger type="text" onClick={() => removeRow(ri)}>Remove</Button>}
+        >
+          <div className="admin-form-row">
+            <Form.Item label="Left" style={{ flex: 1, marginBottom: 0 }}>
+              <Input size="small" value={row.left || ''} onChange={(e) => updateRow(ri, { left: e.target.value })} />
+            </Form.Item>
+            <Form.Item label="Right" style={{ flex: 1, marginBottom: 0 }}>
+              <Input size="small" value={row.right || ''} onChange={(e) => updateRow(ri, { right: e.target.value })} />
+            </Form.Item>
+          </div>
+        </Card>
+      ))}
+      <Button size="small" style={{ marginTop: 4, marginBottom: 8 }} onClick={addRow}>+ Add Row</Button>
+      <Form.Item label="Note (shown below table)" style={{ marginBottom: 8 }}>
+        <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.note || ''} onChange={(e) => update({ note: e.target.value })} />
+      </Form.Item>
+    </>
+  )
+}
+
+function IconGridEditor({ section, sectionIndex, onChange }) {
+  function update(patch) { onChange(sectionIndex, patch) }
+  function addItem() {
+    onChange(sectionIndex, { items: [...(section.items || []), { icon: '', text: '' }] })
+  }
+  function updateItem(ii, patch) {
+    onChange(sectionIndex, {
+      items: (section.items || []).map((item, i) => (i === ii ? normalizeIconItem({ ...item, ...patch }) : item)),
+    })
+  }
+  function removeItem(ii) {
+    onChange(sectionIndex, { items: (section.items || []).filter((_, i) => i !== ii) })
+  }
+  return (
+    <>
+      <Form.Item label="Body" style={{ marginBottom: 8 }}>
+        <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
+      </Form.Item>
+      {(section.items || []).map((item, ii) => (
+        <Card
+          key={ii}
+          size="small"
+          className="admin-sub-card"
+          title={`Item ${ii + 1}`}
+          extra={<Button size="small" danger type="text" onClick={() => removeItem(ii)}>Remove</Button>}
+        >
+          <div className="admin-form-row">
+            <Form.Item label="Icon / Emoji" style={{ flex: 1, marginBottom: 0 }}>
+              <Input size="small" value={item.icon || ''} onChange={(e) => updateItem(ii, { icon: e.target.value })} />
+            </Form.Item>
+            <Form.Item label="Text" style={{ flex: 3, marginBottom: 0 }}>
+              <Input size="small" value={item.text || ''} onChange={(e) => updateItem(ii, { text: e.target.value })} />
+            </Form.Item>
+          </div>
+        </Card>
+      ))}
+      <Button size="small" style={{ marginTop: 4, marginBottom: 8 }} onClick={addItem}>+ Add Item</Button>
+      <Form.Item label="Image Label (photo collage placeholder)" style={{ marginBottom: 8 }}>
+        <Input value={section.image_label || ''} onChange={(e) => update({ image_label: e.target.value })} placeholder="Describes the intended photo collage" />
+      </Form.Item>
+    </>
+  )
+}
+
 // ── Main AdminPanel ────────────────────────────────────────────────────────────
 export function AdminPanel() {
   const navigate = useNavigate()
@@ -400,28 +594,33 @@ export function AdminPanel() {
   }
 
   // Collapse items for section list
-  const collapseItems = sectionsDraft.map((section, index) => ({
-    key: String(index),
-    label: (
-      <span className="admin-section-label">
-        <Tag color="blue" style={{ marginRight: 6, fontSize: 11 }}>
-          {SECTION_TYPES.find((t) => t.value === section.type)?.label || section.type}
-        </Tag>
-        {section.heading || `Section ${index + 1}`}
-      </span>
-    ),
-    children: (
-      <SectionEditor
-        section={section}
-        index={index}
-        total={sectionsDraft.length}
-        onChange={updateSection}
-        onRemove={removeSection}
-        onMoveUp={moveSectionUp}
-        onMoveDown={moveSectionDown}
-      />
-    ),
-  }))
+  const collapseItems = sectionsDraft.map((section, index) => {
+    const typeLabel = SECTION_TYPES.find((t) => t.value === section.type)?.label || section.type
+    const heading = section.heading || `Section ${index + 1}`
+    return {
+      key: String(index),
+      label: (
+        <span className="admin-section-label">
+          <span className="admin-section-label__meta">
+            <span className="admin-section-label__index">#{index + 1}</span>
+            <Tag className="admin-section-label__type">{typeLabel}</Tag>
+          </span>
+          <span className="admin-section-label__heading">{heading}</span>
+        </span>
+      ),
+      children: (
+        <SectionEditor
+          section={section}
+          index={index}
+          total={sectionsDraft.length}
+          onChange={updateSection}
+          onRemove={removeSection}
+          onMoveUp={moveSectionUp}
+          onMoveDown={moveSectionDown}
+        />
+      ),
+    }
+  })
 
   const selectedPageLabel = CMS_PAGES.find((p) => p.slug === selectedSlug)?.label || selectedSlug
 

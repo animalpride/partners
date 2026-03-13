@@ -31,3 +31,4 @@ go.work.sum
 # Environment file for management scripts
 scripts/.env
 *config.yml
+content-context

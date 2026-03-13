@@ -17,6 +17,9 @@ export const SECTION_TYPES = [
   { label: 'Application Form Fields', value: 'application_form' },
   { label: 'Image Block', value: 'image' },
   { label: 'Image Grid', value: 'image_grid' },
+  { label: 'Two-Column (Text + Image)', value: 'two_column' },
+  { label: 'Comparison Table', value: 'comparison_table' },
+  { label: 'Icon Grid', value: 'icon_grid' },
 ]
 
 export const SECTION_BACKGROUND_OPTIONS = [
@@ -36,6 +39,23 @@ export const IMAGE_POSITION_OPTIONS = [
   { label: 'Center (default)', value: 'center' },
   { label: 'Top', value: 'top' },
   { label: 'Bottom', value: 'bottom' },
+]
+
+export const TWO_COLUMN_IMAGE_SIDE_OPTIONS = [
+  { label: 'Right (default)', value: 'right' },
+  { label: 'Left', value: 'left' },
+]
+
+export const TWO_COLUMN_VARIANT_OPTIONS = [
+  { label: 'Default', value: 'default' },
+  { label: 'Hero (full height)', value: 'hero' },
+]
+
+export const IMAGE_ASPECT_RATIO_OPTIONS = [
+  { label: '16 : 9  (wide landscape)', value: '16/9' },
+  { label: '4 : 3', value: '4/3' },
+  { label: '3 : 2', value: '3/2' },
+  { label: '1 : 1  (square)', value: '1/1' },
 ]
 
 export const FIELD_TYPE_OPTIONS = [
@@ -83,6 +103,20 @@ export function normalizeGridItem(item) {
   }
 }
 
+export function normalizeIconItem(item) {
+  return {
+    icon: String(item?.icon || '').trim(),
+    text: String(item?.text || '').trim(),
+  }
+}
+
+export function normalizeComparisonRow(row) {
+  return {
+    left: String(row?.left || '').trim(),
+    right: String(row?.right || '').trim(),
+  }
+}
+
 export function makeDefaultSection(type = 'text') {
   if (type === 'bullets') {
     return { type, background: '', alignment: 'left', heading: 'Key Benefits', items: ['First point'] }
@@ -104,10 +138,31 @@ export function makeDefaultSection(type = 'text') {
     }
   }
   if (type === 'image') {
-    return { type, background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_alt: '', image_position: 'center', button_label: '', button_link: '' }
+    return { type, background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_label: '', image_alt: '', image_position: 'center', button_label: '', button_link: '' }
   }
   if (type === 'image_grid') {
     return { type, background: '', alignment: 'left', heading: 'Image Grid', items: [{ title: '', image_url: '', link_url: '' }] }
+  }
+  if (type === 'two_column') {
+    return {
+      type, variant: 'default', image_side: 'right', background: '', alignment: 'left',
+      heading: 'Section Heading', body: '', bullets: [], pull_quote: '',
+      button_label: '', button_link: '',
+      image_url: '', image_label: '', image_alt: '', image_aspect_ratio: '16/9',
+    }
+  }
+  if (type === 'comparison_table') {
+    return {
+      type, background: '', alignment: 'center',
+      heading: 'Why We Are Different', left_label: 'Traditional', right_label: 'Our Approach',
+      rows: [{ left: '', right: '' }], note: '',
+    }
+  }
+  if (type === 'icon_grid') {
+    return {
+      type, background: '', alignment: 'center',
+      heading: 'Impact', body: '', items: [{ icon: '✓', text: '' }], image_label: '',
+    }
   }
   return { type: 'text', background: '', alignment: 'left', heading: 'Overview', body: '' }
 }
@@ -124,6 +179,15 @@ export function normalizeSections(content) {
       }
       if (normalized.type === 'image_grid') {
         normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeGridItem) : []
+      }
+      if (normalized.type === 'two_column') {
+        normalized.bullets = Array.isArray(normalized.bullets) ? normalized.bullets : []
+      }
+      if (normalized.type === 'comparison_table') {
+        normalized.rows = Array.isArray(normalized.rows) ? normalized.rows.map(normalizeComparisonRow) : []
+      }
+      if (normalized.type === 'icon_grid') {
+        normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeIconItem) : []
       }
       return normalized
     })
