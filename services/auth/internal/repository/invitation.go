@@ -96,7 +96,7 @@ func (r *InvitationRepository) CreateInvitation(email string, roleID int, invite
 		return err
 	}
 
-	if err := r.emailService.SendInvitationEmail(email, "", token); err != nil {
+	if err := r.emailService.SendInvitationEmail(email, "", role.Name, token); err != nil {
 		fmt.Printf("Warning: Failed to send invitation email to %s: %v\n", email, err)
 	}
 
@@ -133,7 +133,15 @@ func (r *InvitationRepository) ResendInvitation(email string, inviterID int) err
 		return errors.New("invitation token mismatch")
 	}
 
-	if err := r.emailService.SendInvitationEmail(email, "", token); err != nil {
+	resendRole, err := r.rbacRepo.GetRoleByID(invitation.RoleID)
+	resendRoleName := ""
+	if err != nil {
+		log.Printf("ResendInvitation: role lookup failed (non-fatal): %v", err)
+	} else {
+		resendRoleName = resendRole.Name
+	}
+
+	if err := r.emailService.SendInvitationEmail(email, "", resendRoleName, token); err != nil {
 		fmt.Printf("Warning: Failed to resend invitation email to %s: %v\n", email, err)
 	}
 
@@ -332,7 +340,13 @@ func (r *InvitationRepository) RegisterInvitation(token, firstName, lastName, pa
 	return user, role, nil
 }
 
-func (r *InvitationRepository) ListPendingInvitations() ([]models.Invitation, error) {
+// InvitationSummary is a view of an Invitation enriched with the role name.
+type InvitationSummary struct {
+	models.Invitation
+	RoleName string `json:"role_name"`
+}
+
+func (r *InvitationRepository) ListPendingInvitations() ([]InvitationSummary, error) {
 	now := time.Now()
 	if err := r.expireStaleInvitations(now); err != nil {
 		log.Printf("ListPendingInvitations: expire stale invitations failed: %v", err)
@@ -347,7 +361,31 @@ func (r *InvitationRepository) ListPendingInvitations() ([]models.Invitation, er
 		log.Printf("ListPendingInvitations: query failed: %v", err)
 		return nil, err
 	}
-	return invitations, nil
+
+	// Collect unique role IDs and bulk-fetch roles.
+	roleIDSet := make(map[int]struct{})
+	for _, inv := range invitations {
+		roleIDSet[inv.RoleID] = struct{}{}
+	}
+	roleMap := make(map[int]string, len(roleIDSet))
+	for roleID := range roleIDSet {
+		role, err := r.rbacRepo.GetRoleByID(roleID)
+		if err != nil {
+			log.Printf("ListPendingInvitations: role lookup failed for id %d: %v", roleID, err)
+			roleMap[roleID] = ""
+		} else {
+			roleMap[roleID] = role.Name
+		}
+	}
+
+	summaries := make([]InvitationSummary, len(invitations))
+	for i, inv := range invitations {
+		summaries[i] = InvitationSummary{
+			Invitation: inv,
+			RoleName:   roleMap[inv.RoleID],
+		}
+	}
+	return summaries, nil
 }
 
 func (r *InvitationRepository) ensureNoUser(email string) error {

@@ -31,6 +31,7 @@ type InvitationEmailData struct {
 	CompanyName     string
 	InviteLink      string
 	SupportEmail    string
+	RoleName        string
 }
 
 type PasswordResetEmailData struct {
@@ -46,18 +47,20 @@ type PasswordChangedEmailData struct {
 	SupportEmail    string
 }
 
-// SendInvitationEmail sends an invitation email to a new user
-func (s *EmailService) SendInvitationEmail(to, recipientName, invitationToken string) error {
+// SendInvitationEmail sends an invitation email to a new user.
+// roleName is used to tailor the email body (e.g. "admin", "partner").
+func (s *EmailService) SendInvitationEmail(to, recipientName, roleName, invitationToken string) error {
 	inviteLink := s.buildInviteLink(invitationToken)
 
 	// Email template data
 	data := InvitationEmailData{
 		RecipientName:   recipientName,
-		InviterName:     "DenOps Team",
-		ApplicationName: "DenOps",
+		InviterName:     "Animal Pride Partners Team",
+		ApplicationName: "Animal Pride Partners",
 		CompanyName:     "Animal Pride",
 		InviteLink:      inviteLink,
 		SupportEmail:    s.config.Email.FromEmail,
+		RoleName:        roleName,
 	}
 
 	// HTML email template
@@ -95,8 +98,16 @@ func (s *EmailService) SendInvitationEmail(to, recipientName, invitationToken st
 			</div>
 			<div class="content">
 				<h2>Hello{{if .RecipientName}} {{.RecipientName}}{{end}}!</h2>
+				{{if eq .RoleName "admin"}}
+				<p>You have been invited to join <strong>{{.ApplicationName}}</strong> as an <strong>Administrator</strong>.</p>
+				<p>As an Administrator, you will have full access to manage content, users, and settings for the {{.CompanyName}} partners platform.</p>
+				{{else if eq .RoleName "partner"}}
+				<p>You have been invited to join <strong>{{.ApplicationName}}</strong> as a <strong>Partner</strong>.</p>
+				<p>Your partner account will give you access to the {{.CompanyName}} partner portal and resources.</p>
+				{{else}}
 				<p>You have been invited to join <strong>{{.ApplicationName}}</strong>, the {{.CompanyName}} operations platform.</p>
 				<p>The {{.InviterName}} has created an invitation for you.</p>
+				{{end}}
 				<p>To complete your registration, click the button below:</p>
 				<div style="text-align: center;">
 					<a href="{{.InviteLink}}" class="button" style="color: #ffffff !important; text-decoration: none;">Complete Registration</a>
@@ -138,7 +149,7 @@ func (s *EmailService) SendInvitationEmail(to, recipientName, invitationToken st
 }
 
 func (s *EmailService) buildInviteLink(token string) string {
-	base := strings.TrimSpace(s.config.Email.InviteBaseURL)
+	base := strings.TrimSpace(s.config.Email.Links.InviteBaseURL)
 	if base == "" {
 		base = "http://localhost:3000/accept-invitation"
 	}
@@ -154,7 +165,7 @@ func (s *EmailService) buildInviteLink(token string) string {
 }
 
 func (s *EmailService) buildResetLink(token string) string {
-	base := strings.TrimSpace(s.config.Email.ResetBaseURL)
+	base := strings.TrimSpace(s.config.Email.Links.ResetBaseURL)
 	if base == "" {
 		base = "http://localhost:3000/reset-password"
 	}
@@ -174,7 +185,7 @@ func (s *EmailService) SendPasswordResetEmail(to, resetToken string) error {
 	resetLink := s.buildResetLink(resetToken)
 
 	data := PasswordResetEmailData{
-		ApplicationName: "DenOps",
+		ApplicationName: "Animal Pride Partners",
 		CompanyName:     "Animal Pride",
 		ResetLink:       resetLink,
 		SupportEmail:    s.config.Email.FromEmail,
@@ -250,7 +261,7 @@ func (s *EmailService) SendPasswordResetEmail(to, resetToken string) error {
 // SendPasswordChangedEmail notifies the user of a successful password change.
 func (s *EmailService) SendPasswordChangedEmail(to string) error {
 	data := PasswordChangedEmailData{
-		ApplicationName: "DenOps",
+		ApplicationName: "Animal Pride Partners",
 		CompanyName:     "Animal Pride",
 		SupportEmail:    s.config.Email.FromEmail,
 	}

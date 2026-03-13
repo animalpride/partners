@@ -3,6 +3,7 @@ import { Alert, Button, Drawer, Form, Grid, Input, Layout, Menu, Modal, Space, T
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { getAuthState, getComingSoonState, login, logout, unlockComingSoonPreview } from './api'
+import { AcceptInvitation } from './components/AcceptInvitation'
 import { AdminPanel } from './components/AdminPanel'
 import { ApplicationPage } from './components/ApplicationPage'
 import { CMSPageView } from './components/CMSPageView'
@@ -258,6 +259,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/admin/*" element={<AdminPanel />} />
+      <Route path="/accept-invitation" element={<AcceptInvitation />} />
       <Route path="/*" element={<PublicLayout {...publicProps} />} />
     </Routes>
   )

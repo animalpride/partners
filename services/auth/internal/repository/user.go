@@ -167,7 +167,7 @@ func (s *UserRepository) InviteUser(email string) error {
 		recipientName = ""
 	}
 
-	if err := s.emailService.SendInvitationEmail(email, recipientName, token); err != nil {
+	if err := s.emailService.SendInvitationEmail(email, recipientName, "", token); err != nil {
 		// Log the error but don't fail the invitation - the user was created/updated
 		log.Printf("InviteUser: failed to send invitation email to %s: %v", email, err)
 	}
@@ -297,7 +297,7 @@ func (s *UserRepository) ResendInvitation(email string) error {
 		recipientName = ""
 	}
 
-	if err := s.emailService.SendInvitationEmail(email, recipientName, token); err != nil {
+	if err := s.emailService.SendInvitationEmail(email, recipientName, "", token); err != nil {
 		// Log the error but don't fail the resend - the user was updated
 		log.Printf("ResendInvitation: failed to send invitation email to %s: %v", email, err)
 	}
