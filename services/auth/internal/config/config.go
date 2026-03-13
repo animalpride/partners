@@ -26,14 +26,18 @@ type Database struct {
 type DatabasePool = sharedconfig.DatabasePool
 
 type Email struct {
-	SMTPHost      string `yaml:"smtp_host"`
-	SMTPPort      int    `yaml:"smtp_port"`
-	SMTPTLS       bool   `yaml:"smtp_tls"`
-	SMTPAuth      bool   `yaml:"smtp_auth"`
-	SMTPUser      string `yaml:"smtp_user"`
-	SMTPPassword  string `yaml:"smtp_password"`
-	FromEmail     string `yaml:"from_email"`
-	FromName      string `yaml:"from_name"`
+	SMTPHost     string     `yaml:"smtp_host"`
+	SMTPPort     int        `yaml:"smtp_port"`
+	SMTPTLS      bool       `yaml:"smtp_tls"`
+	SMTPAuth     bool       `yaml:"smtp_auth"`
+	SMTPUser     string     `yaml:"smtp_user"`
+	SMTPPassword string     `yaml:"smtp_password"`
+	FromEmail    string     `yaml:"from_email"`
+	FromName     string     `yaml:"from_name"`
+	Links        EmailLinks `yaml:"links"`
+}
+
+type EmailLinks struct {
 	InviteBaseURL string `yaml:"invite_base_url"`
 	ResetBaseURL  string `yaml:"reset_base_url"`
 }

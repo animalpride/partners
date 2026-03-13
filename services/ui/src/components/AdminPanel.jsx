@@ -13,6 +13,7 @@ import {
   normalizeSections, toContentJSON,
 } from '../cmsTypes'
 import { CMSContentRenderer } from './CMSPageView'
+import { UsersRoles } from './UsersRoles'
 
 // ── Section mutation helpers ───────────────────────────────────────────────────
 function mutateSectionAt(prev, index, fn) {
@@ -777,13 +778,7 @@ export function AdminPanel() {
         ) : null}
 
         {adminSection === 'users' ? (
-          <div className="admin-stub">
-            <Typography.Title level={3}>Users & Roles</Typography.Title>
-            <Typography.Paragraph type="secondary">
-              Manage user accounts, assign roles, and configure permissions.
-              This section is under construction.
-            </Typography.Paragraph>
-          </div>
+          <UsersRoles />
         ) : null}
       </Layout.Content>
     </Layout>

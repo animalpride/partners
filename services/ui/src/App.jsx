@@ -3,7 +3,10 @@ import { Alert, Button, Drawer, Form, Grid, Input, Layout, Menu, Modal, Space, T
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { getAuthState, getComingSoonState, login, logout, unlockComingSoonPreview } from './api'
+import { AcceptInvitation } from './components/AcceptInvitation'
 import { AdminPanel } from './components/AdminPanel'
+import { ForgotPassword } from './components/ForgotPassword'
+import { ResetPassword } from './components/ResetPassword'
 import { ApplicationPage } from './components/ApplicationPage'
 import { CMSPageView } from './components/CMSPageView'
 import { ComingSoonPage } from './components/ComingSoonPage'
@@ -111,6 +114,16 @@ function PublicLayout({ canEdit, isAuthenticated, onLogin, onLogout, logoutLoadi
           <Button type="primary" htmlType="submit" loading={loginLoading} block>
             Sign in
           </Button>
+          <div style={{ textAlign: 'center', marginTop: 12 }}>
+            <Typography.Link
+              onClick={() => {
+                setLoginOpen(false)
+                navigate('/forgot-password')
+              }}
+            >
+              Forgot password?
+            </Typography.Link>
+          </div>
         </Form>
       </Modal>
     </Layout>
@@ -258,6 +271,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/admin/*" element={<AdminPanel />} />
+      <Route path="/accept-invitation" element={<AcceptInvitation />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/*" element={<PublicLayout {...publicProps} />} />
     </Routes>
   )

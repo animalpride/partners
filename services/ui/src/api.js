@@ -10,6 +10,16 @@ function getCookie(name) {
   return decodeURIComponent(pair.slice(name.length + 1))
 }
 
+// Authenticated fetch wrapper — redirects to / on session expiry (401)
+async function authFetch(url, options = {}) {
+  const response = await fetch(url, { credentials: 'include', ...options })
+  if (response.status === 401) {
+    window.location.replace('/')
+    throw new Error('Session expired')
+  }
+  return response
+}
+
 export async function getPage(slug) {
   const response = await fetch(`${CORE_BASE}/cms/pages/${slug}`, { credentials: 'include' })
   if (!response.ok) {
@@ -19,7 +29,7 @@ export async function getPage(slug) {
 }
 
 export async function updatePage(slug, payload) {
-  const response = await fetch(`${CORE_BASE}/cms/admin/pages/${slug}`, {
+  const response = await authFetch(`${CORE_BASE}/cms/admin/pages/${slug}`, {
     method: 'PUT',
     credentials: 'include',
     headers: {
@@ -143,5 +153,239 @@ export async function unlockComingSoonPreview(token) {
     throw new Error('Preview unlock failed')
   }
 
+  return response.json()
+}
+
+// ── CSRF ──────────────────────────────────────────────────────────────────────
+
+export async function fetchCsrf() {
+  await fetch(`${AUTH_BASE}/csrf`, { credentials: 'include' })
+}
+
+// ── Invitations (public — no auth required) ───────────────────────────────────
+
+export async function validateInvitation(token) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/invitations/validate`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ token }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Invalid invitation')
+  }
+  return response.json()
+}
+
+export async function registerInvitation(payload) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/invitations/register`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Registration failed')
+  }
+  return response.json()
+}
+
+// ── Invitations (admin — requires auth + admin role) ──────────────────────────
+
+export async function getInvitations() {
+  const response = await authFetch(`${AUTH_BASE}/invitations/pending`, {
+    credentials: 'include',
+  })
+  if (!response.ok) throw new Error('Failed to fetch invitations')
+  return response.json()
+}
+
+export async function createInvitation(email, roleId) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/invitations`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ email, role_id: roleId }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to send invitation')
+  }
+  return response.json()
+}
+
+export async function resendInvitation(email) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/invitations/resend`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ email }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to resend invitation')
+  }
+  return response.json()
+}
+
+export async function revokeInvitation(email) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/invitations/revoke`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ email }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to revoke invitation')
+  }
+  return response.json()
+}
+
+export async function getRoles() {
+  const response = await authFetch(`${AUTH_BASE}/admin/roles`, {
+    credentials: 'include',
+  })
+  if (!response.ok) throw new Error('Failed to fetch roles')
+  return response.json()
+}
+
+export async function getUsers() {
+  const response = await authFetch(`${AUTH_BASE}/admin/users`, {
+    credentials: 'include',
+  })
+  if (!response.ok) throw new Error('Failed to fetch users')
+  return response.json()
+}
+
+export async function setUserActive(id, active) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/users/${id}/activate`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ active }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to update user status')
+  }
+  return response.json()
+}
+
+export async function assignRole(userId, roleId) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/assign-role`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ user_id: userId, role_id: roleId }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to assign role')
+  }
+  return response.json()
+}
+
+export async function removeRole(userId, roleId) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/remove-role`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ user_id: userId, role_id: roleId }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to remove role')
+  }
+  return response.json()
+}
+
+// ── Password Reset (public — no auth required) ────────────────────────────────
+
+export async function requestPasswordReset(email) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/request`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ email }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Request failed')
+  }
+  return response.json()
+}
+
+export async function validatePasswordResetToken(token) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/validate`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ token }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Reset link is invalid or expired')
+  }
+  return response.json()
+}
+
+export async function completePasswordReset(token, password, passwordConfirm) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await fetch(`${AUTH_BASE}/password-reset/complete`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ token, password, password_confirm: passwordConfirm }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Password reset failed')
+  }
   return response.json()
 }

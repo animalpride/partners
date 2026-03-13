@@ -1145,3 +1145,43 @@ a.cms-grid-card:hover .cms-grid-img {
   flex: 1;
 }
 
+/* ── Accept Invitation page ────────────────────────────────────────────────── */
+.accept-invitation-page {
+  min-height: 100vh;
+  background-color: #f2f6f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.accept-invitation-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.accept-invitation-card {
+  width: 100%;
+  max-width: 480px;
+  border: 1px solid #d3dee8;
+  border-radius: 12px;
+}
+
+.accept-invitation-logo {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+/* ── Users & Roles admin section ───────────────────────────────────────────── */
+.users-roles-panel {
+  padding: 32px 48px;
+  flex: 1;
+  max-width: 900px;
+}
+
+.users-roles-invite-card {
+  margin-bottom: 32px;
+}
+
