@@ -59,6 +59,9 @@ export function CMSContentRenderer({ sections }) {
                 <div className="cms-section-inner" style={{ ...innerStyle, backgroundColor: bg || undefined, color: textColor }}>
                   {section.heading ? <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2> : null}
                   {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+                  <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 16 }}>
+                    <span className="cms-img-placeholder__label">{section.image_label || 'Image placeholder'}</span>
+                  </div>
                 </div>
               )}
             </section>
@@ -210,7 +213,139 @@ export function CMSContentRenderer({ sections }) {
             </section>
           )
         }
+        // ── Two Column ────────────────────────────────────────────────────────────────────
+        if (section.type === 'two_column') {
+          const isHero = section.variant === 'hero'
+          const imgLeft = section.image_side === 'left'
+          const ASPECT_CLASS = {
+            '16/9': 'cms-img-placeholder--16-9',
+            '4/3':  'cms-img-placeholder--4-3',
+            '3/2':  'cms-img-placeholder--3-2',
+            '1/1':  'cms-img-placeholder--1-1',
+          }
+          const aspectClass = ASPECT_CLASS[section.image_aspect_ratio] || 'cms-img-placeholder--16-9'
 
+          const textCol = (
+            <div className="cms-two-col__text">
+              {section.heading ? (
+                <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+              ) : null}
+              {section.body ? (
+                <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p>
+              ) : null}
+              {(section.bullets || []).length > 0 ? (
+                <ul className="cms-bullets">
+                  {section.bullets.filter(Boolean).map((item, bi) => (
+                    <li key={`bullet-${bi}`} className="cms-bullet-item" style={{ color: textColor }}>
+                      <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {section.pull_quote ? (
+                <blockquote className="cms-pull-quote">{section.pull_quote}</blockquote>
+              ) : null}
+              {section.button_label && section.button_link ? (
+                <div className="cms-btn-row" style={{ justifyContent: 'flex-start', marginTop: 20 }}>
+                  <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">
+                    {section.button_label}
+                  </a>
+                </div>
+              ) : null}
+            </div>
+          )
+
+          const imgCol = (
+            <div className="cms-two-col__img">
+              {section.image_url ? (
+                <img
+                  src={section.image_url}
+                  alt={section.image_alt || section.heading || 'Section image'}
+                  className="cms-two-col__img-el"
+                />
+              ) : (
+                <div className={`cms-img-placeholder ${aspectClass}`}>
+                  <span className="cms-img-placeholder__label">{section.image_label || 'Image placeholder'}</span>
+                </div>
+              )}
+            </div>
+          )
+
+          return (
+            <section
+              key={index}
+              className={`cms-section${hasColor ? ' cms-section--colored' : ''}${isHero ? ' cms-section--twocol-hero' : ''}`}
+              style={{ backgroundColor: bg || undefined, color: textColor }}
+            >
+              <div className={`cms-two-col${isHero ? ' cms-two-col--hero' : ''}${imgLeft ? ' cms-two-col--img-left' : ''}`}>
+                {textCol}
+                {imgCol}
+              </div>
+            </section>
+          )
+        }
+
+        // ── Comparison Table ───────────────────────────────────────────────────────────
+        if (section.type === 'comparison_table') {
+          return (
+            <section
+              key={index}
+              className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
+              style={{ backgroundColor: bg || undefined, color: textColor }}
+            >
+              <div className="cms-section-inner" style={innerStyle}>
+                {section.heading ? (
+                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+                ) : null}
+                <div className="cms-ct-wrap">
+                  <div className="cms-ct-header">
+                    <div className="cms-ct-header-cell">{section.left_label}</div>
+                    <div className="cms-ct-header-cell">{section.right_label}</div>
+                  </div>
+                  {(section.rows || []).map((row, ri) => (
+                    <div key={`row-${ri}`} className="cms-ct-row">
+                      <div className="cms-ct-cell cms-ct-cell--left">{row.left}</div>
+                      <div className="cms-ct-cell cms-ct-cell--right">{row.right}</div>
+                    </div>
+                  ))}
+                </div>
+                {section.note ? <p className="cms-ct-note">{section.note}</p> : null}
+              </div>
+            </section>
+          )
+        }
+
+        // ── Icon Grid ───────────────────────────────────────────────────────────────────
+        if (section.type === 'icon_grid') {
+          return (
+            <section
+              key={index}
+              className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
+              style={{ backgroundColor: bg || undefined, color: textColor }}
+            >
+              <div className="cms-section-inner cms-section-inner--wide" style={innerStyle}>
+                {section.heading ? (
+                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+                ) : null}
+                {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+                <div className="cms-icon-grid">
+                  {(section.items || []).map((item, ii) => (
+                    <div key={`icon-${ii}`} className="cms-icon-item">
+                      {item.icon ? <span className="cms-icon-item__icon">{item.icon}</span> : null}
+                      <span className="cms-icon-item__text">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+                {section.image_label ? (
+                  <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 32 }}>
+                    <span className="cms-img-placeholder__label">{section.image_label}</span>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          )
+        }
         // ── Default: Text ─────────────────────────────────────────────────────
         return (
           <section
