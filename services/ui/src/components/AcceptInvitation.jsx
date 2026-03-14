@@ -1,73 +1,81 @@
-import { Alert, Button, Card, Form, Input, Spin, Typography } from 'antd'
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchCsrf, registerInvitation, validateInvitation } from '../api'
+import { Alert, Button, Card, Form, Input, Spin, Typography } from "antd";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { fetchCsrf, registerInvitation, validateInvitation } from "../api";
 
 const ROLE_LABELS = {
-  admin: 'Administrator',
-  partner: 'Partner',
-}
+  admin: "Administrator",
+  partner: "Partner",
+};
 
 function roleHeading(roleName) {
-  const label = ROLE_LABELS[roleName] || roleName
-  return label ? `You've been invited as a Animal Pride Partner ${label}` : "You've been invited to join Animal Pride Partners"
+  const label = ROLE_LABELS[roleName] || roleName;
+  return label
+    ? `You've been invited as a Animal Pride Partner ${label}`
+    : "You've been invited to join Animal Pride Partners";
 }
 
 function roleSubtext(roleName) {
-  if (roleName === 'admin') {
-    return 'As an Administrator you will have full access to manage content, users, and settings for the Animal Pride partners platform.'
+  if (roleName === "admin") {
+    return "As an Administrator you will have full access to manage content, users, and settings for the Animal Pride partners platform.";
   }
-  if (roleName === 'partner') {
-    return 'Your partner account will give you access to the Animal Pride partner portal and resources.'
+  if (roleName === "partner") {
+    return "Your partner account will give you access to the Animal Pride partner portal and resources.";
   }
-  return 'Complete your registration below to get started.'
+  return "Complete your registration below to get started.";
 }
 
 export function AcceptInvitation() {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const token = searchParams.get('token') || ''
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get("token") || "";
 
-  const [validating, setValidating] = useState(true)
-  const [validateError, setValidateError] = useState('')
-  const [invitation, setInvitation] = useState(null) // { email, role_name, expires_at }
+  const [validating, setValidating] = useState(true);
+  const [validateError, setValidateError] = useState("");
+  const [invitation, setInvitation] = useState(null); // { email, role_name, expires_at }
 
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     if (!token) {
-      setValidateError('No invitation token provided. Please use the link from your invitation email.')
-      setValidating(false)
-      return
+      setValidateError(
+        "No invitation token provided. Please use the link from your invitation email.",
+      );
+      setValidating(false);
+      return;
     }
 
-    let cancelled = false
+    let cancelled = false;
 
     async function load() {
       try {
-        await fetchCsrf()
-        const data = await validateInvitation(token)
+        await fetchCsrf();
+        const data = await validateInvitation(token);
         if (!cancelled) {
-          setInvitation(data)
+          setInvitation(data);
         }
       } catch (err) {
         if (!cancelled) {
-          setValidateError(err.message || 'This invitation is no longer valid.')
+          setValidateError(
+            err.message || "This invitation is no longer valid.",
+          );
         }
       } finally {
-        if (!cancelled) setValidating(false)
+        if (!cancelled) setValidating(false);
       }
     }
 
-    load()
+    load();
 
-    return () => { cancelled = true }
-  }, [token])
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   async function onFinish(values) {
-    setSubmitting(true)
-    setSubmitError('')
+    setSubmitting(true);
+    setSubmitError("");
     try {
       await registerInvitation({
         token,
@@ -75,12 +83,12 @@ export function AcceptInvitation() {
         last_name: values.last_name.trim(),
         password: values.password,
         password_confirm: values.password_confirm,
-      })
-      navigate('/admin', { replace: true })
+      });
+      navigate("/admin", { replace: true });
     } catch (err) {
-      setSubmitError(err.message || 'Registration failed. Please try again.')
+      setSubmitError(err.message || "Registration failed. Please try again.");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
   }
 
@@ -91,7 +99,7 @@ export function AcceptInvitation() {
           <Spin size="large" />
         </div>
       </div>
-    )
+    );
   }
 
   if (validateError) {
@@ -99,7 +107,11 @@ export function AcceptInvitation() {
       <div className="accept-invitation-page">
         <Card className="accept-invitation-card">
           <div className="accept-invitation-logo">
-            <img src="/AnimalPridePartnerLogotrans.png" alt="Animal Pride Partners" style={{ height: 48 }} />
+            <img
+              src="/Logo-Wordmark-Dog-PartnersPlatform2.png"
+              alt="Animal Pride Partners"
+              style={{ height: 48 }}
+            />
           </div>
           <Alert
             type="error"
@@ -110,16 +122,20 @@ export function AcceptInvitation() {
           />
         </Card>
       </div>
-    )
+    );
   }
 
-  const roleName = invitation?.role_name || ''
+  const roleName = invitation?.role_name || "";
 
   return (
     <div className="accept-invitation-page">
       <Card className="accept-invitation-card">
         <div className="accept-invitation-logo">
-          <img src="/AnimalPridePartnerLogotrans.png" alt="Animal Pride Partners" style={{ height: 48 }} />
+          <img
+            src="/Logo-Wordmark-Dog-PartnersPlatform2.png"
+            alt="Animal Pride Partners"
+            style={{ height: 48 }}
+          />
         </div>
 
         <Typography.Title level={3} style={{ marginTop: 16, marginBottom: 4 }}>
@@ -129,17 +145,20 @@ export function AcceptInvitation() {
           {roleSubtext(roleName)}
         </Typography.Paragraph>
 
-        <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 20 }}>
+        <Typography.Text
+          type="secondary"
+          style={{ display: "block", marginBottom: 20 }}
+        >
           Registering for <strong>{invitation?.email}</strong>
         </Typography.Text>
 
         <Form layout="vertical" onFinish={onFinish} disabled={submitting}>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: "flex", gap: 12 }}>
             <Form.Item
               label="First Name"
               name="first_name"
               style={{ flex: 1 }}
-              rules={[{ required: true, message: 'First name is required' }]}
+              rules={[{ required: true, message: "First name is required" }]}
             >
               <Input autoComplete="given-name" />
             </Form.Item>
@@ -147,7 +166,7 @@ export function AcceptInvitation() {
               label="Last Name"
               name="last_name"
               style={{ flex: 1 }}
-              rules={[{ required: true, message: 'Last name is required' }]}
+              rules={[{ required: true, message: "Last name is required" }]}
             >
               <Input autoComplete="family-name" />
             </Form.Item>
@@ -157,8 +176,8 @@ export function AcceptInvitation() {
             label="Password"
             name="password"
             rules={[
-              { required: true, message: 'Password is required' },
-              { min: 8, message: 'Password must be at least 8 characters' },
+              { required: true, message: "Password is required" },
+              { min: 8, message: "Password must be at least 8 characters" },
             ]}
           >
             <Input.Password autoComplete="new-password" />
@@ -167,13 +186,14 @@ export function AcceptInvitation() {
           <Form.Item
             label="Confirm Password"
             name="password_confirm"
-            dependencies={['password']}
+            dependencies={["password"]}
             rules={[
-              { required: true, message: 'Please confirm your password' },
+              { required: true, message: "Please confirm your password" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue('password') === value) return Promise.resolve()
-                  return Promise.reject(new Error('Passwords do not match'))
+                  if (!value || getFieldValue("password") === value)
+                    return Promise.resolve();
+                  return Promise.reject(new Error("Passwords do not match"));
                 },
               }),
             ]}
@@ -182,7 +202,12 @@ export function AcceptInvitation() {
           </Form.Item>
 
           {submitError ? (
-            <Alert type="error" message={submitError} showIcon style={{ marginBottom: 16 }} />
+            <Alert
+              type="error"
+              message={submitError}
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
           ) : null}
 
           <Button type="primary" htmlType="submit" loading={submitting} block>
@@ -191,5 +216,5 @@ export function AcceptInvitation() {
         </Form>
       </Card>
     </div>
-  )
+  );
 }
