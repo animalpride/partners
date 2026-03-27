@@ -35,15 +35,10 @@ database:
   coredbname: partners_qa_core
 
 email:
-  smtp_host: "smtp-relay.gmail.com"
-  smtp_port: 587
-  smtp_tls: true
-  smtp_auth: false
+  resend_api_key: "to_be_replaced_with_docker_secret"
   from_email: "noreply@animalpride.com"
   from_name: "DenOps"
   partner_leads_to: "partners@animalpride.com"
   links:
     invite_base_url: "https://partners.octagon.home/accept-invitation"
     reset_base_url: "https://partners.octagon.home/reset-password"
-  smtp_user: "your-email@gmail.com"
-  smtp_password: "your-app-password"

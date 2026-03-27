@@ -40,15 +40,10 @@ database:
     conn_max_idle_minutes: 5
 
 email:
-  smtp_host: "smtp-relay.gmail.com"
-  smtp_port: 587
-  smtp_tls: true
-  smtp_auth: false
+  resend_api_key: "to_be_replaced_with_docker_secret"
   from_email: "noreply@animalpride.com"
   from_name: "AnimalPride"
   partner_leads_to: "support@animalpride.com"
   links:
     invite_base_url: "https://partners.animalpride.com/accept-invitation"
     reset_base_url: "https://partners.animalpride.com/reset-password"
-  smtp_user: "your-email@gmail.com"
-  smtp_password: "your-app-password"

@@ -49,10 +49,12 @@ services:
     secrets:
       - partners_auth_db_password
       - partners_auth_jwt_secret
+      - partners_resend_api_key
     environment:
       - GIN_MODE=release
       - PARTNERS_AUTH_DB_PASSWORD_FILE=/run/secrets/partners_auth_db_password
       - PARTNERS_AUTH_JWT_SECRET_FILE=/run/secrets/partners_auth_jwt_secret
+      - PARTNERS_RESEND_API_KEY_FILE=/run/secrets/partners_resend_api_key
     deploy:
       replicas: 2
       update_config:
@@ -81,9 +83,11 @@ services:
       - GIN_MODE=release
       - PARTNERS_CORE_DB_PASSWORD_FILE=/run/secrets/partners_core_db_password
       - PARTNERS_INTERNAL_TOKEN_FILE=/run/secrets/partners_internal_token
+      - PARTNERS_RESEND_API_KEY_FILE=/run/secrets/partners_resend_api_key
     secrets:
       - partners_core_db_password
       - partners_internal_token
+      - partners_resend_api_key
     deploy:
       replicas: 2
       update_config:
@@ -132,5 +136,7 @@ secrets:
   partners_core_db_password:
     external: true
   partners_internal_token:
+    external: true
+  partners_resend_api_key:
     external: true
  

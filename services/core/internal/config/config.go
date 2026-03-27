@@ -28,12 +28,7 @@ type Auth struct {
 }
 
 type Email struct {
-	SMTPHost       string `yaml:"smtp_host"`
-	SMTPPort       int    `yaml:"smtp_port"`
-	SMTPTLS        bool   `yaml:"smtp_tls"`
-	SMTPAuth       bool   `yaml:"smtp_auth"`
-	SMTPUser       string `yaml:"smtp_user"`
-	SMTPPassword   string `yaml:"smtp_password"`
+	ResendAPIKey   string `yaml:"resend_api_key"`
 	FromEmail      string `yaml:"from_email"`
 	FromName       string `yaml:"from_name"`
 	PartnerLeadsTo string `yaml:"partner_leads_to"`
@@ -85,6 +80,6 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	cfg.Database.Password = sharedconfig.ResolveSecret("PARTNERS_CORE_DB_PASSWORD", cfg.Database.Password)
-	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("PARTNERS_CORE_SMTP_PASSWORD", cfg.Email.SMTPPassword)
+	cfg.Email.ResendAPIKey = sharedconfig.ResolveSecret("PARTNERS_RESEND_API_KEY", cfg.Email.ResendAPIKey)
 	return &cfg, nil
 }
