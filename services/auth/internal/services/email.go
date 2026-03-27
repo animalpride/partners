@@ -2,13 +2,13 @@ package services
 
 import (
 	"bytes"
-	"crypto/tls"
 	"fmt"
 	"html/template"
 	"log"
-	"net/smtp"
 	"net/url"
 	"strings"
+
+	resend "github.com/resend/resend-go/v2"
 
 	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
 )
@@ -317,80 +317,19 @@ func (s *EmailService) SendPasswordChangedEmail(to string) error {
 }
 
 func (s *EmailService) sendHTML(to, subject, htmlBody string) error {
-	headers := map[string]string{
-		"From":         fmt.Sprintf("%s <%s>", s.config.Email.FromName, s.config.Email.FromEmail),
-		"To":           to,
-		"Subject":      subject,
-		"MIME-Version": "1.0",
-		"Content-Type": "text/html; charset=UTF-8",
+	client := resend.NewClient(s.config.Email.ResendAPIKey)
+
+	params := &resend.SendEmailRequest{
+		From:    fmt.Sprintf("%s <%s>", s.config.Email.FromName, s.config.Email.FromEmail),
+		To:      []string{to},
+		Subject: subject,
+		Html:    htmlBody,
 	}
 
-	message := ""
-	for k, v := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-	message += "\r\n" + htmlBody
-
-	smtpAddr := fmt.Sprintf("%s:%d", s.config.Email.SMTPHost, s.config.Email.SMTPPort)
-	client, err := smtp.Dial(smtpAddr)
+	_, err := client.Emails.Send(params)
 	if err != nil {
-		log.Printf("Failed to connect to SMTP server: %v", err)
-		return fmt.Errorf("failed to connect to smtp server: %v", err)
-	}
-	defer client.Close()
-
-	hostname := "denops.animalpride.com"
-	if err := client.Hello(hostname); err != nil {
-		log.Printf("sendHTML: smtp hello failed: %v", err)
-		return fmt.Errorf("failed to say hello: %w", err)
-	}
-
-	if s.config.Email.SMTPTLS {
-		if ok, _ := client.Extension("STARTTLS"); !ok {
-			log.Printf("SMTP server does not support STARTTLS")
-			return fmt.Errorf("smtp server does not support STARTTLS")
-		}
-		tlsConfig := &tls.Config{ServerName: s.config.Email.SMTPHost}
-		if err := client.StartTLS(tlsConfig); err != nil {
-			log.Printf("Failed to start TLS: %v", err)
-			return fmt.Errorf("failed to start tls: %v", err)
-		}
-	}
-
-	if s.config.Email.SMTPAuth {
-		auth := smtp.PlainAuth("", s.config.Email.SMTPUser, s.config.Email.SMTPPassword, s.config.Email.SMTPHost)
-		if err := client.Auth(auth); err != nil {
-			log.Printf("Failed to authenticate with SMTP server: %v", err)
-			return fmt.Errorf("failed to authenticate with smtp server: %v", err)
-		}
-	}
-
-	if err := client.Mail(s.config.Email.FromEmail); err != nil {
-		log.Printf("Failed to set from address: %v", err)
-		return fmt.Errorf("failed to set from address: %v", err)
-	}
-	if err := client.Rcpt(to); err != nil {
-		log.Printf("Failed to set recipient: %v", err)
-		return fmt.Errorf("failed to set recipient: %v", err)
-	}
-
-	dataWriter, err := client.Data()
-	if err != nil {
-		log.Printf("Failed to get data writer: %v", err)
-		return fmt.Errorf("failed to send email data: %v", err)
-	}
-	if _, err := dataWriter.Write([]byte(message)); err != nil {
-		log.Printf("Failed to write email data: %v", err)
-		return fmt.Errorf("failed to write email data: %v", err)
-	}
-	if err := dataWriter.Close(); err != nil {
-		log.Printf("Failed to close data writer: %v", err)
-		return fmt.Errorf("failed to finalize email data: %v", err)
-	}
-
-	if err := client.Quit(); err != nil {
-		log.Printf("Failed to close smtp session: %v", err)
-		return fmt.Errorf("failed to close smtp session: %v", err)
+		log.Printf("sendHTML: resend failed: %v", err)
+		return fmt.Errorf("failed to send email: %w", err)
 	}
 
 	return nil

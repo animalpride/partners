@@ -26,12 +26,7 @@ type Database struct {
 type DatabasePool = sharedconfig.DatabasePool
 
 type Email struct {
-	SMTPHost     string     `yaml:"smtp_host"`
-	SMTPPort     int        `yaml:"smtp_port"`
-	SMTPTLS      bool       `yaml:"smtp_tls"`
-	SMTPAuth     bool       `yaml:"smtp_auth"`
-	SMTPUser     string     `yaml:"smtp_user"`
-	SMTPPassword string     `yaml:"smtp_password"`
+	ResendAPIKey string     `yaml:"resend_api_key"`
 	FromEmail    string     `yaml:"from_email"`
 	FromName     string     `yaml:"from_name"`
 	Links        EmailLinks `yaml:"links"`
@@ -74,7 +69,7 @@ func LoadConfig(path string) (*Config, error) {
 	// Pull secrets from Docker/Kubernetes secret mounts/env, fall back to config file.
 	cfg.Database.Password = sharedconfig.ResolveSecret("PARTNERS_AUTH_DB_PASSWORD", cfg.Database.Password)
 	cfg.JWTSecret = sharedconfig.ResolveSecret("PARTNERS_AUTH_JWT_SECRET", cfg.JWTSecret)
-	cfg.Email.SMTPPassword = sharedconfig.ResolveSecret("PARTNERS_AUTH_SMTP_PASSWORD", cfg.Email.SMTPPassword)
+	cfg.Email.ResendAPIKey = sharedconfig.ResolveSecret("PARTNERS_RESEND_API_KEY", cfg.Email.ResendAPIKey)
 	if cfg.AuthSession.AccessTokenTTL == 0 {
 		cfg.AuthSession.AccessTokenTTL = 15 * time.Minute
 	}
