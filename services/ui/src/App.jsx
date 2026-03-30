@@ -41,8 +41,8 @@ const NAV_ITEMS = [
   { key: "/", label: "Partnership Overview" },
   { key: "/how-it-works", label: "How it Works" },
   { key: "/case-studies", label: "Case Studies" },
-  { key: "/pricing", label: "Pricing" },
-  { key: "/faq", label: "Partner FAQ" },
+  { key: "/pricing", label: "Revenue Share" },
+  // { key: "/faq", label: "Partner FAQ" },
   { key: "/apply", label: "Application" },
 ];
 
@@ -120,7 +120,7 @@ function PublicLayout({
           <div className="site-brand">
             <img
               src="/Logo-Wordmark-Dog-PartnersPlatform2.png"
-              alt="Animal Pride Partners"
+              alt="Animal Pride Partners Platform"
               className="site-brand-logo"
             />
 
