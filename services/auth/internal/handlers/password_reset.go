@@ -27,6 +27,7 @@ func (h *PasswordResetHandler) RequestReset(c *gin.Context) {
 		Email string `json:"email" binding:"required,email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("RequestReset: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
@@ -46,12 +47,14 @@ func (h *PasswordResetHandler) ValidateReset(c *gin.Context) {
 		Token string `json:"token" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ValidateReset: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	_, _, err := h.resetRepo.ValidateToken(strings.TrimSpace(request.Token), c.ClientIP())
 	if err != nil {
+		log.Printf("ValidateReset: token validation failed: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Reset link is invalid or expired"})
 		return
 	}
@@ -66,6 +69,7 @@ func (h *PasswordResetHandler) CompleteReset(c *gin.Context) {
 		PasswordConfirm string `json:"password_confirm" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("CompleteReset: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
@@ -82,6 +86,7 @@ func (h *PasswordResetHandler) CompleteReset(c *gin.Context) {
 
 	user, err := h.resetRepo.CompleteReset(strings.TrimSpace(request.Token), request.Password, c.ClientIP())
 	if err != nil {
+		log.Printf("CompleteReset: reset failed: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Reset link is invalid or expired"})
 		return
 	}

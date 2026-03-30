@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -39,6 +40,7 @@ func (h *AdminHandler) GetAdminDashboard(c *gin.Context) {
 	// Get total users count
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
+		log.Printf("GetAdminDashboard: failed to get users: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users count"})
 		return
 	}
@@ -46,6 +48,7 @@ func (h *AdminHandler) GetAdminDashboard(c *gin.Context) {
 	// Get total roles count
 	roles, err := h.rbacRepo.GetAllRoles()
 	if err != nil {
+		log.Printf("GetAdminDashboard: failed to get roles: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get roles count"})
 		return
 	}
@@ -60,6 +63,7 @@ func (h *AdminHandler) GetAdminDashboard(c *gin.Context) {
 
 	invites, err := h.invRepo.ListPendingInvitations()
 	if err != nil {
+		log.Printf("GetAdminDashboard: failed to get invitations: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get invitations"})
 		return
 	}
@@ -83,6 +87,7 @@ func (h *AdminHandler) CreateRole(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("CreateRole: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
@@ -94,6 +99,7 @@ func (h *AdminHandler) CreateRole(c *gin.Context) {
 	}
 
 	if err := h.rbacRepo.CreateRole(role); err != nil {
+		log.Printf("CreateRole: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create role"})
 		return
 	}
@@ -105,6 +111,7 @@ func (h *AdminHandler) CreateRole(c *gin.Context) {
 func (h *AdminHandler) GetAllRoles(c *gin.Context) {
 	roles, err := h.rbacRepo.GetAllRoles()
 	if err != nil {
+		log.Printf("GetAllRoles: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get roles"})
 		return
 	}
@@ -120,11 +127,13 @@ func (h *AdminHandler) AssignRoleToUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("AssignRoleToUser: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	if err := h.rbacRepo.AssignRoleToUser(req.UserID, req.RoleID); err != nil {
+		log.Printf("AssignRoleToUser: failed to assign role %d to user %d: %v", req.RoleID, req.UserID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to assign role"})
 		return
 	}
@@ -140,11 +149,13 @@ func (h *AdminHandler) RemoveRoleFromUser(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("RemoveRoleFromUser: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
 	if err := h.rbacRepo.RemoveRoleFromUser(req.UserID, req.RoleID); err != nil {
+		log.Printf("RemoveRoleFromUser: failed to remove role %d from user %d: %v", req.RoleID, req.UserID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove role"})
 		return
 	}
@@ -156,6 +167,7 @@ func (h *AdminHandler) RemoveRoleFromUser(c *gin.Context) {
 func (h *AdminHandler) GetUsersWithRoles(c *gin.Context) {
 	users, err := h.userRepo.GetAllUsers()
 	if err != nil {
+		log.Printf("GetUsersWithRoles: failed to get users: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users"})
 		return
 	}
@@ -164,6 +176,7 @@ func (h *AdminHandler) GetUsersWithRoles(c *gin.Context) {
 	for _, user := range users {
 		roles, err := h.rbacRepo.GetUserRoles(user.ID)
 		if err != nil {
+			log.Printf("GetUsersWithRoles: failed to get roles for user %d: %v", user.ID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user roles"})
 			return
 		}
@@ -190,25 +203,28 @@ func (h *AdminHandler) ActivateUser(c *gin.Context) {
 	userIDStr := c.Param("id")
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
+		log.Printf("ActivateUser: invalid user ID %q: %v", userIDStr, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
 	var req struct {
-		Active int `json:"active" binding:"required"`
+		Active *int `json:"active" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("ActivateUser: invalid input for user %d: %v", userID, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	if err := h.userRepo.UpdateUserStatus(userID, req.Active); err != nil {
+	if err := h.userRepo.UpdateUserStatus(userID, *req.Active); err != nil {
+		log.Printf("ActivateUser: failed to update status for user %d: %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user status"})
 		return
 	}
 
-	if req.Active == 0 {
+	if *req.Active == 0 {
 		_ = h.refreshRepo.RevokeByUserID(userID, time.Now())
 		actorID := c.GetInt("user_id")
 		_ = h.auditRepo.CreateEvent("user.revoked", &actorID, &userID, nil, nil)

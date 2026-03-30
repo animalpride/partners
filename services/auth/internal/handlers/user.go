@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -27,6 +28,7 @@ func NewUserHandler(userRepository *repository.UserRepository) *UserHandler {
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userRepository.GetAllUsers()
 	if err != nil {
+		log.Printf("GetAllUsers: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
 		return
 	}
@@ -38,6 +40,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 	id := c.Param("id")
 	user, err := h.userRepository.GetUserByID(id)
 	if err != nil {
+		log.Printf("GetUserByID: db error for id %s: %v", id, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user"})
 		return
 	}
@@ -48,11 +51,13 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
+		log.Printf("CreateUser: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	user.CreatedAt = time.Now()
 	if err := h.userRepository.CreateUser(&user); err != nil {
+		log.Printf("CreateUser: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -64,16 +69,19 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
+		log.Printf("UpdateUser: invalid input for id %s: %v", id, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	userId, err := strconv.Atoi(id)
 	if err != nil {
+		log.Printf("UpdateUser: invalid user ID %q: %v", id, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 	user.ID = userId
 	if err := h.userRepository.UpdateUser(&user); err != nil {
+		log.Printf("UpdateUser: db error for user %d: %v", userId, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 		return
 	}
@@ -84,6 +92,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.userRepository.DeleteUser(id); err != nil {
+		log.Printf("DeleteUser: db error for id %s: %v", id, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
 		return
 	}
@@ -97,10 +106,12 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 		NewPassword string `json:"new_password"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ChangePassword: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.ChangePassword(request.UserId, request.NewPassword); err != nil {
+		log.Printf("ChangePassword: db error for user %d: %v", request.UserId, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to change password"})
 		return
 	}
@@ -114,10 +125,12 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		Email  string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ResetPassword: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.ResetPassword(request.UserId, request.Email); err != nil {
+		log.Printf("ResetPassword: db error for user %d: %v", request.UserId, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset password"})
 		return
 	}
@@ -130,10 +143,12 @@ func (h *UserHandler) InviteUser(c *gin.Context) {
 		Email string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("InviteUser: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.InviteUser(request.Email); err != nil {
+		log.Printf("InviteUser: db error for %s: %v", request.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invite user"})
 		return
 	}
@@ -147,10 +162,12 @@ func (h *UserHandler) AcceptInvitation(c *gin.Context) {
 		Token  string `json:"token"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("AcceptInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.AcceptInvitation(request.UserId, request.Token); err != nil {
+		log.Printf("AcceptInvitation: db error for user %s: %v", request.UserId, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to accept invitation"})
 		return
 	}
@@ -163,10 +180,12 @@ func (h *UserHandler) ResendInvitation(c *gin.Context) {
 		Email string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ResendInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.ResendInvitation(request.Email); err != nil {
+		log.Printf("ResendInvitation: db error for %s: %v", request.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to resend invitation"})
 		return
 	}
@@ -179,10 +198,12 @@ func (h *UserHandler) BlacklistToken(c *gin.Context) {
 		Token string `json:"token"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("BlacklistToken: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.BlacklistToken(request.Token); err != nil {
+		log.Printf("BlacklistToken: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to blacklist token"})
 		return
 	}
@@ -193,6 +214,7 @@ func (h *UserHandler) BlacklistToken(c *gin.Context) {
 func (h *UserHandler) GetBlacklistedTokens(c *gin.Context) {
 	tokens, err := h.userRepository.GetBlacklistedTokens()
 	if err != nil {
+		log.Printf("GetBlacklistedTokens: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve blacklisted tokens"})
 		return
 	}
@@ -203,6 +225,7 @@ func (h *UserHandler) GetBlacklistedTokens(c *gin.Context) {
 func (h *UserHandler) DeleteBlacklistedToken(c *gin.Context) {
 	id := c.Param("id")
 	if err := h.userRepository.DeleteBlacklistedToken(id); err != nil {
+		log.Printf("DeleteBlacklistedToken: db error for id %s: %v", id, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete blacklisted token"})
 		return
 	}
@@ -215,11 +238,13 @@ func (h *UserHandler) ValidateToken(c *gin.Context) {
 		Token string `json:"token"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ValidateToken: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	user, err := h.userRepository.ValidateToken(request.Token)
 	if err != nil {
+		log.Printf("ValidateToken: db error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate token"})
 		return
 	}
@@ -232,6 +257,7 @@ func (h *UserHandler) ValidateTokenById(c *gin.Context) {
 	token := c.Param("token")
 	user, err := h.userRepository.ValidateTokenById(id, token)
 	if err != nil {
+		log.Printf("ValidateTokenById: db error for id %s: %v", id, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate token"})
 		return
 	}
@@ -250,6 +276,7 @@ type RegisterUserRequest struct {
 func (h *UserHandler) RegisterUser(c *gin.Context) {
 	var req RegisterUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("RegisterUser: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
 		return
 	}
@@ -257,6 +284,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("RegisterUser: bcrypt error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
@@ -275,6 +303,7 @@ func (h *UserHandler) RegisterUser(c *gin.Context) {
 	}
 
 	if err := h.userRepository.CreateUser(&user); err != nil {
+		log.Printf("RegisterUser: db error for %s: %v", req.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
@@ -293,10 +322,12 @@ func (h *UserHandler) RemoveInvitation(c *gin.Context) {
 		Email string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("RemoveInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.RemoveInvitation(request.Email); err != nil {
+		log.Printf("RemoveInvitation: db error for %s: %v", request.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove invitation"})
 		return
 	}
@@ -309,10 +340,12 @@ func (h *UserHandler) CreateUserManually(c *gin.Context) {
 		Email string `json:"email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("CreateUserManually: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	if err := h.userRepository.CreateUserManually(request.Email); err != nil {
+		log.Printf("CreateUserManually: db error for %s: %v", request.Email, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user manually"})
 		return
 	}
@@ -329,6 +362,7 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 		NewPasswordConfirm string `json:"new_password_confirm"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("UpdateUserProfile: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}

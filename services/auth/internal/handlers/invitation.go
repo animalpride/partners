@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
@@ -26,11 +27,13 @@ func (h *InvitationHandler) CreateInvitation(c *gin.Context) {
 		RoleID int    `json:"role_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("CreateInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	actorID := c.GetInt("user_id")
 	if err := h.invitationRepo.CreateInvitation(strings.TrimSpace(request.Email), request.RoleID, actorID); err != nil {
+		log.Printf("CreateInvitation: repo error for %s: %v", request.Email, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -42,11 +45,13 @@ func (h *InvitationHandler) ResendInvitation(c *gin.Context) {
 		Email string `json:"email" binding:"required,email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ResendInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	actorID := c.GetInt("user_id")
 	if err := h.invitationRepo.ResendInvitation(strings.TrimSpace(request.Email), actorID); err != nil {
+		log.Printf("ResendInvitation: repo error for %s: %v", request.Email, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -58,11 +63,13 @@ func (h *InvitationHandler) RevokeInvitation(c *gin.Context) {
 		Email string `json:"email" binding:"required,email"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("RevokeInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 	actorID := c.GetInt("user_id")
 	if err := h.invitationRepo.RevokeInvitation(strings.TrimSpace(request.Email), actorID); err != nil {
+		log.Printf("RevokeInvitation: repo error for %s: %v", request.Email, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -72,6 +79,7 @@ func (h *InvitationHandler) RevokeInvitation(c *gin.Context) {
 func (h *InvitationHandler) ListPendingInvitations(c *gin.Context) {
 	invitations, err := h.invitationRepo.ListPendingInvitations()
 	if err != nil {
+		log.Printf("ListPendingInvitations: repo error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch invitations"})
 		return
 	}
@@ -83,6 +91,7 @@ func (h *InvitationHandler) ValidateInvitation(c *gin.Context) {
 		Token string `json:"token" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("ValidateInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
@@ -108,6 +117,7 @@ func (h *InvitationHandler) RegisterInvitation(c *gin.Context) {
 		PasswordConfirm string `json:"password_confirm" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
+		log.Printf("RegisterInvitation: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
