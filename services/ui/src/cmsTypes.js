@@ -205,6 +205,7 @@ export function makeDefaultSection(type = 'text') {
     return {
       type, container_size: 'wider', background: '', alignment: 'center',
       heading: 'Matrix Heading', subheading: '',
+      annotation_heading: '', annotation_items: [],
       columns: [
         { label: 'Column A', subtext: '', features: [] },
         { label: 'Column B', subtext: '', features: [] },
@@ -251,6 +252,7 @@ export function normalizeSection(section) {
     normalized.columns = Array.isArray(normalized.columns) ? normalized.columns.map(normalizeMatrixColumn) : []
     const colCount = normalized.columns.length
     normalized.rows = Array.isArray(normalized.rows) ? normalized.rows.map((r) => normalizeMatrixRow(r, colCount)) : []
+    normalized.annotation_items = Array.isArray(normalized.annotation_items) ? normalized.annotation_items : []
   }
   if (normalized.type === 'content_with_image') {
     const inner = normalizeSection(normalized.content_section || {})

@@ -1,5 +1,5 @@
 import {
-  Alert, Button, Card, Collapse, Dropdown, Form, Input, Layout, Menu,
+  Alert, Button, Card, Collapse, Divider, Dropdown, Form, Input, Layout, Menu,
   Select, Slider, Space, Spin, Tag, Typography,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
@@ -646,6 +646,17 @@ function MatrixTableEditor({ section, sectionIndex, onChange }) {
 
       <Form.Item label="Note (shown below table)" style={{ marginBottom: 8 }}>
         <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.note || ''} onChange={(e) => update({ note: e.target.value })} />
+      </Form.Item>
+
+      <Divider orientation="left" orientationMargin={0} style={{ marginBottom: 8, fontSize: '0.82rem' }}>Annotation (optional callout shown top-right of table)</Divider>
+      <Form.Item label="Annotation Heading" style={{ marginBottom: 8 }}>
+        <Input value={section.annotation_heading || ''} onChange={(e) => update({ annotation_heading: e.target.value })} placeholder="e.g. Key Assumptions" />
+      </Form.Item>
+      <Form.Item label="Annotation Items" style={{ marginBottom: 8 }}>
+        <BulletsEditor
+          items={section.annotation_items || []}
+          onChange={(newItems) => update({ annotation_items: newItems })}
+        />
       </Form.Item>
     </>
   )

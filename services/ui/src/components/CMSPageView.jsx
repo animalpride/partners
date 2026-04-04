@@ -22,6 +22,30 @@ const ASPECT_CLASS_MAP = {
   '1/1':  'cms-img-placeholder--1-1',
 }
 
+// Parse inline markdown (**bold**, *italic*, _italic_) within a single line of text.
+function parseInline(text) {
+  const re = /\*\*(.*?)\*\*|\*(.*?)\*|_(.*?)_|[^*_]+|[*_]/g
+  const nodes = []
+  let m
+  while ((m = re.exec(text)) !== null) {
+    if (m[1] !== undefined) nodes.push(<strong key={nodes.length}>{m[1]}</strong>)
+    else if (m[2] !== undefined) nodes.push(<em key={nodes.length}>{m[2]}</em>)
+    else if (m[3] !== undefined) nodes.push(<em key={nodes.length}>{m[3]}</em>)
+    else nodes.push(m[0])
+  }
+  return nodes
+}
+
+// Render user-typed text with \n line breaks and inline markdown.
+function renderMarkdown(text) {
+  if (!text) return null
+  const lines = String(text).split('\\n')
+  return lines.flatMap((line, li) => {
+    const nodes = parseInline(line)
+    return li === 0 ? nodes : [<br key={`br-${li}`} />, ...nodes]
+  })
+}
+
 // ── SectionContent ────────────────────────────────────────────────────────────
 // Renders the inner content of any "simple" section type.
 // embedded=false (default): wraps content in cms-section-inner (max-width, centering).
@@ -56,7 +80,7 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
           {(section.items || []).filter(Boolean).map((item, i) => (
             <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
               <span className="cms-bullet-icon" style={{ color: bulletAccent }}>✓</span>
-              {item}
+              {renderMarkdown(item)}
             </li>
           ))}
         </ul>
@@ -98,7 +122,7 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
         {section.heading ? (
           <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
         ) : null}
-        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p> : null}
         {section.button_label && section.button_link ? (
           <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
             <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
@@ -160,7 +184,7 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
         {section.heading ? (
           <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
         ) : null}
-        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p> : null}
         <div className="cms-icon-grid">
           {(section.items || []).map((item, i) => (
             <div key={i} className="cms-icon-item">
@@ -182,14 +206,32 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
   if (section.type === 'matrix_table') {
     const columns = section.columns || []
     const rows = section.rows || []
+    const annotationItems = section.annotation_items || []
+    const hasAnnotation = section.annotation_heading || annotationItems.length > 0
     return W(
       <>
-        {section.heading ? (
-          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-        ) : null}
-        {section.subheading ? (
-          <p className="cms-section-body" style={{ color: textColor, marginBottom: 24 }}>{section.subheading}</p>
-        ) : null}
+        <div className="cms-matrix-top-area">
+          <div className="cms-matrix-meta">
+            {section.heading ? (
+              <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+            ) : null}
+            {section.subheading ? (
+              <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.subheading)}</p>
+            ) : null}
+          </div>
+          {hasAnnotation ? (
+            <div className="cms-matrix-annotation">
+              {section.annotation_heading ? (
+                <p className="cms-matrix-annotation__heading">{section.annotation_heading}</p>
+              ) : null}
+              {annotationItems.length > 0 ? (
+                <ul className="cms-matrix-annotation__list">
+                  {annotationItems.map((item, i) => <li key={i}>{renderMarkdown(item)}</li>)}
+                </ul>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
         <div className="cms-matrix-scroll">
           <div className="cms-matrix-grid" style={{ '--matrix-cols': columns.length }}>
             <div className="cms-matrix-header-row">
@@ -240,7 +282,7 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
         <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
       ) : null}
       {section.body ? (
-        <p className="cms-section-body" style={{ whiteSpace: 'pre-wrap', color: textColor }}>{section.body}</p>
+        <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p>
       ) : null}
     </>
   )
@@ -294,7 +336,7 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
               ) : (
                 <div className="cms-section-inner" style={{ ...innerStyle, backgroundColor: bg || undefined, color: textColor }}>
                   {section.heading ? <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2> : null}
-                  {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+                  {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p> : null}
                   <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 16 }}>
                     <span className="cms-img-placeholder__label">{section.image_label || 'Image placeholder'}</span>
                   </div>
@@ -354,14 +396,14 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
                 <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
               ) : null}
               {section.body ? (
-                <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p>
+                <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p>
               ) : null}
               {(section.bullets || []).length > 0 ? (
                 <ul className="cms-bullets">
                   {section.bullets.filter(Boolean).map((item, bi) => (
                     <li key={bi} className="cms-bullet-item" style={{ color: textColor }}>
                       <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>
-                      {item}
+                      {renderMarkdown(item)}
                     </li>
                   ))}
                 </ul>

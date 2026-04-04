@@ -811,10 +811,53 @@ a.cms-grid-card:hover .cms-grid-img {
 }
 
 /* ── Matrix / Pivot Table ───────────────────────────────────────────────── */
+
+/* Top area: heading/subheading flex-left, annotation card flex-right */
+.cms-matrix-top-area {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.cms-matrix-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.cms-matrix-annotation {
+  width: 240px;
+  flex-shrink: 0;
+  background: #f6f7fe;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 105, 143, 0.14);
+  padding: 16px 18px;
+}
+
+.cms-matrix-annotation__heading {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #00698f;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cms-matrix-annotation__list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: #3a3a4a;
+  line-height: 1.55;
+}
+
+.cms-matrix-annotation__list li {
+  margin-bottom: 5px;
+}
+
 .cms-matrix-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  margin-top: 12px;
 }
 
 .cms-matrix-grid {
@@ -1058,6 +1101,14 @@ a.cms-grid-card:hover .cms-grid-img {
 
 /* ── Matrix mobile card layout (phones) ────────────────────────────────── */
 @media (max-width: 540px) {
+  .cms-matrix-top-area {
+    flex-direction: column;
+  }
+
+  .cms-matrix-annotation {
+    width: 100%;
+  }
+
   .cms-matrix-scroll {
     overflow-x: visible;
   }
