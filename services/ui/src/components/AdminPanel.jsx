@@ -1,15 +1,16 @@
 import {
   Alert, Button, Card, Collapse, Dropdown, Form, Input, Layout, Menu,
-  Select, Space, Spin, Tag, Typography,
+  Select, Slider, Space, Spin, Tag, Typography,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPage, updatePage } from '../api'
 import {
-  CMS_PAGES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
+  CMS_PAGES, CONTAINER_SIZE_OPTIONS, CONTENT_WITH_IMAGE_SUPPORTED_TYPES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
   SECTION_ALIGNMENT_OPTIONS, SECTION_BACKGROUND_OPTIONS, SECTION_TYPES,
   TWO_COLUMN_IMAGE_SIDE_OPTIONS, TWO_COLUMN_VARIANT_OPTIONS,
-  makeDefaultSection, normalizeComparisonRow, normalizeField, normalizeGridItem, normalizeIconItem,
+  makeDefaultSection, normalizeComparisonRow, normalizeContent, normalizeField, normalizeGridItem, normalizeIconItem,
+  normalizeMatrixColumn, normalizeMatrixRow,
   normalizeSections, toContentJSON,
 } from '../cmsTypes'
 import { CMSContentRenderer } from './CMSPageView'
@@ -19,6 +20,10 @@ import { UsersRoles } from './UsersRoles'
 function mutateSectionAt(prev, index, fn) {
   return prev.map((s, i) => (i === index ? fn(s) : s))
 }
+
+const CONTAINER_STEPS = CONTAINER_SIZE_OPTIONS.map((o) => o.value)
+const CONTAINER_STEP_INDEX = Object.fromEntries(CONTAINER_STEPS.map((v, i) => [v, i]))
+const CONTAINER_MARKS = Object.fromEntries(CONTAINER_SIZE_OPTIONS.map((o, i) => [i, o.label]))
 
 // ── Per-section editor panel ───────────────────────────────────────────────────
 function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, onMoveDown }) {
@@ -59,6 +64,18 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
             />
           </Form.Item>
         </div>
+
+        <Form.Item label="Section Width" style={{ marginBottom: 24 }}>
+          <Slider
+            min={0}
+            max={3}
+            step={1}
+            marks={CONTAINER_MARKS}
+            value={CONTAINER_STEP_INDEX[section.container_size] ?? 0}
+            onChange={(v) => update({ container_size: CONTAINER_STEPS[v] })}
+            tooltip={{ formatter: (v) => CONTAINER_MARKS[v] }}
+          />
+        </Form.Item>
 
         {section.type === 'image' ? (
           <Form.Item label="Image Focus" style={{ marginBottom: 8 }}>
@@ -162,6 +179,16 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
         {/* ── Icon Grid ── */}
         {section.type === 'icon_grid' ? (
           <IconGridEditor section={section} sectionIndex={index} onChange={onChange} />
+        ) : null}
+
+        {/* ── Matrix / Pivot Table ── */}
+        {section.type === 'matrix_table' ? (
+          <MatrixTableEditor section={section} sectionIndex={index} onChange={onChange} />
+        ) : null}
+
+        {/* ── Content + Image (paired) ── */}
+        {section.type === 'content_with_image' ? (
+          <ContentWithImageEditor section={section} sectionIndex={index} onChange={onChange} />
         ) : null}
       </Form>
     </div>
@@ -494,6 +521,214 @@ function IconGridEditor({ section, sectionIndex, onChange }) {
   )
 }
 
+function MatrixTableEditor({ section, sectionIndex, onChange }) {
+  function update(patch) { onChange(sectionIndex, patch) }
+
+  const colCount = (section.columns || []).length
+
+  function addColumn() {
+    const newCols = [...(section.columns || []), normalizeMatrixColumn({})]
+    const newRows = (section.rows || []).map((r) => ({ ...r, cells: [...(r.cells || []), ''] }))
+    onChange(sectionIndex, { columns: newCols, rows: newRows })
+  }
+  function updateColumn(ci, patch) {
+    onChange(sectionIndex, {
+      columns: (section.columns || []).map((c, i) => (i === ci ? normalizeMatrixColumn({ ...c, ...patch }) : c)),
+    })
+  }
+  function removeColumn(ci) {
+    const newCols = (section.columns || []).filter((_, i) => i !== ci)
+    const newRows = (section.rows || []).map((r) => ({
+      ...r,
+      cells: (r.cells || []).filter((_, i) => i !== ci),
+    }))
+    onChange(sectionIndex, { columns: newCols, rows: newRows })
+  }
+  function updateColumnFeatures(ci, newFeatures) {
+    onChange(sectionIndex, {
+      columns: (section.columns || []).map((c, i) =>
+        i === ci ? { ...c, features: newFeatures } : c
+      ),
+    })
+  }
+
+  function addRow() {
+    const newRow = normalizeMatrixRow({ label: '', subtext: '', cells: [] }, colCount)
+    onChange(sectionIndex, { rows: [...(section.rows || []), newRow] })
+  }
+  function updateRow(ri, patch) {
+    onChange(sectionIndex, {
+      rows: (section.rows || []).map((r, i) =>
+        i === ri ? normalizeMatrixRow({ ...r, ...patch }, colCount) : r
+      ),
+    })
+  }
+  function updateCell(ri, ci, value) {
+    onChange(sectionIndex, {
+      rows: (section.rows || []).map((r, i) => {
+        if (i !== ri) return r
+        const cells = [...(r.cells || [])]
+        cells[ci] = value
+        return { ...r, cells }
+      }),
+    })
+  }
+  function removeRow(ri) {
+    onChange(sectionIndex, { rows: (section.rows || []).filter((_, i) => i !== ri) })
+  }
+
+  return (
+    <>
+      <div className="admin-form-row">
+        <Form.Item label="Subheading" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.subheading || ''} onChange={(e) => update({ subheading: e.target.value })} />
+        </Form.Item>
+        <Form.Item label="Cell Label (e.g. Yearly Revenue)" style={{ flex: 1, marginBottom: 8 }}>
+          <Input value={section.cell_label || ''} onChange={(e) => update({ cell_label: e.target.value })} />
+        </Form.Item>
+      </div>
+
+      <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Columns</Typography.Text>
+      {(section.columns || []).map((col, ci) => (
+        <Card
+          key={ci}
+          size="small"
+          className="admin-sub-card"
+          title={`Column ${ci + 1}${col.label ? ` — ${col.label}` : ''}`}
+          extra={<Button size="small" danger type="text" onClick={() => removeColumn(ci)}>Remove</Button>}
+        >
+          <Form.Item label="Label" style={{ marginBottom: 6 }}>
+            <Input size="small" value={col.label || ''} onChange={(e) => updateColumn(ci, { label: e.target.value })} />
+          </Form.Item>
+          <Form.Item label="Subtext" style={{ marginBottom: 6 }}>
+            <Input size="small" value={col.subtext || ''} onChange={(e) => updateColumn(ci, { subtext: e.target.value })} />
+          </Form.Item>
+          <Form.Item label="Features" style={{ marginBottom: 0 }}>
+            <BulletsEditor
+              items={col.features || []}
+              onChange={(newFeatures) => updateColumnFeatures(ci, newFeatures)}
+            />
+          </Form.Item>
+        </Card>
+      ))}
+      <Button size="small" style={{ marginBottom: 12 }} onClick={addColumn}>+ Add Column</Button>
+
+      <Typography.Text strong style={{ display: 'block', marginBottom: 6 }}>Rows</Typography.Text>
+      {(section.rows || []).map((row, ri) => (
+        <Card
+          key={ri}
+          size="small"
+          className="admin-sub-card"
+          title={`Row ${ri + 1}${row.label ? ` — ${row.label}` : ''}`}
+          extra={<Button size="small" danger type="text" onClick={() => removeRow(ri)}>Remove</Button>}
+        >
+          <div className="admin-form-row">
+            <Form.Item label="Label" style={{ flex: 1, marginBottom: 6 }}>
+              <Input size="small" value={row.label || ''} onChange={(e) => updateRow(ri, { label: e.target.value })} />
+            </Form.Item>
+            <Form.Item label="Subtext" style={{ flex: 1, marginBottom: 6 }}>
+              <Input size="small" value={row.subtext || ''} onChange={(e) => updateRow(ri, { subtext: e.target.value })} />
+            </Form.Item>
+          </div>
+          {(section.columns || []).map((col, ci) => (
+            <Form.Item key={ci} label={`Cell: ${col.label || `Column ${ci + 1}`}`} style={{ marginBottom: 6 }}>
+              <Input
+                size="small"
+                value={(row.cells || [])[ci] || ''}
+                onChange={(e) => updateCell(ri, ci, e.target.value)}
+                placeholder="e.g. $1,000 - $5,000"
+              />
+            </Form.Item>
+          ))}
+        </Card>
+      ))}
+      <Button size="small" style={{ marginBottom: 8 }} onClick={addRow}>+ Add Row</Button>
+
+      <Form.Item label="Note (shown below table)" style={{ marginBottom: 8 }}>
+        <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.note || ''} onChange={(e) => update({ note: e.target.value })} />
+      </Form.Item>
+    </>
+  )
+}
+
+function ContentWithImageEditor({ section, sectionIndex, onChange }) {
+  function update(patch) { onChange(sectionIndex, patch) }
+
+  const inner = section.content_section || makeDefaultSection('text')
+
+  function updateInner(patch) {
+    update({ content_section: { ...inner, ...patch } })
+  }
+  function changeInnerType(newType) {
+    update({ content_section: makeDefaultSection(newType) })
+  }
+  // Adapter so sub-editors can call onChange(_, patch) and updateInner(patch) is triggered
+  function innerOnChange(_, patch) { updateInner(patch) }
+
+  return (
+    <>
+      <div className="admin-form-row">
+        <Form.Item label="Image Side" style={{ flex: 1, marginBottom: 8 }}>
+          <Select
+            value={section.image_side || 'right'}
+            options={TWO_COLUMN_IMAGE_SIDE_OPTIONS}
+            onChange={(v) => update({ image_side: v })}
+          />
+        </Form.Item>
+        <Form.Item label="Aspect Ratio" style={{ flex: 1, marginBottom: 8 }}>
+          <Select
+            value={section.image_aspect_ratio || '4/3'}
+            options={IMAGE_ASPECT_RATIO_OPTIONS}
+            onChange={(v) => update({ image_aspect_ratio: v })}
+          />
+        </Form.Item>
+      </div>
+      <Form.Item label="Image URL" style={{ marginBottom: 8 }}>
+        <Input value={section.image_url || ''} onChange={(e) => update({ image_url: e.target.value })} />
+      </Form.Item>
+      <Form.Item label="Image Label (placeholder text, shown when no URL)" style={{ marginBottom: 8 }}>
+        <Input value={section.image_label || ''} onChange={(e) => update({ image_label: e.target.value })} placeholder="Describes the intended image" />
+      </Form.Item>
+      <Form.Item label="Image Alt Text" style={{ marginBottom: 8 }}>
+        <Input value={section.image_alt || ''} onChange={(e) => update({ image_alt: e.target.value })} />
+      </Form.Item>
+
+      <Typography.Text strong style={{ display: 'block', margin: '12px 0 6px' }}>Content Column</Typography.Text>
+      <Card size="small" className="admin-sub-card">
+        <Form.Item label="Content Type" style={{ marginBottom: 8 }}>
+          <Select
+            value={inner.type || 'text'}
+            options={CONTENT_WITH_IMAGE_SUPPORTED_TYPES}
+            onChange={changeInnerType}
+          />
+        </Form.Item>
+        <Form.Item label="Heading" style={{ marginBottom: 8 }}>
+          <Input value={inner.heading || ''} onChange={(e) => updateInner({ heading: e.target.value })} />
+        </Form.Item>
+        {inner.type === 'text' ? (
+          <Form.Item label="Body" style={{ marginBottom: 0 }}>
+            <Input.TextArea autoSize={{ minRows: 3, maxRows: 8 }} value={inner.body || ''} onChange={(e) => updateInner({ body: e.target.value })} />
+          </Form.Item>
+        ) : null}
+        {inner.type === 'bullets' ? (
+          <Form.Item label="Items" style={{ marginBottom: 0 }}>
+            <BulletsEditor items={inner.items || []} onChange={(items) => updateInner({ items })} />
+          </Form.Item>
+        ) : null}
+        {inner.type === 'comparison_table' ? (
+          <ComparisonTableEditor section={inner} sectionIndex={0} onChange={innerOnChange} />
+        ) : null}
+        {inner.type === 'icon_grid' ? (
+          <IconGridEditor section={inner} sectionIndex={0} onChange={innerOnChange} />
+        ) : null}
+        {inner.type === 'matrix_table' ? (
+          <MatrixTableEditor section={inner} sectionIndex={0} onChange={innerOnChange} />
+        ) : null}
+      </Card>
+    </>
+  )
+}
+
 // ── Main AdminPanel ────────────────────────────────────────────────────────────
 export function AdminPanel() {
   const navigate = useNavigate()
@@ -507,6 +742,7 @@ export function AdminPanel() {
   const [saveError, setSaveError] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [draft, setDraft] = useState({ title: '', description: '', content_json: '{}' })
+  const [containerSize, setContainerSize] = useState('standard')
   const [sectionsDraft, setSectionsDraft] = useState([])
   const [isDirty, setIsDirty] = useState(false)
 
@@ -524,8 +760,12 @@ export function AdminPanel() {
         setPage(data)
         const d = { title: data.title, description: data.description || '', content_json: data.content_json || '{}' }
         setDraft(d)
-        try { setSectionsDraft(normalizeSections(JSON.parse(d.content_json))) }
-        catch { setSectionsDraft([]) }
+        try {
+          const parsed = JSON.parse(d.content_json)
+          const { sections, container_size } = normalizeContent(parsed)
+          setSectionsDraft(sections)
+          setContainerSize(container_size)
+        } catch { setSectionsDraft([]) }
       })
       .catch((err) => { if (mounted) setLoadError(err.message) })
     return () => { mounted = false }
@@ -564,8 +804,12 @@ export function AdminPanel() {
     if (!page) return
     const d = { title: page.title, description: page.description || '', content_json: page.content_json || '{}' }
     setDraft(d)
-    try { setSectionsDraft(normalizeSections(JSON.parse(d.content_json))) }
-    catch { setSectionsDraft([]) }
+    try {
+      const parsed = JSON.parse(d.content_json)
+      const { sections, container_size } = normalizeContent(parsed)
+      setSectionsDraft(sections)
+      setContainerSize(container_size)
+    } catch { setSectionsDraft([]) }
     setIsDirty(false)
     setSaveError('')
     setSaveSuccess(false)
@@ -576,7 +820,7 @@ export function AdminPanel() {
     setIsSaving(true)
     setSaveError('')
     try {
-      const payload = { ...draft, content_json: toContentJSON(sectionsDraft) }
+      const payload = { ...draft, content_json: toContentJSON(sectionsDraft, containerSize) }
       const updated = await updatePage(selectedSlug, payload)
       setPage(updated)
       setIsDirty(false)
@@ -702,6 +946,17 @@ export function AdminPanel() {
                           onChange={(e) => { setDraft((d) => ({ ...d, description: e.target.value })); markDirty() }}
                         />
                       </Form.Item>
+                      <Form.Item label="Container Width" style={{ marginBottom: 0, marginTop: 12, paddingBottom: 8 }}>
+                        <Slider
+                          min={0}
+                          max={3}
+                          step={1}
+                          marks={CONTAINER_MARKS}
+                          value={CONTAINER_STEP_INDEX[containerSize] ?? 0}
+                          onChange={(v) => { setContainerSize(CONTAINER_STEPS[v]); markDirty() }}
+                          tooltip={{ formatter: (v) => CONTAINER_MARKS[v] }}
+                        />
+                      </Form.Item>
                     </Form>
 
                     {collapseItems.length > 0 ? (
@@ -753,14 +1008,14 @@ export function AdminPanel() {
                 </Typography.Text>
               </div>
               <div className="admin-preview-content">
-                <div className="admin-preview-inner app-shell">
+                <div className={`admin-preview-inner admin-preview-page--${containerSize}`}>
                   <div className="cms-page-header" style={{ paddingLeft: 0, paddingRight: 0 }}>
                     <Typography.Title level={2} className="cms-page-title">{draft.title}</Typography.Title>
                     {draft.description ? (
                       <Typography.Paragraph className="cms-page-desc">{draft.description}</Typography.Paragraph>
                     ) : null}
                   </div>
-                  <CMSContentRenderer sections={previewSections} />
+                  <CMSContentRenderer sections={previewSections} containerSize={containerSize} />
                 </div>
               </div>
             </div>

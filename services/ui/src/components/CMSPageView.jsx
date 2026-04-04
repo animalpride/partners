@@ -1,7 +1,7 @@
 import { Alert, Spin, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { getPage } from '../api'
-import { getContrastTextColor, normalizeSections } from '../cmsTypes'
+import { getContrastTextColor, normalizeContent } from '../cmsTypes'
 
 
 
@@ -9,8 +9,244 @@ import { getContrastTextColor, normalizeSections } from '../cmsTypes'
 const OVERLAY_JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' }
 const BTN_ROW_JUSTIFY  = { left: 'flex-start', center: 'center', right: 'flex-end' }
 const BULLET_ALIGN     = { left: 'flex-start', center: 'center', right: 'flex-end' }
+const SECTION_INNER_CLS = {
+  standard: 'cms-section-inner',
+  wide:     'cms-section-inner cms-section-inner--wide',
+  wider:    'cms-section-inner cms-section-inner--wider',
+  full:     'cms-section-inner cms-section-inner--full',
+}
+const ASPECT_CLASS_MAP = {
+  '16/9': 'cms-img-placeholder--16-9',
+  '4/3':  'cms-img-placeholder--4-3',
+  '3/2':  'cms-img-placeholder--3-2',
+  '1/1':  'cms-img-placeholder--1-1',
+}
 
-export function CMSContentRenderer({ sections }) {
+// ── SectionContent ────────────────────────────────────────────────────────────
+// Renders the inner content of any "simple" section type.
+// embedded=false (default): wraps content in cms-section-inner (max-width, centering).
+// embedded=true: renders content directly — used inside a content_with_image column.
+function SectionContent({ section, textColor, hasColor, embedded = false }) {
+  const alignment = section.alignment || 'left'
+  const innerStyle = { textAlign: alignment }
+  const bulletAccent = hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f'
+
+  function W(children) {
+    if (embedded) return <div style={innerStyle}>{children}</div>
+    const cls = SECTION_INNER_CLS[section.container_size] || SECTION_INNER_CLS.standard
+    return (
+      <div className={cls} style={innerStyle}>
+        {children}
+      </div>
+    )
+  }
+
+  // ── Bullets ──────────────────────────────────────────────────────────────
+  if (section.type === 'bullets') {
+    const bulletCls = embedded ? undefined : (SECTION_INNER_CLS[section.container_size] || SECTION_INNER_CLS.standard)
+    return (
+      <div
+        className={bulletCls}
+        style={embedded ? {} : { ...innerStyle, ...(section.heading ? {} : { marginLeft: 0 }) }}
+      >
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        <ul className="cms-bullets" style={{ alignItems: BULLET_ALIGN[alignment] || 'flex-start' }}>
+          {(section.items || []).filter(Boolean).map((item, i) => (
+            <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
+              <span className="cms-bullet-icon" style={{ color: bulletAccent }}>✓</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  // ── Buttons / Links ───────────────────────────────────────────────────────
+  if (section.type === 'buttons') {
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        <div className="cms-btn-row" style={{ justifyContent: BTN_ROW_JUSTIFY[alignment] || 'flex-start' }}>
+          {(section.buttons || []).filter((btn) => btn?.label && btn?.url).map((button, i) => {
+            const isExternal = /^https?:\/\//i.test(button.url)
+            return (
+              <a
+                key={i}
+                href={button.url}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noreferrer' : undefined}
+                className={`cms-cta-btn${button.variant === 'primary' ? ' cms-cta-btn--primary' : ' cms-cta-btn--ghost'}`}
+              >
+                {button.label}
+              </a>
+            )
+          })}
+        </div>
+      </>
+    )
+  }
+
+  // ── Form CTA ──────────────────────────────────────────────────────────────
+  if (section.type === 'form_cta') {
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+        {section.button_label && section.button_link ? (
+          <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
+            <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
+              {section.button_label}
+            </a>
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  // ── Application Form (preview only) ──────────────────────────────────────
+  if (section.type === 'application_form') {
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        <ul className="cms-bullets">
+          {(section.fields || []).map((field, i) => (
+            <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
+              <span className="cms-bullet-icon" style={{ color: bulletAccent }}>✓</span>
+              {field.label || field.name}{field.required ? ' *' : ''}
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  // ── Comparison Table ──────────────────────────────────────────────────────
+  if (section.type === 'comparison_table') {
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        <div className="cms-ct-wrap">
+          <div className="cms-ct-header">
+            <div className="cms-ct-header-cell">{section.left_label}</div>
+            <div className="cms-ct-header-cell">{section.right_label}</div>
+          </div>
+          {(section.rows || []).map((row, ri) => (
+            <div key={ri} className="cms-ct-row">
+              <div className="cms-ct-cell cms-ct-cell--left">{row.left}</div>
+              <div className="cms-ct-cell cms-ct-cell--right">{row.right}</div>
+            </div>
+          ))}
+        </div>
+        {section.note ? <p className="cms-ct-note">{section.note}</p> : null}
+      </>
+    )
+  }
+
+  // ── Icon Grid ─────────────────────────────────────────────────────────────
+  if (section.type === 'icon_grid') {
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
+        <div className="cms-icon-grid">
+          {(section.items || []).map((item, i) => (
+            <div key={i} className="cms-icon-item">
+              {item.icon ? <span className="cms-icon-item__icon">{item.icon}</span> : null}
+              <span className="cms-icon-item__text">{item.text}</span>
+            </div>
+          ))}
+        </div>
+        {section.image_label ? (
+          <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 32 }}>
+            <span className="cms-img-placeholder__label">{section.image_label}</span>
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  // ── Matrix / Pivot Table ──────────────────────────────────────────────────
+  if (section.type === 'matrix_table') {
+    const columns = section.columns || []
+    const rows = section.rows || []
+    return W(
+      <>
+        {section.heading ? (
+          <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+        ) : null}
+        {section.subheading ? (
+          <p className="cms-section-body" style={{ color: textColor, marginBottom: 24 }}>{section.subheading}</p>
+        ) : null}
+        <div className="cms-matrix-scroll">
+          <div className="cms-matrix-grid" style={{ '--matrix-cols': columns.length }}>
+            <div className="cms-matrix-header-row">
+              <div className="cms-matrix-corner" />
+              {columns.map((col, ci) => (
+                <div key={ci} className="cms-matrix-col-header">
+                  <p className="cms-matrix-col-header__label">{col.label}</p>
+                  {col.subtext ? <p className="cms-matrix-col-header__subtext">{col.subtext}</p> : null}
+                  {(col.features || []).length > 0 ? (
+                    <ul className="cms-matrix-features">
+                      {col.features.map((f, fi) => (
+                        <li key={fi} className="cms-matrix-features__item">
+                          <span className="cms-bullet-icon cms-bullet-icon--light">✓</span>{f}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            {rows.map((row, ri) => (
+              <div key={ri} className="cms-matrix-data-row">
+                <div className="cms-matrix-row-header">
+                  <p className="cms-matrix-row-header__label">{row.label}</p>
+                  {row.subtext ? <p className="cms-matrix-row-header__subtext">{row.subtext}</p> : null}
+                </div>
+                {columns.map((col, ci) => (
+                  <div key={ci} className="cms-matrix-cell" data-label={col.label}>
+                    <p className="cms-matrix-cell__value">{(row.cells || [])[ci] || ''}</p>
+                    {section.cell_label ? <p className="cms-matrix-cell__label">{section.cell_label}</p> : null}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        {section.note ? (
+          <p className="cms-ct-note" style={{ textAlign: 'center', marginTop: 24 }}>{section.note}</p>
+        ) : null}
+      </>
+    )
+  }
+
+  // ── Default: Text ─────────────────────────────────────────────────────────
+  return W(
+    <>
+      {section.heading ? (
+        <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
+      ) : null}
+      {section.body ? (
+        <p className="cms-section-body" style={{ whiteSpace: 'pre-wrap', color: textColor }}>{section.body}</p>
+      ) : null}
+    </>
+  )
+}
+
+export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
   if (!sections.length) {
     return (
       <div className="cms-empty">
@@ -20,7 +256,7 @@ export function CMSContentRenderer({ sections }) {
   }
 
   return (
-    <div className="cms-page">
+    <div className={`cms-page${containerSize !== 'standard' ? ` cms-page--${containerSize}` : ''}`}>
       {sections.map((section, index) => {
         const bg = section.background || ''
         const textColor = getContrastTextColor(bg)
@@ -28,7 +264,7 @@ export function CMSContentRenderer({ sections }) {
         const alignment = section.alignment || 'left'
         const innerStyle = { textAlign: alignment }
 
-        // ── Image / Hero ────────────────────────────────────────────────────
+        // ── Image / Hero ──────────────────────────────────────────────────
         if (section.type === 'image') {
           const hasOverlay = section.heading || section.body || (section.button_label && section.button_link)
           return (
@@ -68,7 +304,7 @@ export function CMSContentRenderer({ sections }) {
           )
         }
 
-        // ── Image Grid ───────────────────────────────────────────────────────
+        // ── Image Grid ────────────────────────────────────────────────────
         if (section.type === 'image_grid') {
           return (
             <section
@@ -76,7 +312,7 @@ export function CMSContentRenderer({ sections }) {
               className={`cms-section cms-section--grid${hasColor ? ' cms-section--colored' : ''}`}
               style={{ backgroundColor: bg || undefined, color: textColor }}
             >
-              <div className="cms-section-inner" style={innerStyle}>
+              <div className={SECTION_INNER_CLS[section.container_size] || SECTION_INNER_CLS.standard} style={innerStyle}>
                 {section.heading ? (
                   <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
                 ) : null}
@@ -88,7 +324,7 @@ export function CMSContentRenderer({ sections }) {
                       ? { href: item.link_url, target: isExternal ? '_blank' : undefined, rel: isExternal ? 'noreferrer' : undefined }
                       : {}
                     return (
-                      <Tag key={`grid-${itemIndex}`} className="cms-grid-card" {...linkProps}>
+                      <Tag key={itemIndex} className="cms-grid-card" {...linkProps}>
                         <div className="cms-grid-img-wrap">
                           {item.image_url ? (
                             <img src={item.image_url} alt={item.title || `Partner ${itemIndex + 1}`} className="cms-grid-img" />
@@ -106,124 +342,11 @@ export function CMSContentRenderer({ sections }) {
           )
         }
 
-        // ── Bullets ──────────────────────────────────────────────────────────
-        if (section.type === 'bullets') {
-          return (
-            <section
-              key={index}
-              className={`cms-section cms-section--bullets${hasColor ? ' cms-section--colored' : ''}`}
-              style={{ backgroundColor: bg || undefined, color: textColor }}
-            >
-              <div className="cms-section-inner" style={{ ...innerStyle, ...(section.heading ? {} : { marginLeft: 0 }) }}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                <ul className="cms-bullets" style={{ alignItems: BULLET_ALIGN[alignment] || 'flex-start' }}>
-                  {(section.items || []).filter(Boolean).map((item, itemIndex) => (
-                    <li key={`bullet-${itemIndex}`} className="cms-bullet-item" style={{ color: textColor }}>
-                      <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          )
-        }
-
-        // ── Buttons / Links ──────────────────────────────────────────────────
-        if (section.type === 'buttons') {
-          return (
-            <section
-              key={index}
-              className={`cms-section cms-section--buttons${hasColor ? ' cms-section--colored' : ''}`}
-              style={{ backgroundColor: bg || undefined, color: textColor }}
-            >
-              <div className="cms-section-inner" style={innerStyle}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                <div className="cms-btn-row" style={{ justifyContent: BTN_ROW_JUSTIFY[alignment] || 'flex-start' }}>
-                  {(section.buttons || []).filter((btn) => btn?.label && btn?.url).map((button, buttonIndex) => {
-                    const isExternal = /^https?:\/\//i.test(button.url)
-                    return (
-                      <a
-                        key={`btn-${buttonIndex}`}
-                        href={button.url}
-                        target={isExternal ? '_blank' : undefined}
-                        rel={isExternal ? 'noreferrer' : undefined}
-                        className={`cms-cta-btn${button.variant === 'primary' ? ' cms-cta-btn--primary' : ' cms-cta-btn--ghost'}`}
-                      >
-                        {button.label}
-                      </a>
-                    )
-                  })}
-                </div>
-              </div>
-            </section>
-          )
-        }
-
-        // ── Form CTA ─────────────────────────────────────────────────────────
-        if (section.type === 'form_cta') {
-          return (
-            <section
-              key={index}
-              className={`cms-section cms-section--cta${hasColor ? ' cms-section--colored' : ''}`}
-              style={{ backgroundColor: bg || undefined, color: textColor }}
-            >
-              <div className="cms-section-inner" style={innerStyle}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
-                {section.button_label && section.button_link ? (
-                  <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
-                    <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
-                      {section.button_label}
-                    </a>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          )
-        }
-
-        // ── Application Form (preview only in renderer) ───────────────────────
-        if (section.type === 'application_form') {
-          return (
-            <section
-              key={index}
-              className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
-              style={{ backgroundColor: bg || undefined, color: textColor }}
-            >
-              <div className="cms-section-inner" style={innerStyle}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                <ul className="cms-bullets">
-                  {(section.fields || []).map((field, fieldIndex) => (
-                    <li key={`field-${fieldIndex}`} className="cms-bullet-item" style={{ color: textColor }}>
-                      <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>
-                      {field.label || field.name}{field.required ? ' *' : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-          )
-        }
-        // ── Two Column ────────────────────────────────────────────────────────────────────
+        // ── Two Column ────────────────────────────────────────────────────
         if (section.type === 'two_column') {
           const isHero = section.variant === 'hero'
           const imgLeft = section.image_side === 'left'
-          const ASPECT_CLASS = {
-            '16/9': 'cms-img-placeholder--16-9',
-            '4/3':  'cms-img-placeholder--4-3',
-            '3/2':  'cms-img-placeholder--3-2',
-            '1/1':  'cms-img-placeholder--1-1',
-          }
-          const aspectClass = ASPECT_CLASS[section.image_aspect_ratio] || 'cms-img-placeholder--16-9'
+          const aspectClass = ASPECT_CLASS_MAP[section.image_aspect_ratio] || 'cms-img-placeholder--16-9'
 
           const textCol = (
             <div className="cms-two-col__text">
@@ -236,7 +359,7 @@ export function CMSContentRenderer({ sections }) {
               {(section.bullets || []).length > 0 ? (
                 <ul className="cms-bullets">
                   {section.bullets.filter(Boolean).map((item, bi) => (
-                    <li key={`bullet-${bi}`} className="cms-bullet-item" style={{ color: textColor }}>
+                    <li key={bi} className="cms-bullet-item" style={{ color: textColor }}>
                       <span className="cms-bullet-icon" style={{ color: hasColor && textColor === '#ffffff' ? '#ffffff' : '#00698f' }}>✓</span>
                       {item}
                     </li>
@@ -278,89 +401,63 @@ export function CMSContentRenderer({ sections }) {
               className={`cms-section${hasColor ? ' cms-section--colored' : ''}${isHero ? ' cms-section--twocol-hero' : ''}`}
               style={{ backgroundColor: bg || undefined, color: textColor }}
             >
-              <div className={`cms-two-col${isHero ? ' cms-two-col--hero' : ''}${imgLeft ? ' cms-two-col--img-left' : ''}`}>
-                {textCol}
-                {imgCol}
+              <div className={SECTION_INNER_CLS[section.container_size] || SECTION_INNER_CLS.standard}>
+                <div className={`cms-two-col${isHero ? ' cms-two-col--hero' : ''}${imgLeft ? ' cms-two-col--img-left' : ''}`}>
+                  {textCol}
+                  {imgCol}
+                </div>
               </div>
             </section>
           )
         }
 
-        // ── Comparison Table ───────────────────────────────────────────────────────────
-        if (section.type === 'comparison_table') {
+        // ── Content + Image (paired) ──────────────────────────────────────
+        if (section.type === 'content_with_image') {
+          const inner = section.content_section || { type: 'text' }
+          const imgLeft = section.image_side === 'left'
+          const aspectClass = ASPECT_CLASS_MAP[section.image_aspect_ratio] || 'cms-img-placeholder--4-3'
           return (
             <section
               key={index}
               className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
               style={{ backgroundColor: bg || undefined, color: textColor }}
             >
-              <div className="cms-section-inner" style={innerStyle}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                <div className="cms-ct-wrap">
-                  <div className="cms-ct-header">
-                    <div className="cms-ct-header-cell">{section.left_label}</div>
-                    <div className="cms-ct-header-cell">{section.right_label}</div>
+              <div className={SECTION_INNER_CLS[section.container_size] || SECTION_INNER_CLS.standard}>
+                <div className={`cms-two-col${imgLeft ? ' cms-two-col--img-left' : ''}`}>
+                  <div className="cms-two-col__text">
+                    <SectionContent section={inner} textColor={textColor} hasColor={hasColor} embedded />
                   </div>
-                  {(section.rows || []).map((row, ri) => (
-                    <div key={`row-${ri}`} className="cms-ct-row">
-                      <div className="cms-ct-cell cms-ct-cell--left">{row.left}</div>
-                      <div className="cms-ct-cell cms-ct-cell--right">{row.right}</div>
-                    </div>
-                  ))}
+                  <div className="cms-two-col__img">
+                    {section.image_url ? (
+                      <img
+                        src={section.image_url}
+                        alt={section.image_alt || inner.heading || 'Section image'}
+                        className="cms-two-col__img-el"
+                      />
+                    ) : (
+                      <div className={`cms-img-placeholder ${aspectClass}`}>
+                        <span className="cms-img-placeholder__label">{section.image_label || 'Image placeholder'}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {section.note ? <p className="cms-ct-note">{section.note}</p> : null}
               </div>
             </section>
           )
         }
 
-        // ── Icon Grid ───────────────────────────────────────────────────────────────────
-        if (section.type === 'icon_grid') {
-          return (
-            <section
-              key={index}
-              className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
-              style={{ backgroundColor: bg || undefined, color: textColor }}
-            >
-              <div className="cms-section-inner cms-section-inner--wide" style={innerStyle}>
-                {section.heading ? (
-                  <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-                ) : null}
-                {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{section.body}</p> : null}
-                <div className="cms-icon-grid">
-                  {(section.items || []).map((item, ii) => (
-                    <div key={`icon-${ii}`} className="cms-icon-item">
-                      {item.icon ? <span className="cms-icon-item__icon">{item.icon}</span> : null}
-                      <span className="cms-icon-item__text">{item.text}</span>
-                    </div>
-                  ))}
-                </div>
-                {section.image_label ? (
-                  <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 32 }}>
-                    <span className="cms-img-placeholder__label">{section.image_label}</span>
-                  </div>
-                ) : null}
-              </div>
-            </section>
-          )
-        }
-        // ── Default: Text ─────────────────────────────────────────────────────
+        // ── All other types via SectionContent ────────────────────────────
+        const typeExtraClass =
+          section.type === 'bullets' ? ' cms-section--bullets' :
+          section.type === 'buttons' ? ' cms-section--buttons' :
+          section.type === 'form_cta' ? ' cms-section--cta' : ''
         return (
           <section
             key={index}
-            className={`cms-section${hasColor ? ' cms-section--colored' : ''}`}
+            className={`cms-section${typeExtraClass}${hasColor ? ' cms-section--colored' : ''}`}
             style={{ backgroundColor: bg || undefined, color: textColor }}
           >
-            <div className="cms-section-inner" style={innerStyle}>
-              {section.heading ? (
-                <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
-              ) : null}
-              {section.body ? (
-                <p className="cms-section-body" style={{ whiteSpace: 'pre-wrap', color: textColor }}>{section.body}</p>
-              ) : null}
-            </div>
+            <SectionContent section={section} textColor={textColor} hasColor={hasColor} embedded={false} />
           </section>
         )
       })}
@@ -382,9 +479,9 @@ export function CMSPageView({ slug }) {
     return () => { mounted = false }
   }, [slug])
 
-  const sections = useMemo(() => {
-    try { return normalizeSections(JSON.parse(page?.content_json || '{}')) }
-    catch { return [] }
+  const { sections, container_size: containerSize } = useMemo(() => {
+    try { return normalizeContent(JSON.parse(page?.content_json || '{}')) }
+    catch { return { sections: [], container_size: 'standard' } }
   }, [page?.content_json])
 
   if (error) return <Alert type="error" message={error} showIcon style={{ margin: '24px 0' }} />
@@ -396,7 +493,7 @@ export function CMSPageView({ slug }) {
         <Typography.Title level={2} className="cms-page-title">{page.title}</Typography.Title>
         {page.description ? <Typography.Paragraph className="cms-page-desc">{page.description}</Typography.Paragraph> : null}
       </div>
-      <CMSContentRenderer sections={sections} />
+      <CMSContentRenderer sections={sections} containerSize={containerSize} />
     </div>
   )
 }

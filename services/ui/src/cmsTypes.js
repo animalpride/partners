@@ -20,6 +20,18 @@ export const SECTION_TYPES = [
   { label: 'Two-Column (Text + Image)', value: 'two_column' },
   { label: 'Comparison Table', value: 'comparison_table' },
   { label: 'Icon Grid', value: 'icon_grid' },
+  { label: 'Matrix / Pivot Table', value: 'matrix_table' },
+  { label: 'Content + Image (paired)', value: 'content_with_image' },
+]
+
+// Section types allowed as the content column inside content_with_image.
+// Excludes layout types (two_column, image, image_grid, content_with_image).
+export const CONTENT_WITH_IMAGE_SUPPORTED_TYPES = [
+  { label: 'Text Block', value: 'text' },
+  { label: 'Bullet List', value: 'bullets' },
+  { label: 'Comparison Table', value: 'comparison_table' },
+  { label: 'Icon Grid', value: 'icon_grid' },
+  { label: 'Matrix / Pivot Table', value: 'matrix_table' },
 ]
 
 export const SECTION_BACKGROUND_OPTIONS = [
@@ -33,6 +45,13 @@ export const SECTION_ALIGNMENT_OPTIONS = [
   { label: 'Left', value: 'left' },
   { label: 'Center', value: 'center' },
   { label: 'Right', value: 'right' },
+]
+
+export const CONTAINER_SIZE_OPTIONS = [
+  { label: 'Standard', value: 'standard' },
+  { label: 'Wide',     value: 'wide'     },
+  { label: 'Wider',    value: 'wider'    },
+  { label: 'Full',     value: 'full'     },
 ]
 
 export const IMAGE_POSITION_OPTIONS = [
@@ -117,19 +136,37 @@ export function normalizeComparisonRow(row) {
   }
 }
 
+export function normalizeMatrixColumn(col) {
+  return {
+    label: String(col?.label || '').trim(),
+    subtext: String(col?.subtext || '').trim(),
+    features: Array.isArray(col?.features) ? col.features.map((f) => String(f).trim()).filter(Boolean) : [],
+  }
+}
+
+export function normalizeMatrixRow(row, colCount) {
+  const cells = Array.isArray(row?.cells) ? row.cells.map((c) => String(c).trim()) : []
+  while (cells.length < colCount) cells.push('')
+  return {
+    label: String(row?.label || '').trim(),
+    subtext: String(row?.subtext || '').trim(),
+    cells: cells.slice(0, colCount),
+  }
+}
+
 export function makeDefaultSection(type = 'text') {
   if (type === 'bullets') {
-    return { type, background: '', alignment: 'left', heading: 'Key Benefits', items: ['First point'] }
+    return { type, container_size: 'standard', background: '', alignment: 'left', heading: 'Key Benefits', items: ['First point'] }
   }
   if (type === 'buttons') {
-    return { type, background: '', alignment: 'center', heading: 'Next Steps', buttons: [{ label: 'Learn More', url: '/', variant: 'primary' }] }
+    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Next Steps', buttons: [{ label: 'Learn More', url: '/', variant: 'primary' }] }
   }
   if (type === 'form_cta') {
-    return { type, background: '', alignment: 'center', heading: 'Ready to Partner?', body: 'Tell us about your organization and goals.', button_label: 'Start Application', button_link: '/apply' }
+    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Ready to Partner?', body: 'Tell us about your organization and goals.', button_label: 'Start Application', button_link: '/apply' }
   }
   if (type === 'application_form') {
     return {
-      type, background: '#f6f7fe', alignment: 'left', heading: 'Application Fields', submit_label: 'Submit Application',
+      type, container_size: 'standard', background: '#f6f7fe', alignment: 'left', heading: 'Application Fields', submit_label: 'Submit Application',
       fields: [
         { name: 'organization_name', label: 'Organization Name', type: 'text', required: true, placeholder: '' },
         { name: 'contact_name', label: 'Contact Name', type: 'text', required: true, placeholder: '' },
@@ -138,14 +175,14 @@ export function makeDefaultSection(type = 'text') {
     }
   }
   if (type === 'image') {
-    return { type, background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_label: '', image_alt: '', image_position: 'center', button_label: '', button_link: '' }
+    return { type, container_size: 'full', background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_label: '', image_alt: '', image_position: 'center', button_label: '', button_link: '' }
   }
   if (type === 'image_grid') {
-    return { type, background: '', alignment: 'left', heading: 'Image Grid', items: [{ title: '', image_url: '', link_url: '' }] }
+    return { type, container_size: 'wide', background: '', alignment: 'left', heading: 'Image Grid', items: [{ title: '', image_url: '', link_url: '' }] }
   }
   if (type === 'two_column') {
     return {
-      type, variant: 'default', image_side: 'right', background: '', alignment: 'left',
+      type, container_size: 'standard', variant: 'default', image_side: 'right', background: '', alignment: 'left',
       heading: 'Section Heading', body: '', bullets: [], pull_quote: '',
       button_label: '', button_link: '',
       image_url: '', image_label: '', image_alt: '', image_aspect_ratio: '16/9',
@@ -153,44 +190,78 @@ export function makeDefaultSection(type = 'text') {
   }
   if (type === 'comparison_table') {
     return {
-      type, background: '', alignment: 'center',
+      type, container_size: 'wide', background: '', alignment: 'center',
       heading: 'Why We Are Different', left_label: 'Traditional', right_label: 'Our Approach',
       rows: [{ left: '', right: '' }], note: '',
     }
   }
   if (type === 'icon_grid') {
     return {
-      type, background: '', alignment: 'center',
+      type, container_size: 'wide', background: '', alignment: 'center',
       heading: 'Impact', body: '', items: [{ icon: '✓', text: '' }], image_label: '',
     }
   }
-  return { type: 'text', background: '', alignment: 'left', heading: 'Overview', body: '' }
+  if (type === 'matrix_table') {
+    return {
+      type, container_size: 'wider', background: '', alignment: 'center',
+      heading: 'Matrix Heading', subheading: '',
+      columns: [
+        { label: 'Column A', subtext: '', features: [] },
+        { label: 'Column B', subtext: '', features: [] },
+      ],
+      rows: [
+        { label: 'Row 1', subtext: '', cells: ['', ''] },
+        { label: 'Row 2', subtext: '', cells: ['', ''] },
+      ],
+      cell_label: '',
+      note: '',
+    }
+  }
+  if (type === 'content_with_image') {
+    return {
+      type, container_size: 'standard', background: '', image_side: 'right',
+      image_url: '', image_alt: '', image_label: '', image_aspect_ratio: '4/3',
+      content_section: makeDefaultSection('text'),
+    }
+  }
+  return { type: 'text', container_size: 'standard', background: '', alignment: 'left', heading: 'Overview', body: '' }
+}
+
+export function normalizeSection(section) {
+  const normalized = { ...makeDefaultSection(section?.type), ...section }
+  if (normalized.type === 'bullets') normalized.items = Array.isArray(normalized.items) ? normalized.items : []
+  if (normalized.type === 'buttons') normalized.buttons = Array.isArray(normalized.buttons) ? normalized.buttons : []
+  if (normalized.type === 'application_form') {
+    normalized.submit_label = String(normalized.submit_label || 'Submit Application')
+    normalized.fields = Array.isArray(normalized.fields) ? normalized.fields.map(normalizeField).filter((f) => f.name) : []
+  }
+  if (normalized.type === 'image_grid') {
+    normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeGridItem) : []
+  }
+  if (normalized.type === 'two_column') {
+    normalized.bullets = Array.isArray(normalized.bullets) ? normalized.bullets : []
+  }
+  if (normalized.type === 'comparison_table') {
+    normalized.rows = Array.isArray(normalized.rows) ? normalized.rows.map(normalizeComparisonRow) : []
+  }
+  if (normalized.type === 'icon_grid') {
+    normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeIconItem) : []
+  }
+  if (normalized.type === 'matrix_table') {
+    normalized.columns = Array.isArray(normalized.columns) ? normalized.columns.map(normalizeMatrixColumn) : []
+    const colCount = normalized.columns.length
+    normalized.rows = Array.isArray(normalized.rows) ? normalized.rows.map((r) => normalizeMatrixRow(r, colCount)) : []
+  }
+  if (normalized.type === 'content_with_image') {
+    const inner = normalizeSection(normalized.content_section || {})
+    normalized.content_section = inner.type === 'content_with_image' ? makeDefaultSection('text') : inner
+  }
+  return normalized
 }
 
 export function normalizeSections(content) {
   if (Array.isArray(content?.sections)) {
-    return content.sections.map((section) => {
-      const normalized = { ...makeDefaultSection(section?.type), ...section }
-      if (normalized.type === 'bullets') normalized.items = Array.isArray(normalized.items) ? normalized.items : []
-      if (normalized.type === 'buttons') normalized.buttons = Array.isArray(normalized.buttons) ? normalized.buttons : []
-      if (normalized.type === 'application_form') {
-        normalized.submit_label = String(normalized.submit_label || 'Submit Application')
-        normalized.fields = Array.isArray(normalized.fields) ? normalized.fields.map(normalizeField).filter((f) => f.name) : []
-      }
-      if (normalized.type === 'image_grid') {
-        normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeGridItem) : []
-      }
-      if (normalized.type === 'two_column') {
-        normalized.bullets = Array.isArray(normalized.bullets) ? normalized.bullets : []
-      }
-      if (normalized.type === 'comparison_table') {
-        normalized.rows = Array.isArray(normalized.rows) ? normalized.rows.map(normalizeComparisonRow) : []
-      }
-      if (normalized.type === 'icon_grid') {
-        normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeIconItem) : []
-      }
-      return normalized
-    })
+    return content.sections.map(normalizeSection)
   }
 
   const entries = Object.entries(content || {})
@@ -204,6 +275,13 @@ export function normalizeSections(content) {
   })
 }
 
-export function toContentJSON(sections) {
-  return JSON.stringify({ sections }, null, 2)
+export function toContentJSON(sections, containerSize = 'standard') {
+  return JSON.stringify({ container_size: containerSize, sections }, null, 2)
+}
+
+export function normalizeContent(raw) {
+  return {
+    sections: normalizeSections(raw),
+    container_size: raw?.container_size || 'standard',
+  }
 }
