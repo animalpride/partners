@@ -1,6 +1,7 @@
+import { WarningOutlined } from '@ant-design/icons'
 import {
-  Alert, Button, Card, Collapse, Divider, Dropdown, Form, Input, Layout, Menu,
-  Select, Slider, Space, Spin, Tag, Typography,
+  Alert, Button, Card, Collapse, Divider, Dropdown, Form, Grid, Input, Layout, Menu,
+  Modal, Select, Slider, Space, Spin, Tag, Tooltip, Typography,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -880,8 +881,28 @@ export function AdminPanel() {
 
   const selectedPageLabel = CMS_PAGES.find((p) => p.slug === selectedSlug)?.label || selectedSlug
 
+  const screens = Grid.useBreakpoint()
+  const [mobileWarnSeen, setMobileWarnSeen] = useState(false)
+  const isMobile = screens.md === false
+
   return (
     <Layout className="admin-layout">
+      <Modal
+        open={isMobile && !mobileWarnSeen}
+        onOk={() => setMobileWarnSeen(true)}
+        onCancel={() => setMobileWarnSeen(true)}
+        cancelButtonProps={{ style: { display: 'none' } }}
+        okText="Got it"
+        title={
+          <Space>
+            <WarningOutlined style={{ color: '#faad14' }} />
+            Desktop recommended
+          </Space>
+        }
+      >
+        The admin panel is designed for desktop use. Some features may be difficult or impossible to use on a small screen.
+      </Modal>
+
       {/* ── Admin header bar ── */}
       <Layout.Header className="admin-header">
         <div className="admin-header-inner">
@@ -899,7 +920,16 @@ export function AdminPanel() {
               { key: 'users', label: 'Users & Roles' },
             ]}
           />
-          <div style={{ width: 160 }} />
+          <div style={{ width: 160, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+            {isMobile ? (
+              <Tooltip title="Admin panel works best on desktop">
+                <WarningOutlined
+                  style={{ color: '#faad14', fontSize: 18, cursor: 'pointer' }}
+                  onClick={() => setMobileWarnSeen(false)}
+                />
+              </Tooltip>
+            ) : null}
+          </div>
         </div>
       </Layout.Header>
 

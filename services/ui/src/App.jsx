@@ -46,11 +46,10 @@ const NAV_ITEMS = [
   { key: "/apply", label: "Application" },
 ];
 
-function Nav() {
+function Nav({ mobileOpen, setMobileOpen, mobileExtra }) {
   const navigate = useNavigate();
   const location = useLocation();
   const screens = Grid.useBreakpoint();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const selectedKey = NAV_ITEMS.some((item) => item.key === location.pathname)
     ? location.pathname
@@ -63,28 +62,22 @@ function Nav() {
 
   if (!screens.md) {
     return (
-      <>
-        <Button
-          icon={<MenuOutlined />}
-          className="nav-toggle"
-          onClick={() => setMobileOpen(true)}
-        >
-          Sections
-        </Button>
-        <Drawer
-          title="Partner Sections"
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          placement="left"
-        >
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={NAV_ITEMS}
-            onClick={onNavigate}
-          />
-        </Drawer>
-      </>
+      <Drawer
+        title="Partner Sections"
+        open={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+        placement="left"
+      >
+        <Menu
+          mode="inline"
+          selectedKeys={[selectedKey]}
+          items={NAV_ITEMS}
+          onClick={onNavigate}
+        />
+        {mobileExtra ? (
+          <div style={{ marginTop: 16 }}>{mobileExtra}</div>
+        ) : null}
+      </Drawer>
     );
   }
 
@@ -112,6 +105,41 @@ function PublicLayout({
   setLoginError,
 }) {
   const navigate = useNavigate();
+  const screens = Grid.useBreakpoint();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const mobileExtra = (
+    <Space direction="vertical" style={{ width: "100%" }}>
+      {canEdit ? (
+        <Button
+          block
+          onClick={() => {
+            navigate("/admin");
+            setMobileMenuOpen(false);
+          }}
+        >
+          Admin Panel
+        </Button>
+      ) : null}
+      {!isAuthenticated ? (
+        <Button
+          type="primary"
+          block
+          onClick={() => {
+            setLoginError("");
+            setLoginOpen(true);
+            setMobileMenuOpen(false);
+          }}
+        >
+          Login
+        </Button>
+      ) : (
+        <Button block onClick={onLogout} loading={logoutLoading}>
+          Logout
+        </Button>
+      )}
+    </Space>
+  );
 
   return (
     <Layout className="app-layout">
@@ -125,31 +153,43 @@ function PublicLayout({
             />
 
           </div>
-          <Space>
-            {canEdit ? (
-              <Button onClick={() => navigate("/admin")}>Admin Panel</Button>
-            ) : null}
-            {!isAuthenticated ? (
-              <Button
-                type="primary"
-                onClick={() => {
-                  setLoginError("");
-                  setLoginOpen(true);
-                }}
-              >
-                Login
-              </Button>
-            ) : (
-              <Button onClick={onLogout} loading={logoutLoading}>
-                Logout
-              </Button>
-            )}
-          </Space>
+          {screens.md ? (
+            <Space>
+              {canEdit ? (
+                <Button onClick={() => navigate("/admin")}>Admin Panel</Button>
+              ) : null}
+              {!isAuthenticated ? (
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    setLoginError("");
+                    setLoginOpen(true);
+                  }}
+                >
+                  Login
+                </Button>
+              ) : (
+                <Button onClick={onLogout} loading={logoutLoading}>
+                  Logout
+                </Button>
+              )}
+            </Space>
+          ) : (
+            <Button
+              icon={<MenuOutlined />}
+              type="text"
+              onClick={() => setMobileMenuOpen(true)}
+            />
+          )}
         </div>
       </Layout.Header>
 
       <Layout.Content className="app-shell app-content">
-        <Nav />
+        <Nav
+          mobileOpen={mobileMenuOpen}
+          setMobileOpen={setMobileMenuOpen}
+          mobileExtra={mobileExtra}
+        />
         <Routes>
           <Route
             path="/"
