@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"crypto/subtle"
 	"log"
 	"net/http"
 	"strings"
@@ -21,7 +22,7 @@ func InternalAuthMiddleware(token string) gin.HandlerFunc {
 		}
 
 		provided := strings.TrimSpace(c.GetHeader("X-Internal-Token"))
-		if provided == "" || provided != trimmed {
+		if provided == "" || subtle.ConstantTimeCompare([]byte(provided), []byte(trimmed)) != 1 {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid internal token"})
 			c.Abort()
 			return
@@ -43,7 +44,7 @@ func InternalOrAuthMiddleware(authBaseURL, internalToken string) gin.HandlerFunc
 		provided := strings.TrimSpace(c.GetHeader("X-Internal-Token"))
 
 		if internal != "" && provided != "" {
-			if provided == internal {
+			if subtle.ConstantTimeCompare([]byte(provided), []byte(internal)) == 1 {
 				log.Printf("[InternalAuth] Internal token validated for %s %s", c.Request.Method, c.Request.URL.Path)
 				c.Next()
 				return

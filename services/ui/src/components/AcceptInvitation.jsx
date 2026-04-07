@@ -84,7 +84,7 @@ export function AcceptInvitation() {
         password: values.password,
         password_confirm: values.password_confirm,
       });
-      navigate("/admin", { replace: true });
+      navigate(invitation?.role_name === "admin" ? "/admin" : "/", { replace: true });
     } catch (err) {
       setSubmitError(err.message || "Registration failed. Please try again.");
     } finally {

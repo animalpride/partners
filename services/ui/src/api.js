@@ -29,11 +29,13 @@ export async function getPage(slug) {
 }
 
 export async function updatePage(slug, payload) {
+  const csrfToken = getCookie('csrf_token')
   const response = await authFetch(`${CORE_BASE}/cms/admin/pages/${slug}`, {
     method: 'PUT',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
     },
     body: JSON.stringify(payload),
   })

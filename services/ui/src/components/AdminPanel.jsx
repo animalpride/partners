@@ -1,7 +1,7 @@
 import { WarningOutlined } from '@ant-design/icons'
 import {
   Alert, Button, Card, Collapse, Divider, Dropdown, Form, Grid, Input, Layout, Menu,
-  Modal, Select, Slider, Space, Spin, Tag, Tooltip, Typography,
+  Modal, Select, Slider, Space, Spin, Switch, Tag, Tooltip, Typography,
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -755,6 +755,7 @@ export function AdminPanel() {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [draft, setDraft] = useState({ title: '', description: '', content_json: '{}' })
   const [containerSize, setContainerSize] = useState('standard')
+  const [showHeader, setShowHeader] = useState(false)
   const [sectionsDraft, setSectionsDraft] = useState([])
   const [isDirty, setIsDirty] = useState(false)
 
@@ -774,9 +775,10 @@ export function AdminPanel() {
         setDraft(d)
         try {
           const parsed = JSON.parse(d.content_json)
-          const { sections, container_size } = normalizeContent(parsed)
+          const { sections, container_size, show_header } = normalizeContent(parsed)
           setSectionsDraft(sections)
           setContainerSize(container_size)
+          setShowHeader(show_header)
         } catch { setSectionsDraft([]) }
       })
       .catch((err) => { if (mounted) setLoadError(err.message) })
@@ -818,9 +820,10 @@ export function AdminPanel() {
     setDraft(d)
     try {
       const parsed = JSON.parse(d.content_json)
-      const { sections, container_size } = normalizeContent(parsed)
+      const { sections, container_size, show_header } = normalizeContent(parsed)
       setSectionsDraft(sections)
       setContainerSize(container_size)
+      setShowHeader(show_header)
     } catch { setSectionsDraft([]) }
     setIsDirty(false)
     setSaveError('')
@@ -832,7 +835,7 @@ export function AdminPanel() {
     setIsSaving(true)
     setSaveError('')
     try {
-      const payload = { ...draft, content_json: toContentJSON(sectionsDraft, containerSize) }
+      const payload = { ...draft, content_json: toContentJSON(sectionsDraft, containerSize, showHeader) }
       const updated = await updatePage(selectedSlug, payload)
       setPage(updated)
       setIsDirty(false)
@@ -985,6 +988,14 @@ export function AdminPanel() {
                           rows={2}
                           value={draft.description}
                           onChange={(e) => { setDraft((d) => ({ ...d, description: e.target.value })); markDirty() }}
+                        />
+                      </Form.Item>
+                      <Form.Item label="Show page header" style={{ marginBottom: 0, marginTop: 12 }}>
+                        <Switch
+                          checked={showHeader}
+                          onChange={(v) => { setShowHeader(v); markDirty() }}
+                          checkedChildren="Visible"
+                          unCheckedChildren="Hidden"
                         />
                       </Form.Item>
                       <Form.Item label="Container Width" style={{ marginBottom: 0, marginTop: 12, paddingBottom: 8 }}>

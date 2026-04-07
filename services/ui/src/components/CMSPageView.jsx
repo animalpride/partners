@@ -1,7 +1,20 @@
 import { Alert, Spin, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
+import { Helmet } from 'react-helmet-async'
 import { getPage } from '../api'
 import { getContrastTextColor, normalizeContent } from '../cmsTypes'
+
+const SITE_URL = 'https://partners.animalpride.com'
+const DEFAULT_OG_IMAGE = `${SITE_URL}/Logo-Wordmark-Dog-PartnersPlatform2.png`
+
+const SLUG_TO_PATH = {
+  'partnership-overview': '/',
+  'how-it-works': '/how-it-works',
+  'case-studies': '/case-studies',
+  'pricing-revenue-share': '/pricing',
+  'partner-faq': '/faq',
+  'application-contact': '/apply',
+}
 
 
 
@@ -521,21 +534,97 @@ export function CMSPageView({ slug }) {
     return () => { mounted = false }
   }, [slug])
 
-  const { sections, container_size: containerSize } = useMemo(() => {
+  const { sections, container_size: containerSize, show_header: showHeader } = useMemo(() => {
     try { return normalizeContent(JSON.parse(page?.content_json || '{}')) }
-    catch { return { sections: [], container_size: 'standard' } }
+    catch { return { sections: [], container_size: 'standard', show_header: false } }
   }, [page?.content_json])
+
+  const canonicalPath = SLUG_TO_PATH[slug] ?? '/'
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`
+  const pageTitle = page ? `${page.title} | Animal Pride Partners` : 'Animal Pride Partners'
+  const pageDescription = page?.description || ''
+
+  // Build JSON-LD based on page slug
+  const jsonLd = useMemo(() => {
+    if (!page) return null
+
+    const base = {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: page.title,
+      description: page.description || '',
+      url: canonicalUrl,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Animal Pride',
+        url: 'https://animalpride.com',
+      },
+    }
+
+    if (slug === 'partner-faq') {
+      // Extract FAQ items from bullets sections for FAQPage schema
+      const faqSections = sections.filter((s) => s.type === 'bullets' && s.heading && (s.items || []).length > 0)
+      if (faqSections.length > 0) {
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqSections.flatMap((s) =>
+            (s.items || []).filter(Boolean).map((item) => ({
+              '@type': 'Question',
+              name: s.heading,
+              acceptedAnswer: { '@type': 'Answer', text: item },
+            }))
+          ),
+        }
+      }
+    }
+
+    if (slug === 'partnership-overview') {
+      return {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Animal Pride Partners',
+        url: SITE_URL,
+        description: page.description || '',
+        logo: `${SITE_URL}/animalpride-fav.png`,
+        sameAs: ['https://animalpride.com'],
+      }
+    }
+
+    return base
+  }, [page, slug, sections, canonicalUrl])
 
   if (error) return <Alert type="error" message={error} showIcon style={{ margin: '24px 0' }} />
   if (!page) return <div style={{ padding: '60px 0', textAlign: 'center' }}><Spin size="large" /></div>
 
   return (
-    <div className="cms-page-root">
-      <div className="cms-page-header">
-        <Typography.Title level={2} className="cms-page-title">{page.title}</Typography.Title>
-        {page.description ? <Typography.Paragraph className="cms-page-desc">{page.description}</Typography.Paragraph> : null}
+    <>
+      <Helmet>
+        <title>{pageTitle}</title>
+        {pageDescription ? <meta name="description" content={pageDescription} /> : null}
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={pageTitle} />
+        {pageDescription ? <meta property="og:description" content={pageDescription} /> : null}
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        {pageDescription ? <meta name="twitter:description" content={pageDescription} /> : null}
+        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        {jsonLd ? (
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        ) : null}
+      </Helmet>
+      <div className="cms-page-root">
+        {showHeader ? (
+          <div className="cms-page-header">
+            <Typography.Title level={2} className="cms-page-title">{page.title}</Typography.Title>
+            {page.description ? <Typography.Paragraph className="cms-page-desc">{page.description}</Typography.Paragraph> : null}
+          </div>
+        ) : null}
+        <CMSContentRenderer sections={sections} containerSize={containerSize} />
       </div>
-      <CMSContentRenderer sections={sections} containerSize={containerSize} />
-    </div>
+    </>
   )
 }

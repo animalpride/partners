@@ -32,3 +32,6 @@ go.work.sum
 scripts/.env
 *config.yml
 content-context
+**/node_modules
+**/dist
+**/build

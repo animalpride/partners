@@ -121,15 +121,15 @@ func (h *UserHandler) ChangePassword(c *gin.Context) {
 // ResetPassword resets a user's password
 func (h *UserHandler) ResetPassword(c *gin.Context) {
 	var request struct {
-		UserId int    `json:"user_id"`
-		Email  string `json:"email"`
+		UserId      int    `json:"user_id"`
+		NewPassword string `json:"new_password"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		log.Printf("ResetPassword: invalid input: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
-	if err := h.userRepository.ResetPassword(request.UserId, request.Email); err != nil {
+	if err := h.userRepository.ResetPassword(request.UserId, request.NewPassword); err != nil {
 		log.Printf("ResetPassword: db error for user %d: %v", request.UserId, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reset password"})
 		return

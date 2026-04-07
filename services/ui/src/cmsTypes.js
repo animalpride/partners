@@ -277,13 +277,14 @@ export function normalizeSections(content) {
   })
 }
 
-export function toContentJSON(sections, containerSize = 'standard') {
-  return JSON.stringify({ container_size: containerSize, sections }, null, 2)
+export function toContentJSON(sections, containerSize = 'standard', showHeader = false) {
+  return JSON.stringify({ container_size: containerSize, show_header: showHeader, sections }, null, 2)
 }
 
 export function normalizeContent(raw) {
   return {
     sections: normalizeSections(raw),
     container_size: raw?.container_size || 'standard',
+    show_header: Boolean(raw?.show_header ?? false),
   }
 }
