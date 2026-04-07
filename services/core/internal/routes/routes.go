@@ -45,6 +45,7 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	admin := router.Group("/cms/admin")
 	admin.Use(sharedmw.AuthMiddleware(cfg.Auth.BaseURL))
 	admin.Use(middleware.RequirePermission(cfg.Auth.BaseURL, "cms", "edit"))
+	admin.Use(sharedmw.CSRFMiddleware())
 	admin.PUT("/pages/:slug", cmsHandler.UpdatePage)
 	admin.GET("/applications", cmsHandler.ListLeads)
 

@@ -80,21 +80,27 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 
 	// Routes for user management
 	userGroup := router.Group("/users")
-	userGroup.GET("/", userHandler.GetAllUsers)
-	userGroup.GET("/:id", userHandler.GetUserByID) // change to only allow int
+
+	// Self-service routes — any authenticated user may call these for their own account.
+	userGroup.POST("/update-profile", userHandler.UpdateUserProfile)
+
+	// Admin-only user management routes.
+	userAdminGroup := userGroup.Group("")
+	userAdminGroup.Use(middleware.RequireRole(rbacRepo, "admin"))
+	userAdminGroup.GET("/", userHandler.GetAllUsers)
+	userAdminGroup.GET("/:id", userHandler.GetUserByID)
 	// POST /users/ creates a user with default role assignment via invitation flow.
 	// POST /users/create-manually creates a user bypassing the invitation system (admin tool).
-	userGroup.POST("/", userHandler.CreateUser)
-	userGroup.PUT("/:id", userHandler.UpdateUser)    // change to only allow int
-	userGroup.DELETE("/:id", userHandler.DeleteUser) // change to only allow int
-	userGroup.POST("/change-password", userHandler.ChangePassword)
-	userGroup.POST("/change-password-clear-flag", userHandler.ChangePasswordAndClearFlag)
-	userGroup.POST("/update-profile", userHandler.UpdateUserProfile)
-	userGroup.POST("/reset-password", userHandler.ResetPassword)
-	userGroup.POST("/create-manually", userHandler.CreateUserManually)
-	userGroup.POST("/validate-token", userHandler.ValidateToken)
-	userGroup.GET("/validate-token/:token", userHandler.ValidateTokenById)
-	userGroup.PUT("/theme-color", userHandler.UpdateUserThemeColor)
+	userAdminGroup.POST("/", userHandler.CreateUser)
+	userAdminGroup.PUT("/:id", userHandler.UpdateUser)
+	userAdminGroup.DELETE("/:id", userHandler.DeleteUser)
+	userAdminGroup.POST("/change-password", userHandler.ChangePassword)
+	userAdminGroup.POST("/change-password-clear-flag", userHandler.ChangePasswordAndClearFlag)
+	userAdminGroup.POST("/reset-password", userHandler.ResetPassword)
+	userAdminGroup.POST("/create-manually", userHandler.CreateUserManually)
+	userAdminGroup.POST("/validate-token", userHandler.ValidateToken)
+	userAdminGroup.GET("/validate-token/:token", userHandler.ValidateTokenById)
+	userAdminGroup.PUT("/theme-color", userHandler.UpdateUserThemeColor)
 
 	invitationGroup := router.Group("/invitations")
 	invitationGroup.Use(middleware.RequireRole(rbacRepo, "admin"))

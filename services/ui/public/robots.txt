@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /accept-invitation
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /preview/
+
+Sitemap: https://partners.animalpride.com/sitemap.xml
