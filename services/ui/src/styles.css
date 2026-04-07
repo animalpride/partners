@@ -178,6 +178,40 @@ body {
   margin: 0 auto;
 }
 
+/*
+  Page-level container width — wider/full sizes break the .cms-page div out of the
+  .app-shell max-width (1200px) by claiming full viewport width with negative margin.
+  The sections inside already use margin-left:-24px to bleed; that still works because
+  .cms-page--wider/full adds 24px of padding to match.
+
+  Formula: margin-left: calc(-50vw + 50%) always positions the element at the
+  viewport’s left edge when its containing block is centered on the viewport.
+*/
+.cms-page.cms-page--wider,
+.cms-page.cms-page--full {
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  padding-left: 24px;
+  padding-right: 24px;
+  box-sizing: border-box;
+}
+
+/* Section widths are controlled purely by the section-level container_size
+   (css classes on cms-section-inner itself). The page-level setting only
+   controls the outer breakout boundary available to sections. */
+
+/*
+  Admin preview: cancel the viewport-breakout on cms-page--wider/full since
+  calc(-50vw + 50%) is wrong inside the preview pane.
+*/
+.admin-preview-content .cms-page.cms-page--wider,
+.admin-preview-content .cms-page.cms-page--full {
+  width: 100%;
+  margin-left: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .cms-section-inner--center {
   text-align: center;
 }
@@ -714,6 +748,16 @@ a.cms-grid-card:hover .cms-grid-img {
   margin: 0 auto;
 }
 
+.cms-section-inner--wider {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.cms-section-inner--full {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
 .cms-ct-wrap {
   width: 100%;
   border-radius: 12px;
@@ -764,6 +808,177 @@ a.cms-grid-card:hover .cms-grid-img {
   font-size: 0.95rem;
   color: #374151;
   font-style: italic;
+}
+
+/* ── Matrix / Pivot Table ───────────────────────────────────────────────── */
+
+/* Top area: heading/subheading flex-left, annotation card flex-right */
+.cms-matrix-top-area {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.cms-matrix-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.cms-matrix-annotation {
+  width: 240px;
+  flex-shrink: 0;
+  background: #f6f7fe;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 105, 143, 0.14);
+  padding: 16px 18px;
+}
+
+.cms-matrix-annotation__heading {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #00698f;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cms-matrix-annotation__list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+  color: #3a3a4a;
+  line-height: 1.55;
+}
+
+.cms-matrix-annotation__list li {
+  margin-bottom: 5px;
+}
+
+.cms-matrix-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cms-matrix-grid {
+  display: grid;
+  grid-template-columns: minmax(160px, auto) repeat(var(--matrix-cols, 3), minmax(160px, 1fr));
+  min-width: max-content;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  width: 100%;
+}
+
+/* Row wrappers are transparent to the CSS grid on desktop */
+.cms-matrix-header-row,
+.cms-matrix-data-row {
+  display: contents;
+}
+
+.cms-matrix-corner {
+  background: #00698f;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cms-matrix-col-header {
+  background: #00698f;
+  color: #ffffff;
+  padding: 18px 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cms-matrix-col-header:last-child {
+  border-right: none;
+}
+
+.cms-matrix-col-header__label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  color: #ffffff;
+}
+
+.cms-matrix-col-header__subtext {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.cms-matrix-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cms-matrix-features__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.cms-bullet-icon--light {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.cms-matrix-row-header {
+  background: #f6f7fe;
+  padding: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cms-matrix-row-header__label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #121212;
+  margin: 0 0 3px;
+}
+
+.cms-matrix-row-header__subtext {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.cms-matrix-cell {
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.cms-matrix-cell:last-child {
+  border-right: none;
+}
+
+.cms-matrix-cell__value {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1rem;
+  color: #00698f;
+  margin: 0 0 3px;
+  line-height: 1.3;
+}
+
+.cms-matrix-cell__label {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* ── Icon Grid ──────────────────────────────────────────────────────────── */
@@ -868,6 +1083,123 @@ a.cms-grid-card:hover .cms-grid-img {
     padding: 12px 14px;
     font-size: 0.88rem;
   }
+
+  .cms-matrix-col-header,
+  .cms-matrix-row-header,
+  .cms-matrix-cell {
+    padding: 10px 12px;
+  }
+
+  .cms-matrix-col-header__label {
+    font-size: 0.85rem;
+  }
+
+  .cms-matrix-cell__value {
+    font-size: 0.9rem;
+  }
+}
+
+/* ── Matrix mobile card layout (phones) ────────────────────────────────── */
+@media (max-width: 540px) {
+  .cms-matrix-top-area {
+    flex-direction: column;
+  }
+
+  .cms-matrix-annotation {
+    width: 100%;
+  }
+
+  .cms-matrix-scroll {
+    overflow-x: visible;
+  }
+
+  .cms-matrix-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+
+  .cms-matrix-header-row {
+    display: none;
+  }
+
+  .cms-matrix-data-row {
+    display: block;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+
+  .cms-matrix-row-header {
+    background: #00698f;
+    border-right: none;
+    border-top: none;
+    padding: 12px 16px;
+  }
+
+  .cms-matrix-row-header__label {
+    color: #ffffff;
+    font-size: 0.88rem;
+  }
+
+  .cms-matrix-row-header__subtext {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .cms-matrix-cell {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-right: none;
+    text-align: left;
+  }
+
+  .cms-matrix-cell:last-child {
+    border-right: none;
+  }
+
+  .cms-matrix-cell::before {
+    content: attr(data-label);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #00698f;
+    flex: 1;
+    padding-right: 12px;
+    line-height: 1.4;
+  }
+
+  .cms-matrix-cell__value {
+    font-size: 0.95rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .cms-matrix-cell__label {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════ */
+
+.app-footer.ant-layout-footer {
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 105, 143, 0.12);
+  padding: 16px 24px;
+}
+
+.app-footer-inner {
+  color: rgba(18, 18, 18, 0.45);
+  font-size: 0.82rem;
+  text-align: center;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1130,14 +1462,24 @@ a.cms-grid-card:hover .cms-grid-img {
 .admin-preview-content {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding: 0 24px 40px;
 }
 
+/*
+  The preview inner width mirrors the page container size so sections render
+  at their intended widths and the user can see how wider/narrower sections
+  relate to the page boundary. overflow-x: auto on the parent allows scroll
+  when the content is wider than the pane.
+*/
 .admin-preview-inner {
-  max-width: 1100px;
-  margin: 0 auto;
+  /* width controlled by admin-preview-page--* below */
 }
+
+.admin-preview-page--standard,
+.admin-preview-page--wide  { max-width: 1100px; margin: 0 auto; }
+.admin-preview-page--wider { width: 1400px; }
+.admin-preview-page--full  { min-width: 100%; }
 
 /* ── Stub pages ── */
 .admin-stub {
