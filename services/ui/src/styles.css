@@ -1187,6 +1187,22 @@ a.cms-grid-card:hover .cms-grid-img {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════════ */
+
+.app-footer.ant-layout-footer {
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 105, 143, 0.12);
+  padding: 16px 24px;
+}
+
+.app-footer-inner {
+  color: rgba(18, 18, 18, 0.45);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    ADMIN PANEL
    ═══════════════════════════════════════════════════════════════ */
 

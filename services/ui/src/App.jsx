@@ -258,6 +258,12 @@ function PublicLayout({
           </div>
         </Form>
       </Modal>
+
+      <Layout.Footer className="app-footer">
+        <div className="app-shell app-footer-inner">
+          &copy; {new Date().getFullYear()} Animal Pride
+        </div>
+      </Layout.Footer>
     </Layout>
   );
 }
