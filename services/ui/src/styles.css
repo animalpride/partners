@@ -531,10 +531,17 @@ a.cms-grid-card:hover .cms-grid-img {
 /* ── CTA Buttons ───────────────────────────────────────────────────────── */
 .cms-btn-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
   margin-top: 8px;
+}
+
+/* Inner column: sizes to widest button, stretches siblings to match */
+.cms-btn-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
 }
 
 .cms-cta-btn {
@@ -544,6 +551,7 @@ a.cms-grid-card:hover .cms-grid-img {
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
+  text-align: center;
   letter-spacing: 0.1px;
   transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease;
   cursor: pointer;
@@ -578,6 +586,19 @@ a.cms-grid-card:hover .cms-grid-img {
   padding: 15px 36px;
   font-size: 1.05rem;
   border-radius: 8px;
+}
+
+/* ── Button visibility controls ────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cms-btn--desktop-only {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .cms-btn--mobile-only {
+    display: none;
+  }
 }
 
 /* ── Empty State ───────────────────────────────────────────────────────── */

@@ -159,10 +159,10 @@ export function makeDefaultSection(type = 'text') {
     return { type, container_size: 'standard', background: '', alignment: 'left', heading: 'Key Benefits', items: ['First point'] }
   }
   if (type === 'buttons') {
-    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Next Steps', buttons: [{ label: 'Learn More', url: '/', variant: 'primary' }] }
+    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Next Steps', buttons: [{ label: 'Learn More', url: '/', variant: 'primary', visibility: 'both' }] }
   }
   if (type === 'form_cta') {
-    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Ready to Partner?', body: 'Tell us about your organization and goals.', button_label: 'Start Application', button_link: '/apply' }
+    return { type, container_size: 'standard', background: '', alignment: 'center', heading: 'Ready to Partner?', body: 'Tell us about your organization and goals.', buttons: [{ label: 'Start Application', url: '/apply', variant: 'primary', visibility: 'both' }] }
   }
   if (type === 'application_form') {
     return {
@@ -175,7 +175,7 @@ export function makeDefaultSection(type = 'text') {
     }
   }
   if (type === 'image') {
-    return { type, container_size: 'full', background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_label: '', image_alt: '', image_position: 'center', button_label: '', button_link: '' }
+    return { type, container_size: 'full', background: '', alignment: 'left', heading: 'Image Section', body: '', image_url: '', image_label: '', image_alt: '', image_position: 'center', buttons: [] }
   }
   if (type === 'image_grid') {
     return { type, container_size: 'wide', background: '', alignment: 'left', heading: 'Image Grid', items: [{ title: '', image_url: '', link_url: '' }] }
@@ -184,7 +184,7 @@ export function makeDefaultSection(type = 'text') {
     return {
       type, container_size: 'standard', variant: 'default', image_side: 'right', background: '', alignment: 'left',
       heading: 'Section Heading', body: '', bullets: [], pull_quote: '',
-      button_label: '', button_link: '',
+      buttons: [],
       image_url: '', image_label: '', image_alt: '', image_aspect_ratio: '16/9',
     }
   }
@@ -231,7 +231,20 @@ export function makeDefaultSection(type = 'text') {
 export function normalizeSection(section) {
   const normalized = { ...makeDefaultSection(section?.type), ...section }
   if (normalized.type === 'bullets') normalized.items = Array.isArray(normalized.items) ? normalized.items : []
-  if (normalized.type === 'buttons') normalized.buttons = Array.isArray(normalized.buttons) ? normalized.buttons : []
+  if (['buttons', 'form_cta', 'image', 'two_column'].includes(normalized.type)) {
+    normalized.buttons = Array.isArray(normalized.buttons) ? normalized.buttons : []
+    // Migrate legacy single-button fields to buttons array
+    if (normalized.buttons.length === 0 && normalized.button_label && normalized.button_link) {
+      normalized.buttons = [{ label: normalized.button_label, url: normalized.button_link, variant: 'primary', visibility: 'both' }]
+    }
+    // Ensure all button objects have the required fields with defaults
+    normalized.buttons = normalized.buttons.map((btn) => ({
+      label: btn.label || '',
+      url: btn.url || '',
+      variant: btn.variant || 'primary',
+      visibility: btn.visibility || 'both',
+    }))
+  }
   if (normalized.type === 'application_form') {
     normalized.submit_label = String(normalized.submit_label || 'Submit Application')
     normalized.fields = Array.isArray(normalized.fields) ? normalized.fields.map(normalizeField).filter((f) => f.name) : []
