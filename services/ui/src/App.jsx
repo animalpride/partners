@@ -176,7 +176,7 @@ function PublicLayout({
             </Space>
           ) : (
             <Button
-              icon={<MenuOutlined />}
+              icon={<MenuOutlined style={{ fontSize: "32px" }} />}
               type="text"
               onClick={() => setMobileMenuOpen(true)}
             />
