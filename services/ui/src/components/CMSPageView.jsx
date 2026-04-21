@@ -59,6 +59,39 @@ function renderMarkdown(text) {
   })
 }
 
+// Render a vertical stack of CMS buttons from a buttons[] array.
+// alignment: 'left' | 'center' | 'right' — controls horizontal alignment of the stack.
+// sizeClass: optional extra class added to each button (e.g. 'cms-cta-btn--lg').
+function renderButtons(buttons, alignment, sizeClass) {
+  const validButtons = (buttons || []).filter((btn) => btn?.label && btn?.url)
+  if (!validButtons.length) return null
+  const alignItems = alignment === 'center' ? 'center' : alignment === 'right' ? 'flex-end' : 'flex-start'
+  return (
+    <div className="cms-btn-row" style={{ alignItems }}>
+      <div className="cms-btn-stack">
+        {validButtons.map((button, i) => {
+          const isExternal = /^https?:\/\//i.test(button.url)
+          const variantCls = button.variant === 'primary' ? 'cms-cta-btn--primary' : 'cms-cta-btn--ghost'
+          const visibilityCls =
+            button.visibility === 'desktop' ? ' cms-btn--desktop-only' :
+            button.visibility === 'mobile' ? ' cms-btn--mobile-only' : ''
+          return (
+            <a
+              key={i}
+              href={button.url}
+              target={isExternal ? '_blank' : undefined}
+              rel={isExternal ? 'noreferrer' : undefined}
+              className={`cms-cta-btn ${variantCls}${sizeClass ? ` ${sizeClass}` : ''}${visibilityCls}`}
+            >
+              {button.label}
+            </a>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── SectionContent ────────────────────────────────────────────────────────────
 // Renders the inner content of any "simple" section type.
 // embedded=false (default): wraps content in cms-section-inner (max-width, centering).
@@ -108,22 +141,7 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
         {section.heading ? (
           <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
         ) : null}
-        <div className="cms-btn-row" style={{ justifyContent: BTN_ROW_JUSTIFY[alignment] || 'flex-start' }}>
-          {(section.buttons || []).filter((btn) => btn?.label && btn?.url).map((button, i) => {
-            const isExternal = /^https?:\/\//i.test(button.url)
-            return (
-              <a
-                key={i}
-                href={button.url}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noreferrer' : undefined}
-                className={`cms-cta-btn${button.variant === 'primary' ? ' cms-cta-btn--primary' : ' cms-cta-btn--ghost'}`}
-              >
-                {button.label}
-              </a>
-            )
-          })}
-        </div>
+        {renderButtons(section.buttons, alignment)}
       </>
     )
   }
@@ -136,13 +154,16 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
           <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
         ) : null}
         {section.body ? <p className="cms-section-body" style={{ color: textColor }}>{renderMarkdown(section.body)}</p> : null}
-        {section.button_label && section.button_link ? (
-          <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
-            <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
-              {section.button_label}
-            </a>
-          </div>
-        ) : null}
+        {(section.buttons && section.buttons.length > 0)
+          ? renderButtons(section.buttons, alignment, 'cms-cta-btn--lg')
+          : (section.button_label && section.button_link
+            ? <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
+                <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
+                  {section.button_label}
+                </a>
+              </div>
+            : null)
+        }
       </>
     )
   }
@@ -321,7 +342,8 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
 
         // ── Image / Hero ──────────────────────────────────────────────────
         if (section.type === 'image') {
-          const hasOverlay = section.heading || section.body || (section.button_label && section.button_link)
+          const hasButtons = (section.buttons && section.buttons.some((b) => b?.label && b?.url))
+          const hasOverlay = section.heading || section.body || (section.button_label && section.button_link) || hasButtons
           return (
             <section key={index} className="cms-section cms-section--hero">
               {section.image_url ? (
@@ -337,11 +359,12 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
                       <div className="cms-hero-content" style={{ textAlign: alignment }}>
                         {section.heading ? <h1 className="cms-hero-heading">{section.heading}</h1> : null}
                         {section.body ? <p className="cms-hero-body">{section.body}</p> : null}
-                        {section.button_label && section.button_link ? (
-                          <a href={section.button_link} className="cms-hero-cta">
-                            {section.button_label}
-                          </a>
-                        ) : null}
+                        {hasButtons
+                          ? renderButtons(section.buttons, alignment, 'cms-cta-btn--lg')
+                          : (section.button_label && section.button_link
+                            ? <a href={section.button_link} className="cms-hero-cta">{section.button_label}</a>
+                            : null)
+                        }
                       </div>
                     </div>
                   ) : null}
@@ -353,6 +376,14 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
                   <div className="cms-img-placeholder cms-img-placeholder--16-9" style={{ marginTop: 16 }}>
                     <span className="cms-img-placeholder__label">{section.image_label || 'Image placeholder'}</span>
                   </div>
+                  {hasButtons
+                    ? <div style={{ marginTop: 16 }}>{renderButtons(section.buttons, alignment)}</div>
+                    : (section.button_label && section.button_link
+                      ? <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'flex-start', marginTop: 16 }}>
+                          <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">{section.button_label}</a>
+                        </div>
+                      : null)
+                  }
                 </div>
               )}
             </section>
@@ -424,13 +455,16 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
               {section.pull_quote ? (
                 <blockquote className="cms-pull-quote">{section.pull_quote}</blockquote>
               ) : null}
-              {section.button_label && section.button_link ? (
-                <div className="cms-btn-row" style={{ justifyContent: 'flex-start', marginTop: 20 }}>
-                  <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">
-                    {section.button_label}
-                  </a>
-                </div>
-              ) : null}
+              {(section.buttons && section.buttons.length > 0)
+                ? <div style={{ marginTop: 20 }}>{renderButtons(section.buttons, section.alignment || 'left')}</div>
+                : (section.button_label && section.button_link
+                  ? <div className="cms-btn-row" style={{ alignItems: 'flex-start', marginTop: 20 }}>
+                      <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">
+                        {section.button_label}
+                      </a>
+                    </div>
+                  : null)
+              }
             </div>
           )
 

@@ -120,14 +120,9 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
             <Form.Item label="Description" style={{ marginBottom: 8 }}>
               <Input.TextArea autoSize={{ minRows: 2, maxRows: 8 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
             </Form.Item>
-            <div className="admin-form-row">
-              <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
-                <Input value={section.button_label || ''} onChange={(e) => update({ button_label: e.target.value })} />
-              </Form.Item>
-              <Form.Item label="Button Link" style={{ flex: 1, marginBottom: 8 }}>
-                <Input value={section.button_link || ''} onChange={(e) => update({ button_link: e.target.value })} />
-              </Form.Item>
-            </div>
+            <Form.Item label="Buttons" style={{ marginBottom: 0 }}>
+              <ButtonsEditor section={section} sectionIndex={index} onChange={onChange} />
+            </Form.Item>
           </>
         ) : null}
 
@@ -151,14 +146,9 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
             <Form.Item label="Caption / Body" style={{ marginBottom: 8 }}>
               <Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} value={section.body || ''} onChange={(e) => update({ body: e.target.value })} />
             </Form.Item>
-            <div className="admin-form-row">
-              <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
-                <Input value={section.button_label || ''} onChange={(e) => update({ button_label: e.target.value })} />
-              </Form.Item>
-              <Form.Item label="Button Link" style={{ flex: 1, marginBottom: 8 }}>
-                <Input value={section.button_link || ''} onChange={(e) => update({ button_link: e.target.value })} />
-              </Form.Item>
-            </div>
+            <Form.Item label="Buttons" style={{ marginBottom: 0 }}>
+              <ButtonsEditor section={section} sectionIndex={index} onChange={onChange} />
+            </Form.Item>
           </>
         ) : null}
 
@@ -198,7 +188,7 @@ function SectionEditor({ section, index, total, onChange, onRemove, onMoveUp, on
 
 function ButtonsEditor({ section, sectionIndex, onChange }) {
   function addButton() {
-    onChange(sectionIndex, { buttons: [...(section.buttons || []), { label: '', url: '', variant: 'default' }] })
+    onChange(sectionIndex, { buttons: [...(section.buttons || []), { label: '', url: '', variant: 'primary', visibility: 'both' }] })
   }
   function updateButton(bi, patch) {
     onChange(sectionIndex, {
@@ -229,9 +219,21 @@ function ButtonsEditor({ section, sectionIndex, onChange }) {
             <Form.Item label="Style" style={{ flex: 1, marginBottom: 6 }}>
               <Select
                 size="small"
-                value={btn.variant || 'default'}
+                value={btn.variant || 'primary'}
                 options={[{ label: 'Primary', value: 'primary' }, { label: 'Ghost', value: 'default' }]}
                 onChange={(v) => updateButton(bi, { variant: v })}
+              />
+            </Form.Item>
+            <Form.Item label="Show On" style={{ flex: 1, marginBottom: 6 }}>
+              <Select
+                size="small"
+                value={btn.visibility || 'both'}
+                options={[
+                  { label: 'Both', value: 'both' },
+                  { label: 'Desktop Only', value: 'desktop' },
+                  { label: 'Mobile Only', value: 'mobile' },
+                ]}
+                onChange={(v) => updateButton(bi, { visibility: v })}
               />
             </Form.Item>
           </div>
@@ -406,14 +408,9 @@ function TwoColumnEditor({ section, sectionIndex, onChange }) {
       <Form.Item label="Pull Quote" style={{ marginBottom: 8 }}>
         <Input value={section.pull_quote || ''} onChange={(e) => update({ pull_quote: e.target.value })} placeholder="Optional callout quote" />
       </Form.Item>
-      <div className="admin-form-row">
-        <Form.Item label="Button Label" style={{ flex: 1, marginBottom: 8 }}>
-          <Input value={section.button_label || ''} onChange={(e) => update({ button_label: e.target.value })} />
-        </Form.Item>
-        <Form.Item label="Button Link" style={{ flex: 1, marginBottom: 8 }}>
-          <Input value={section.button_link || ''} onChange={(e) => update({ button_link: e.target.value })} />
-        </Form.Item>
-      </div>
+      <Form.Item label="Buttons" style={{ marginBottom: 8 }}>
+        <ButtonsEditor section={section} sectionIndex={sectionIndex} onChange={onChange} />
+      </Form.Item>
       <Form.Item label="Image Label (placeholder text)" style={{ marginBottom: 8 }}>
         <Input value={section.image_label || ''} onChange={(e) => update({ image_label: e.target.value })} placeholder="Describes the intended image" />
       </Form.Item>
