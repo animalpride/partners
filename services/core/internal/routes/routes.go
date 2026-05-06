@@ -47,12 +47,17 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	router.GET("/partners/locations/countries", locationHandler.GetCountries)
 	router.GET("/partners/locations/city-states", locationHandler.SearchCityStates)
 
+	internal := router.Group("/partners/internal")
+	internal.Use(sharedmw.InternalAuthMiddleware(cfg.InternalAuth.Token))
+	internal.POST("/locations/refresh", locationHandler.RefreshLocations)
+
 	admin := router.Group("/cms/admin")
 	admin.Use(sharedmw.AuthMiddleware(cfg.Auth.BaseURL))
 	admin.Use(middleware.RequirePermission(cfg.Auth.BaseURL, "cms", "edit"))
 	admin.Use(sharedmw.CSRFMiddleware())
 	admin.PUT("/pages/:slug", cmsHandler.UpdatePage)
 	admin.GET("/applications", cmsHandler.ListLeads)
+	admin.POST("/locations/refresh", locationHandler.RefreshLocations)
 
 	return router
 }

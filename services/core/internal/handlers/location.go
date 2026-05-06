@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/animalpride/partners/services/core/internal/repository"
 	"github.com/gin-gonic/gin"
@@ -54,4 +56,36 @@ func (h *LocationHandler) SearchCityStates(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, results)
+}
+
+func (h *LocationHandler) RefreshLocations(c *gin.Context) {
+	var req struct {
+		CombinedURL  string `json:"combined_url"`
+		CountriesURL string `json:"countries_url"`
+		StatesURL    string `json:"states_url"`
+		CitiesURL    string `json:"cities_url"`
+		WaitSeconds  int    `json:"wait_seconds"`
+	}
+
+	if c.Request.ContentLength > 0 {
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+			return
+		}
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 15*time.Minute)
+	defer cancel()
+
+	imported, err := h.repo.RefreshFromGitHub(ctx, req.CombinedURL, req.CountriesURL, req.StatesURL, req.CitiesURL, req.WaitSeconds)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to refresh locations"})
+		return
+	}
+	if !imported {
+		c.JSON(http.StatusConflict, gin.H{"error": "location refresh already in progress"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "location refresh completed"})
 }

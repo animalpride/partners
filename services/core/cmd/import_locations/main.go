@@ -14,12 +14,14 @@ import (
 )
 
 func main() {
+	var combinedURL string
 	var countriesURL string
 	var statesURL string
 	var citiesURL string
 	var configPath string
 
 	flag.StringVar(&configPath, "config", "config.yml", "path to core config file")
+	flag.StringVar(&combinedURL, "combined-url", "", "combined countries/states/cities dataset URL")
 	flag.StringVar(&countriesURL, "countries-url", "", "countries dataset URL")
 	flag.StringVar(&statesURL, "states-url", "", "states dataset URL")
 	flag.StringVar(&citiesURL, "cities-url", "", "cities dataset URL")
@@ -39,8 +41,12 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if err := repo.ImportFromGitHub(ctx, countriesURL, statesURL, citiesURL); err != nil {
+	imported, err := repo.RefreshFromGitHub(ctx, combinedURL, countriesURL, statesURL, citiesURL, 120)
+	if err != nil {
 		log.Fatalf("location import failed: %v", err)
+	}
+	if !imported {
+		log.Fatalf("location import skipped because another refresh is in progress")
 	}
 
 	log.Println("location import completed")

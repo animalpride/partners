@@ -52,11 +52,12 @@ MIGRATE_ENV_ACTIVE_FILE=""
 
 # --- Helper Functions ---
 usage() {
-  echo "Usage: $0 {up|down|logs|build-push|deploy|migrate|logout}"
+  echo "Usage: $0 {up|down|logs|refresh-locations|build-push|deploy|migrate|logout}"
   echo "Commands:"
   echo "  up             - Start the local development environment."
   echo "  down           - Stop the local development environment."
   echo "  logs [svc]     - Tail logs for all or a specific service."
+  echo "  refresh-locations - Run one-off location import in local development."
   echo "  build-push [tag] [svc...] - Build and push images. If tag provided, push tag and latest."
   echo "  deploy <qa|prod> <tag>   - Deploy to Swarm using the target compose file and image tag."
   echo "  migrate <qa|prod> <up|down> [service] [version] - Migrate databases for the environment."
@@ -579,6 +580,13 @@ dev_logs() {
   fi
 }
 
+# Run one-off location import in development
+dev_refresh_locations() {
+  echo "Running one-off location refresh for local development..."
+  docker compose -f "$DEV_COMPOSE_FILE" run --rm core-location-refresh
+  echo "Location refresh completed."
+}
+
 # Build and push images to registry (QA only)
 build_push_services() {
   local maybe_tag="$1"
@@ -863,6 +871,9 @@ case "$COMMAND" in
     ;;
   logs)
     dev_logs "$2"
+    ;;
+  refresh-locations)
+    dev_refresh_locations
     ;;
   build-push)
     shift # Remove "build-push" from arguments

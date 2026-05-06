@@ -14,9 +14,11 @@ import (
 )
 
 const (
+	defaultCombinedURL  = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/countries+states+cities.json"
 	defaultCountriesURL = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/countries.json"
 	defaultStatesURL    = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/states.json"
 	defaultCitiesURL    = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/cities.json"
+	importLockName      = "partners:location_import"
 )
 
 type LocationRepository struct {
@@ -223,6 +225,146 @@ type rawCity struct {
 	StateName   string `json:"state_name"`
 }
 
+type rawCombinedCity struct {
+	Name string `json:"name"`
+}
+
+type rawCombinedState struct {
+	Name      string            `json:"name"`
+	StateCode string            `json:"state_code"`
+	Cities    []rawCombinedCity `json:"cities"`
+}
+
+type rawCombinedCountry struct {
+	Name   string             `json:"name"`
+	ISO2   string             `json:"iso2"`
+	States []rawCombinedState `json:"states"`
+}
+
+func buildRowsFromCombined(data []rawCombinedCountry) ([]models.LocationCountry, []models.LocationState, []models.LocationCity) {
+	countryRows := make([]models.LocationCountry, 0, len(data))
+	stateRows := make([]models.LocationState, 0, len(data)*8)
+	cityRows := make([]models.LocationCity, 0, len(data)*300)
+	countrySeen := map[string]struct{}{}
+	stateSeen := map[string]struct{}{}
+
+	for _, country := range data {
+		countryCode := strings.ToUpper(strings.TrimSpace(country.ISO2))
+		countryName := strings.TrimSpace(country.Name)
+		if countryCode == "" || countryName == "" {
+			continue
+		}
+
+		if _, exists := countrySeen[countryCode]; !exists {
+			countrySeen[countryCode] = struct{}{}
+			countryRows = append(countryRows, models.LocationCountry{
+				Code:       countryCode,
+				Name:       countryName,
+				SearchName: normalizeSearchTerm(countryName),
+			})
+		}
+
+		for _, state := range country.States {
+			stateName := strings.TrimSpace(state.Name)
+			stateCode := fallbackStateCode(state.StateCode, stateName)
+			if stateCode == "" || stateName == "" {
+				continue
+			}
+
+			stateKey := countryCode + ":" + stateCode
+			if _, exists := stateSeen[stateKey]; !exists {
+				stateSeen[stateKey] = struct{}{}
+				stateRows = append(stateRows, models.LocationState{
+					CountryCode: countryCode,
+					StateCode:   stateCode,
+					Name:        stateName,
+					SearchName:  normalizeSearchTerm(stateName),
+				})
+			}
+
+			for _, city := range state.Cities {
+				cityName := strings.TrimSpace(city.Name)
+				if cityName == "" {
+					continue
+				}
+
+				cityRows = append(cityRows, models.LocationCity{
+					CountryCode: countryCode,
+					StateCode:   stateCode,
+					StateName:   stateName,
+					Name:        cityName,
+					SearchName:  normalizeSearchTerm(cityName),
+				})
+			}
+		}
+	}
+
+	return countryRows, stateRows, cityRows
+}
+
+func buildRowsFromFlat(countries []rawCountry, states []rawState, cities []rawCity) ([]models.LocationCountry, []models.LocationState, []models.LocationCity) {
+	countryRows := make([]models.LocationCountry, 0, len(countries))
+	countrySeen := map[string]struct{}{}
+	for _, country := range countries {
+		code := strings.ToUpper(strings.TrimSpace(country.ISO2))
+		name := strings.TrimSpace(country.Name)
+		if code == "" || name == "" {
+			continue
+		}
+		if _, exists := countrySeen[code]; exists {
+			continue
+		}
+		countrySeen[code] = struct{}{}
+		countryRows = append(countryRows, models.LocationCountry{
+			Code:       code,
+			Name:       name,
+			SearchName: normalizeSearchTerm(name),
+		})
+	}
+
+	stateRows := make([]models.LocationState, 0, len(states))
+	stateSeen := map[string]struct{}{}
+	for _, state := range states {
+		countryCode := strings.ToUpper(strings.TrimSpace(state.CountryCode))
+		name := strings.TrimSpace(state.Name)
+		stateCode := fallbackStateCode(state.StateCode, name)
+		if countryCode == "" || stateCode == "" || name == "" {
+			continue
+		}
+		stateKey := countryCode + ":" + stateCode
+		if _, exists := stateSeen[stateKey]; exists {
+			continue
+		}
+		stateSeen[stateKey] = struct{}{}
+		stateRows = append(stateRows, models.LocationState{
+			CountryCode: countryCode,
+			StateCode:   stateCode,
+			Name:        name,
+			SearchName:  normalizeSearchTerm(name),
+		})
+	}
+
+	cityRows := make([]models.LocationCity, 0, len(cities))
+	for _, city := range cities {
+		countryCode := strings.ToUpper(strings.TrimSpace(city.CountryCode))
+		stateName := strings.TrimSpace(city.StateName)
+		stateCode := fallbackStateCode(city.StateCode, stateName)
+		name := strings.TrimSpace(city.Name)
+		if countryCode == "" || stateCode == "" || stateName == "" || name == "" {
+			continue
+		}
+		cityRows = append(cityRows, models.LocationCity{
+			CountryCode: countryCode,
+			StateCode:   stateCode,
+			StateName:   stateName,
+			Name:        name,
+			SearchName:  normalizeSearchTerm(name),
+		})
+	}
+
+	return countryRows, stateRows, cityRows
+}
+
 func fetchJSON[T any](ctx context.Context, url string) ([]T, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -244,28 +386,77 @@ func fetchJSON[T any](ctx context.Context, url string) ([]T, error) {
 	return out, nil
 }
 
-func (r *LocationRepository) ImportFromGitHub(ctx context.Context, countriesURL, statesURL, citiesURL string) error {
-	if strings.TrimSpace(countriesURL) == "" {
-		countriesURL = defaultCountriesURL
+func (r *LocationRepository) acquireImportLock(ctx context.Context, waitSeconds int) (bool, error) {
+	if waitSeconds < 0 {
+		waitSeconds = 0
 	}
-	if strings.TrimSpace(statesURL) == "" {
-		statesURL = defaultStatesURL
+	var acquired int
+	err := r.db.WithContext(ctx).Raw("SELECT GET_LOCK(?, ?)", importLockName, waitSeconds).Scan(&acquired).Error
+	if err != nil {
+		return false, err
 	}
-	if strings.TrimSpace(citiesURL) == "" {
-		citiesURL = defaultCitiesURL
+	return acquired == 1, nil
+}
+
+func (r *LocationRepository) releaseImportLock(ctx context.Context) {
+	var released int
+	_ = r.db.WithContext(ctx).Raw("SELECT RELEASE_LOCK(?)", importLockName).Scan(&released).Error
+}
+
+func (r *LocationRepository) RefreshFromGitHub(ctx context.Context, combinedURL, countriesURL, statesURL, citiesURL string, waitSeconds int) (bool, error) {
+	acquired, err := r.acquireImportLock(ctx, waitSeconds)
+	if err != nil {
+		return false, err
+	}
+	if !acquired {
+		return false, nil
+	}
+	defer r.releaseImportLock(ctx)
+
+	if err := r.ImportFromGitHub(ctx, combinedURL, countriesURL, statesURL, citiesURL); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (r *LocationRepository) ImportFromGitHub(ctx context.Context, combinedURL, countriesURL, statesURL, citiesURL string) error {
+	if strings.TrimSpace(combinedURL) == "" {
+		combinedURL = defaultCombinedURL
 	}
 
-	countries, err := fetchJSON[rawCountry](ctx, countriesURL)
-	if err != nil {
-		return err
-	}
-	states, err := fetchJSON[rawState](ctx, statesURL)
-	if err != nil {
-		return err
-	}
-	cities, err := fetchJSON[rawCity](ctx, citiesURL)
-	if err != nil {
-		return err
+	combined, combinedErr := fetchJSON[rawCombinedCountry](ctx, combinedURL)
+
+	var countryRows []models.LocationCountry
+	var stateRows []models.LocationState
+	var cityRows []models.LocationCity
+
+	if combinedErr == nil && len(combined) > 0 {
+		countryRows, stateRows, cityRows = buildRowsFromCombined(combined)
+	} else {
+		if strings.TrimSpace(countriesURL) == "" {
+			countriesURL = defaultCountriesURL
+		}
+		if strings.TrimSpace(statesURL) == "" {
+			statesURL = defaultStatesURL
+		}
+		if strings.TrimSpace(citiesURL) == "" {
+			citiesURL = defaultCitiesURL
+		}
+
+		countries, err := fetchJSON[rawCountry](ctx, countriesURL)
+		if err != nil {
+			return err
+		}
+		states, err := fetchJSON[rawState](ctx, statesURL)
+		if err != nil {
+			return err
+		}
+		cities, err := fetchJSON[rawCity](ctx, citiesURL)
+		if err != nil {
+			return err
+		}
+
+		countryRows, stateRows, cityRows = buildRowsFromFlat(countries, states, cities)
 	}
 
 	return r.db.Transaction(func(tx *gorm.DB) error {
@@ -282,62 +473,15 @@ func (r *LocationRepository) ImportFromGitHub(ctx context.Context, countriesURL,
 			return err
 		}
 
-		countryRows := make([]models.LocationCountry, 0, len(countries))
-		for _, country := range countries {
-			code := strings.ToUpper(strings.TrimSpace(country.ISO2))
-			name := strings.TrimSpace(country.Name)
-			if code == "" || name == "" {
-				continue
-			}
-			countryRows = append(countryRows, models.LocationCountry{
-				Code:       code,
-				Name:       name,
-				SearchName: normalizeSearchTerm(name),
-			})
-		}
 		if len(countryRows) > 0 {
 			if err := tx.CreateInBatches(countryRows, 500).Error; err != nil {
 				return err
 			}
 		}
-
-		stateRows := make([]models.LocationState, 0, len(states))
-		for _, state := range states {
-			countryCode := strings.ToUpper(strings.TrimSpace(state.CountryCode))
-			name := strings.TrimSpace(state.Name)
-			stateCode := fallbackStateCode(state.StateCode, name)
-			if countryCode == "" || stateCode == "" || name == "" {
-				continue
-			}
-			stateRows = append(stateRows, models.LocationState{
-				CountryCode: countryCode,
-				StateCode:   stateCode,
-				Name:        name,
-				SearchName:  normalizeSearchTerm(name),
-			})
-		}
 		if len(stateRows) > 0 {
 			if err := tx.CreateInBatches(stateRows, 1000).Error; err != nil {
 				return err
 			}
-		}
-
-		cityRows := make([]models.LocationCity, 0, len(cities))
-		for _, city := range cities {
-			countryCode := strings.ToUpper(strings.TrimSpace(city.CountryCode))
-			stateName := strings.TrimSpace(city.StateName)
-			stateCode := fallbackStateCode(city.StateCode, stateName)
-			name := strings.TrimSpace(city.Name)
-			if countryCode == "" || stateCode == "" || stateName == "" || name == "" {
-				continue
-			}
-			cityRows = append(cityRows, models.LocationCity{
-				CountryCode: countryCode,
-				StateCode:   stateCode,
-				StateName:   stateName,
-				Name:        name,
-				SearchName:  normalizeSearchTerm(name),
-			})
 		}
 		if len(cityRows) > 0 {
 			if err := tx.CreateInBatches(cityRows, 2000).Error; err != nil {
