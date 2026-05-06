@@ -1,11 +1,11 @@
-module github.com/animalpride/animalpride-core/services/denops-auth
+module github.com/animalpride/partners/services/auth
 
 go 1.24.0
 
 toolchain go1.24.12
 
 require (
-	github.com/animalpride/animalpride-core/services/shared v0.0.0
+	github.com/animalpride/partners/services/shared v0.0.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.11.0
 	golang.org/x/crypto v0.47.0
@@ -53,4 +53,4 @@ require (
 	google.golang.org/protobuf v1.36.9 // indirect
 )
 
-replace github.com/animalpride/animalpride-core/services/shared => ../shared
+replace github.com/animalpride/partners/services/shared => ../shared

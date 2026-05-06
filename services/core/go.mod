@@ -1,11 +1,11 @@
-module github.com/animalpride/animalpride-core/services/core
+module github.com/animalpride/partners/services/core
 
 go 1.24.0
 
 toolchain go1.24.12
 
 require (
-	github.com/animalpride/animalpride-core/services/shared v0.0.0
+	github.com/animalpride/partners/services/shared v0.0.0
 	github.com/gin-gonic/gin v1.11.0
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.6.0
@@ -51,4 +51,4 @@ require (
 	google.golang.org/protobuf v1.36.9 // indirect
 )
 
-replace github.com/animalpride/animalpride-core/services/shared => ../shared
+replace github.com/animalpride/partners/services/shared => ../shared

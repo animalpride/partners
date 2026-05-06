@@ -129,6 +129,37 @@ export async function submitApplication(payload) {
   return response.json()
 }
 
+export async function getLocationCountries() {
+  const response = await fetch(`${CORE_BASE}/partners/locations/countries`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to load countries')
+  }
+
+  return response.json()
+}
+
+export async function getLocationCityStates(countryCode, query, limit = 25) {
+  const params = new URLSearchParams({
+    country_code: countryCode,
+    q: query,
+    limit: String(limit),
+  })
+
+  const response = await fetch(`${CORE_BASE}/partners/locations/city-states?${params.toString()}`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to load city suggestions')
+  }
+
+  return response.json()
+}
+
 export async function getComingSoonState() {
   const response = await fetch(`${CORE_BASE}/site/coming-soon`, {
     credentials: 'include',

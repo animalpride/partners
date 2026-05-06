@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/handlers"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/middleware"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/repository"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/services"
-	sharedmw "github.com/animalpride/animalpride-core/services/shared/middleware"
+	"github.com/animalpride/partners/services/auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/handlers"
+	"github.com/animalpride/partners/services/auth/internal/middleware"
+	"github.com/animalpride/partners/services/auth/internal/repository"
+	"github.com/animalpride/partners/services/auth/internal/services"
+	sharedmw "github.com/animalpride/partners/services/shared/middleware"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/db"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/routes"
+	"github.com/animalpride/partners/services/auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/db"
+	"github.com/animalpride/partners/services/auth/internal/routes"
 )
 
 func main() {

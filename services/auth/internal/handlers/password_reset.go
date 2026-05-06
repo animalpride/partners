@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/repository"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/services"
+	"github.com/animalpride/partners/services/auth/internal/repository"
+	"github.com/animalpride/partners/services/auth/internal/services"
 	"github.com/gin-gonic/gin"
 )
 

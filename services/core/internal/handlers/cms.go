@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/animalpride/animalpride-core/services/core/internal/models"
-	"github.com/animalpride/animalpride-core/services/core/internal/repository"
+	"github.com/animalpride/partners/services/core/internal/models"
+	"github.com/animalpride/partners/services/core/internal/repository"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )

@@ -5,9 +5,9 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/animalpride/animalpride-core/services/core/internal/config"
-	"github.com/animalpride/animalpride-core/services/core/internal/db"
-	"github.com/animalpride/animalpride-core/services/core/internal/routes"
+	"github.com/animalpride/partners/services/core/internal/config"
+	"github.com/animalpride/partners/services/core/internal/db"
+	"github.com/animalpride/partners/services/core/internal/routes"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/models"
+	"github.com/animalpride/partners/services/auth/internal/models"
 	"gorm.io/gorm"
 )
 

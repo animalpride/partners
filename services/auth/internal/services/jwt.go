@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/config"
 	"github.com/dgrijalva/jwt-go"
 )
 

@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	sharedconfig "github.com/animalpride/animalpride-core/services/shared/config"
+	sharedconfig "github.com/animalpride/partners/services/shared/config"
 	"gopkg.in/yaml.v3"
 )
 

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/animalpride/animalpride-core/services/core/internal/models"
+	"github.com/animalpride/partners/services/core/internal/models"
 	"gorm.io/gorm"
 )
 
