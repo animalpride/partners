@@ -7,7 +7,7 @@ env: "development"
 
 site:
   coming_soon:
-    enabled: true
+    enabled: false
     message: "The partners.animalpride.com experience is being redesigned to better serve you. We look forward to sharing the new site shortly. Check back soon!"
     preview_path: "preview-qa-rotate-me"
     preview_cookie_name: "ap_preview_access"
