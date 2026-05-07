@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	sharedmw "github.com/animalpride/animalpride-core/services/shared/middleware"
+	sharedmw "github.com/animalpride/partners/services/shared/middleware"
 	"github.com/gin-gonic/gin"
 )
 

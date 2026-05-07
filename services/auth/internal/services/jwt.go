@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/config"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -68,6 +69,58 @@ func (s *JWTService) ValidateRefreshToken(tokenString string) (jwt.MapClaims, er
 		return nil, errors.New("invalid token type")
 	}
 	return claims, nil
+}
+
+// GenerateMachineAccessToken generates a short-lived JWT access token for an OAuth client.
+func (s *JWTService) GenerateMachineAccessToken(clientID string, ttl time.Duration) (string, error) {
+	claims := jwt.MapClaims{
+		"client_id": strings.TrimSpace(clientID),
+		"typ":       "machine_access",
+		"exp":       time.Now().Add(ttl).Unix(),
+		"iat":       time.Now().Unix(),
+	}
+	return s.signClaims(claims)
+}
+
+// ValidateMachineAccessToken validates an M2M access token and returns the client ID.
+func (s *JWTService) ValidateMachineAccessToken(tokenString string) (string, error) {
+	claims, err := s.parseToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+	if claims["typ"] != "machine_access" {
+		return "", errors.New("invalid token type")
+	}
+	clientID, ok := claims["client_id"].(string)
+	if !ok || strings.TrimSpace(clientID) == "" {
+		return "", errors.New("invalid client_id format in token")
+	}
+	return strings.TrimSpace(clientID), nil
+}
+
+func (s *JWTService) ValidatePrincipalToken(tokenString string) (string, string, error) {
+	claims, err := s.parseToken(tokenString)
+	if err != nil {
+		return "", "", err
+	}
+
+	tokenType, _ := claims["typ"].(string)
+	switch tokenType {
+	case "access":
+		userID, err := userIDFromClaims(claims)
+		if err != nil {
+			return "", "", err
+		}
+		return "user", strconv.Itoa(userID), nil
+	case "machine_access":
+		clientID, ok := claims["client_id"].(string)
+		if !ok || strings.TrimSpace(clientID) == "" {
+			return "", "", errors.New("invalid client_id format in token")
+		}
+		return "machine", strings.TrimSpace(clientID), nil
+	default:
+		return "", "", errors.New("invalid token type")
+	}
 }
 
 func (s *JWTService) signClaims(claims jwt.MapClaims) (string, error) {

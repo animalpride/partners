@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/animalpride/animalpride-core/services/core/internal/config"
+	"github.com/animalpride/partners/services/core/internal/config"
 	"github.com/gin-gonic/gin"
 )
 

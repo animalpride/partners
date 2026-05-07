@@ -16,7 +16,7 @@ type permissionResponse struct {
 	Action   string `json:"action"`
 }
 
-func RequirePermission(authBaseURL, resource, action string) gin.HandlerFunc {
+func requirePermissionForPath(authBaseURL, permissionPath, resource, action string) gin.HandlerFunc {
 	client := &http.Client{Timeout: 3 * time.Second}
 	trimmedBase := strings.TrimRight(authBaseURL, "/")
 
@@ -32,7 +32,7 @@ func RequirePermission(authBaseURL, resource, action string) gin.HandlerFunc {
 		req, err := http.NewRequestWithContext(
 			context.Background(),
 			http.MethodGet,
-			fmt.Sprintf("%s/permissions", trimmedBase),
+			fmt.Sprintf("%s%s", trimmedBase, permissionPath),
 			nil,
 		)
 		if err != nil {
@@ -79,4 +79,12 @@ func RequirePermission(authBaseURL, resource, action string) gin.HandlerFunc {
 		c.JSON(http.StatusForbidden, gin.H{"error": "insufficient permissions"})
 		c.Abort()
 	}
+}
+
+func RequirePermission(authBaseURL, resource, action string) gin.HandlerFunc {
+	return requirePermissionForPath(authBaseURL, "/permissions", resource, action)
+}
+
+func RequireMachinePermission(authBaseURL, resource, action string) gin.HandlerFunc {
+	return requirePermissionForPath(authBaseURL, "/permissions/machine", resource, action)
 }

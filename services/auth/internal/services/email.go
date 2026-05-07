@@ -10,7 +10,7 @@ import (
 
 	resend "github.com/resend/resend-go/v2"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/config"
 )
 
 type EmailService struct {

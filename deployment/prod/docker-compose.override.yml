@@ -62,6 +62,9 @@ services:
       - backend
 
   core:
+    environment:
+      - CORE_IMPORT_ON_STARTUP=true
+      - CORE_IMPORT_TIMEOUT=15m
     deploy:
       replicas: 1
       resources:

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/models"
+	"github.com/animalpride/partners/services/auth/internal/models"
 	"gorm.io/gorm"
 )
 
@@ -127,6 +127,20 @@ func (r *RBACRepository) GetUserPermissions(userID int) ([]models.Permission, er
 		Find(&permissions).Error
 	if err != nil {
 		log.Printf("GetUserPermissions: query failed: %v", err)
+	}
+	return permissions, err
+}
+
+func (r *RBACRepository) GetOAuthClientPermissions(clientID string) ([]models.Permission, error) {
+	var permissions []models.Permission
+	err := r.db.Table("permissions").
+		Joins("JOIN client_permissions ON permissions.id = client_permissions.permission_id").
+		Joins("JOIN oauth_clients ON client_permissions.oauth_client_id = oauth_clients.id").
+		Where("oauth_clients.client_id = ? AND oauth_clients.active = 1", clientID).
+		Distinct().
+		Find(&permissions).Error
+	if err != nil {
+		log.Printf("GetOAuthClientPermissions: query failed: %v", err)
 	}
 	return permissions, err
 }

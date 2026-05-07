@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/animalpride/animalpride-core/services/core/internal/config"
+	"github.com/animalpride/partners/services/core/internal/config"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )

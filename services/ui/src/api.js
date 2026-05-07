@@ -129,6 +129,37 @@ export async function submitApplication(payload) {
   return response.json()
 }
 
+export async function getLocationCountries() {
+  const response = await fetch(`${CORE_BASE}/partners/locations/countries`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to load countries')
+  }
+
+  return response.json()
+}
+
+export async function getLocationCityStates(countryCode, query, limit = 25) {
+  const params = new URLSearchParams({
+    country_code: countryCode,
+    q: query,
+    limit: String(limit),
+  })
+
+  const response = await fetch(`${CORE_BASE}/partners/locations/city-states?${params.toString()}`, {
+    credentials: 'include',
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to load city suggestions')
+  }
+
+  return response.json()
+}
+
 export async function getComingSoonState() {
   const response = await fetch(`${CORE_BASE}/site/coming-soon`, {
     credentials: 'include',
@@ -332,6 +363,68 @@ export async function removeRole(userId, roleId) {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
     throw new Error(body.error || 'Failed to remove role')
+  }
+  return response.json()
+}
+
+// ── OAuth Clients (admin — requires auth + admin role) ──────────────────────
+
+export async function getOAuthClients() {
+  const response = await authFetch(`${AUTH_BASE}/admin/oauth/clients`, {
+    credentials: 'include',
+  })
+  if (!response.ok) throw new Error('Failed to fetch OAuth clients')
+  return response.json()
+}
+
+export async function createOAuthClient(payload) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/oauth/clients`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to create OAuth client')
+  }
+  return response.json()
+}
+
+export async function setOAuthClientStatus(id, active) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/oauth/clients/${id}/status`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify({ active }),
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to update OAuth client status')
+  }
+  return response.json()
+}
+
+export async function rotateOAuthClientSecret(id) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${AUTH_BASE}/admin/oauth/clients/${id}/rotate-secret`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'X-CSRF-Token': csrfToken,
+    },
+  })
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to rotate OAuth client secret')
   }
   return response.json()
 }

@@ -7,9 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/models"
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/services"
+	"github.com/animalpride/partners/services/auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/models"
+	"github.com/animalpride/partners/services/auth/internal/services"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

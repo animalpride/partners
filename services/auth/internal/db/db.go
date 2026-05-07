@@ -8,7 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
-	"github.com/animalpride/animalpride-core/services/denops-auth/internal/config"
+	"github.com/animalpride/partners/services/auth/internal/config"
 )
 
 func NewDB(cfg *config.Config) (*gorm.DB, error) {

@@ -1,4 +1,4 @@
-module github.com/animalpride/animalpride-core/services/shared
+module github.com/animalpride/partners/services/shared
 
 go 1.24.0
 

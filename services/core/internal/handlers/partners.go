@@ -1,24 +1,42 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"fmt"
 	"net/http"
+	"regexp"
+	"strconv"
+	"strings"
 
-	"github.com/animalpride/animalpride-core/services/core/internal/models"
-	"github.com/animalpride/animalpride-core/services/core/internal/repository"
+	"github.com/animalpride/partners/services/core/internal/models"
+	"github.com/animalpride/partners/services/core/internal/repository"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
+var phoneRegex = regexp.MustCompile(`^\+?[\d\s\-(). ]{7,20}$`)
+
 type PartnerLeadMailer interface {
-	SendPartnerLead(lead *models.LeadSubmission) error
+	SendPartnerLead(app *models.PartnerApplication) error
 }
 
 type PartnerHandler struct {
-	leadRepo *repository.LeadRepository
-	mailer   PartnerLeadMailer
+	appRepo      *repository.PartnerApplicationRepository
+	locationRepo *repository.LocationRepository
+	mailer       PartnerLeadMailer
 }
 
-func NewPartnerHandler(leadRepo *repository.LeadRepository, mailer PartnerLeadMailer) *PartnerHandler {
-	return &PartnerHandler{leadRepo: leadRepo, mailer: mailer}
+func NewPartnerHandler(appRepo *repository.PartnerApplicationRepository, locationRepo *repository.LocationRepository, mailer PartnerLeadMailer) *PartnerHandler {
+	return &PartnerHandler{appRepo: appRepo, locationRepo: locationRepo, mailer: mailer}
+}
+
+func generateUUID() string {
+	b := make([]byte, 16)
+	_, _ = rand.Read(b)
+	b[6] = (b[6] & 0x0f) | 0x40 // version 4
+	b[8] = (b[8] & 0x3f) | 0x80 // variant
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }
 
 func (h *PartnerHandler) SubmitLead(c *gin.Context) {
@@ -26,7 +44,17 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 		OrganizationName string `json:"organization_name" binding:"required"`
 		ContactName      string `json:"contact_name" binding:"required"`
 		Email            string `json:"email" binding:"required,email"`
-		Phone            string `json:"phone"`
+		Phone            string `json:"phone" binding:"required"`
+		AddressLine1     string `json:"address_line1" binding:"required"`
+		AddressLine2     string `json:"address_line2"`
+		CityState        string `json:"city_state"`
+		CityLookupID     uint   `json:"city_lookup_id"`
+		City             string `json:"city"`
+		State            string `json:"state"`
+		StateCode        string `json:"state_code"`
+		PostalCode       string `json:"postal_code" binding:"required"`
+		Country          string `json:"country" binding:"required"`
+		CountryCode      string `json:"country_code"`
 		Website          string `json:"website"`
 		MonthlyTraffic   string `json:"monthly_traffic"`
 		CurrentStore     string `json:"current_store"`
@@ -39,27 +67,169 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 		return
 	}
 
-	lead := &models.LeadSubmission{
+	if !phoneRegex.MatchString(strings.TrimSpace(req.Phone)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid phone number format"})
+		return
+	}
+
+	country, err := h.locationRepo.FindCountryByCodeOrName(firstNonEmpty(req.CountryCode, req.Country))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to validate country"})
+		return
+	}
+	if country == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid country"})
+		return
+	}
+
+	var city *models.LocationCity
+	if req.CityLookupID > 0 {
+		city, err = h.locationRepo.FindCityByID(country.Code, req.CityLookupID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to validate city"})
+			return
+		}
+	} else {
+		cityName, stateInput := parseCityState(firstNonEmpty(req.CityState, fmt.Sprintf("%s, %s", req.City, req.State)))
+		if cityName == "" {
+			cityName = req.City
+		}
+		if stateInput == "" {
+			stateInput = firstNonEmpty(req.StateCode, req.State)
+		}
+		city, err = h.locationRepo.FindCityByName(country.Code, cityName, stateInput)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to validate city"})
+			return
+		}
+	}
+	if city == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid city/state selection for country"})
+		return
+	}
+
+	if strings.TrimSpace(req.CityState) == "" {
+		req.CityState = fmt.Sprintf("%s, %s", city.Name, city.StateCode)
+	}
+
+	app := &models.PartnerApplication{
+		ID:               generateUUID(),
 		OrganizationName: req.OrganizationName,
 		ContactName:      req.ContactName,
 		Email:            req.Email,
 		Phone:            req.Phone,
+		AddressLine1:     req.AddressLine1,
+		AddressLine2:     req.AddressLine2,
+		City:             city.Name,
+		CityLookupID:     &city.ID,
+		State:            city.StateName,
+		StateCode:        city.StateCode,
+		PostalCode:       req.PostalCode,
+		Country:          country.Name,
+		CountryCode:      country.Code,
 		Website:          req.Website,
 		MonthlyTraffic:   req.MonthlyTraffic,
 		CurrentStore:     req.CurrentStore,
 		Goals:            req.Goals,
 		Notes:            req.Notes,
+		DenopsSyncStatus: models.PartnerApplicationStatusPending,
 	}
 
-	if err := h.leadRepo.Create(lead); err != nil {
+	if err := h.appRepo.Create(app); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to submit application"})
 		return
 	}
 
-	if err := h.mailer.SendPartnerLead(lead); err != nil {
+	if err := h.mailer.SendPartnerLead(app); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "application saved but failed to send notification"})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application submitted"})
+}
+
+func (h *PartnerHandler) ListPendingApplications(c *gin.Context) {
+	limit := 50
+	if rawLimit := strings.TrimSpace(c.Query("limit")); rawLimit != "" {
+		parsed, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
+			return
+		}
+		limit = parsed
+	}
+
+	apps, err := h.appRepo.ListByStatus(models.PartnerApplicationStatusPending, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch pending applications"})
+		return
+	}
+
+	c.JSON(http.StatusOK, apps)
+}
+
+func (h *PartnerHandler) UpdateApplicationStatus(c *gin.Context) {
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "application id is required"})
+		return
+	}
+
+	var req struct {
+		Status string `json:"status" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	req.Status = strings.TrimSpace(strings.ToLower(req.Status))
+	if !models.IsValidPartnerApplicationStatus(req.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status"})
+		return
+	}
+
+	if _, err := h.appRepo.GetByID(id); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch application"})
+		return
+	}
+
+	if err := h.appRepo.UpdateStatus(id, req.Status); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update application status"})
+		return
+	}
+
+	updated, err := h.appRepo.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "status updated but failed to reload application"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updated)
+}
+
+func parseCityState(value string) (string, string) {
+	parts := strings.Split(value, ",")
+	if len(parts) < 2 {
+		return strings.TrimSpace(value), ""
+	}
+	return strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1])
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
 }
