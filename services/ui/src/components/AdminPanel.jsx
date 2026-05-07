@@ -15,6 +15,7 @@ import {
   normalizeSections, toContentJSON,
 } from '../cmsTypes'
 import { CMSContentRenderer } from './CMSPageView'
+import { OAuthClients } from './OAuthClients'
 import { UsersRoles } from './UsersRoles'
 
 // ── Section mutation helpers ───────────────────────────────────────────────────
@@ -918,6 +919,7 @@ export function AdminPanel() {
               { key: 'content', label: 'Content Editor' },
               { key: 'portals', label: 'Partner Portals' },
               { key: 'users', label: 'Users & Roles' },
+              { key: 'oauth_clients', label: 'Machine Clients' },
             ]}
           />
           <div style={{ width: 160, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1083,6 +1085,10 @@ export function AdminPanel() {
 
         {adminSection === 'users' ? (
           <UsersRoles />
+        ) : null}
+
+        {adminSection === 'oauth_clients' ? (
+          <OAuthClients />
         ) : null}
       </Layout.Content>
     </Layout>

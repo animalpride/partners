@@ -19,7 +19,7 @@ func CSRFMiddleware() gin.HandlerFunc {
 		}
 
 		// Login endpoint is exempt — no session cookie exists yet at that point.
-		if c.Request.URL.Path == "/login" {
+		if c.Request.URL.Path == "/login" || c.Request.URL.Path == "/oauth/token" {
 			c.Next()
 			return
 		}

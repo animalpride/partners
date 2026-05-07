@@ -249,3 +249,25 @@ func (h *AdminHandler) GetUserPermissions(c *gin.Context) {
 
 	c.JSON(http.StatusOK, permissions)
 }
+
+// GetMachinePermissions returns the current OAuth client's permissions.
+func (h *AdminHandler) GetMachinePermissions(c *gin.Context) {
+	if c.GetString("principal_type") != "machine" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Machine client not authenticated"})
+		return
+	}
+
+	clientID := c.GetString("client_id")
+	if clientID == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Machine client not authenticated"})
+		return
+	}
+
+	permissions, err := h.rbacRepo.GetOAuthClientPermissions(clientID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get client permissions"})
+		return
+	}
+
+	c.JSON(http.StatusOK, permissions)
+}

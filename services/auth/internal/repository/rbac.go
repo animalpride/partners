@@ -131,6 +131,20 @@ func (r *RBACRepository) GetUserPermissions(userID int) ([]models.Permission, er
 	return permissions, err
 }
 
+func (r *RBACRepository) GetOAuthClientPermissions(clientID string) ([]models.Permission, error) {
+	var permissions []models.Permission
+	err := r.db.Table("permissions").
+		Joins("JOIN client_permissions ON permissions.id = client_permissions.permission_id").
+		Joins("JOIN oauth_clients ON client_permissions.oauth_client_id = oauth_clients.id").
+		Where("oauth_clients.client_id = ? AND oauth_clients.active = 1", clientID).
+		Distinct().
+		Find(&permissions).Error
+	if err != nil {
+		log.Printf("GetOAuthClientPermissions: query failed: %v", err)
+	}
+	return permissions, err
+}
+
 func (r *RBACRepository) UserHasPermission(userID int, resource, action string) (bool, error) {
 	var count int64
 	err := r.db.Table("permissions").

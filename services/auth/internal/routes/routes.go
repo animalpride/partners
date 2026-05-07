@@ -24,9 +24,11 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	auditRepo := repository.NewAuditRepository(db)
 	invitationRepo := repository.NewInvitationRepository(db, cfg, emailService, rbacRepo, auditRepo)
 	passwordResetRepo := repository.NewPasswordResetRepository(db, cfg, emailService, auditRepo)
+	oauthClientRepo := repository.NewOAuthClientRepository(db)
 
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(userService, jwtService, refreshRepo, passwordResetRepo, cfg.AuthSession)
+	oauthHandler := handlers.NewOAuthHandler(oauthClientRepo, jwtService, int(cfg.AuthSession.AccessTokenTTL.Seconds()))
 	userHandler := handlers.NewUserHandler(userService)
 	adminHandler := handlers.NewAdminHandler(rbacRepo, userService, invitationRepo, auditRepo, refreshRepo)
 	invitationHandler := handlers.NewInvitationHandler(invitationRepo, authHandler)
@@ -45,6 +47,7 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 	router.GET("/csrf", authHandler.CSRF)
+	router.POST("/oauth/token", oauthHandler.Token)
 	router.POST("/login", authHandler.Login)
 	router.POST("/refresh", authHandler.Refresh)
 	router.POST("/logout", authHandler.Logout)
@@ -60,6 +63,7 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 
 	// User permissions endpoint - accessible to authenticated users
 	router.GET("/permissions", adminHandler.GetUserPermissions)
+	router.GET("/permissions/machine", adminHandler.GetMachinePermissions)
 
 	// Admin routes - require admin role
 	adminGroup := router.Group("/admin")
@@ -72,6 +76,10 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 		adminGroup.GET("/roles", adminHandler.GetAllRoles)
 		adminGroup.POST("/assign-role", adminHandler.AssignRoleToUser)
 		adminGroup.POST("/remove-role", adminHandler.RemoveRoleFromUser)
+		adminGroup.GET("/oauth/clients", oauthHandler.ListClients)
+		adminGroup.POST("/oauth/clients", oauthHandler.CreateClient)
+		adminGroup.PUT("/oauth/clients/:id/status", oauthHandler.UpdateClientStatus)
+		adminGroup.POST("/oauth/clients/:id/rotate-secret", oauthHandler.RotateClientSecret)
 		// Token blacklist management - admin only
 		adminGroup.POST("/blacklist", userHandler.BlacklistToken)
 		adminGroup.GET("/blacklist", userHandler.GetBlacklistedTokens)

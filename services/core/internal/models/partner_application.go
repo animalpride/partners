@@ -1,6 +1,23 @@
 package models
 
-import "time"
+import (
+	"strings"
+	"time"
+)
+
+const (
+	PartnerApplicationStatusPending  = "pending"
+	PartnerApplicationStatusApproved = "approved"
+	PartnerApplicationStatusRejected = "rejected"
+	PartnerApplicationStatusInReview = "in_review"
+)
+
+var partnerApplicationAllowedStatuses = map[string]struct{}{
+	PartnerApplicationStatusPending:  {},
+	PartnerApplicationStatusApproved: {},
+	PartnerApplicationStatusRejected: {},
+	PartnerApplicationStatusInReview: {},
+}
 
 type PartnerApplication struct {
 	ID               string    `gorm:"type:char(36);primaryKey" json:"id"`
@@ -29,4 +46,9 @@ type PartnerApplication struct {
 
 func (PartnerApplication) TableName() string {
 	return "partner_applications"
+}
+
+func IsValidPartnerApplicationStatus(status string) bool {
+	_, ok := partnerApplicationAllowedStatuses[strings.TrimSpace(strings.ToLower(status))]
+	return ok
 }

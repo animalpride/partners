@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/animalpride/partners/services/core/internal/models"
 	"github.com/animalpride/partners/services/core/internal/repository"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 var phoneRegex = regexp.MustCompile(`^\+?[\d\s\-(). ]{7,20}$`)
@@ -130,7 +132,7 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 		CurrentStore:     req.CurrentStore,
 		Goals:            req.Goals,
 		Notes:            req.Notes,
-		DenopsSyncStatus: "pending",
+		DenopsSyncStatus: models.PartnerApplicationStatusPending,
 	}
 
 	if err := h.appRepo.Create(app); err != nil {
@@ -144,6 +146,74 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "application submitted"})
+}
+
+func (h *PartnerHandler) ListPendingApplications(c *gin.Context) {
+	limit := 50
+	if rawLimit := strings.TrimSpace(c.Query("limit")); rawLimit != "" {
+		parsed, err := strconv.Atoi(rawLimit)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
+			return
+		}
+		limit = parsed
+	}
+
+	apps, err := h.appRepo.ListByStatus(models.PartnerApplicationStatusPending, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch pending applications"})
+		return
+	}
+
+	c.JSON(http.StatusOK, apps)
+}
+
+func (h *PartnerHandler) UpdateApplicationStatus(c *gin.Context) {
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "application id is required"})
+		return
+	}
+
+	var req struct {
+		Status string `json:"status" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid payload"})
+		return
+	}
+
+	req.Status = strings.TrimSpace(strings.ToLower(req.Status))
+	if !models.IsValidPartnerApplicationStatus(req.Status) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status"})
+		return
+	}
+
+	if _, err := h.appRepo.GetByID(id); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch application"})
+		return
+	}
+
+	if err := h.appRepo.UpdateStatus(id, req.Status); err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "application not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update application status"})
+		return
+	}
+
+	updated, err := h.appRepo.GetByID(id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "status updated but failed to reload application"})
+		return
+	}
+
+	c.JSON(http.StatusOK, updated)
 }
 
 func parseCityState(value string) (string, string) {

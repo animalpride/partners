@@ -47,6 +47,11 @@ func SetupRouter(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	router.GET("/partners/locations/countries", locationHandler.GetCountries)
 	router.GET("/partners/locations/city-states", locationHandler.SearchCityStates)
 
+	external := router.Group("/partners/external")
+	external.Use(sharedmw.MachineAuthMiddleware(cfg.Auth.BaseURL))
+	external.GET("/applications/pending", middleware.RequireMachinePermission(cfg.Auth.BaseURL, "partners_applications", "read"), partnerHandler.ListPendingApplications)
+	external.PATCH("/applications/:id/status", middleware.RequireMachinePermission(cfg.Auth.BaseURL, "partners_applications", "write"), partnerHandler.UpdateApplicationStatus)
+
 	internal := router.Group("/partners/internal")
 	internal.Use(sharedmw.InternalAuthMiddleware(cfg.InternalAuth.Token))
 	internal.POST("/locations/refresh", locationHandler.RefreshLocations)

@@ -11,10 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AuthMiddleware validates the incoming Authorization bearer token or session
-// cookie by forwarding a GET /permissions request to the denops-auth service.
-// If the upstream returns HTTP 200, the request is allowed through.
-func AuthMiddleware(authBaseURL string) gin.HandlerFunc {
+func authMiddlewareForPath(authBaseURL, permissionPath string) gin.HandlerFunc {
 	client := &http.Client{Timeout: 3 * time.Second}
 	trimmedBase := strings.TrimRight(authBaseURL, "/")
 
@@ -40,7 +37,7 @@ func AuthMiddleware(authBaseURL string) gin.HandlerFunc {
 		req, err := http.NewRequestWithContext(
 			context.Background(),
 			http.MethodGet,
-			fmt.Sprintf("%s/permissions", trimmedBase),
+			fmt.Sprintf("%s%s", trimmedBase, permissionPath),
 			nil,
 		)
 		if err != nil {
@@ -72,4 +69,16 @@ func AuthMiddleware(authBaseURL string) gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// AuthMiddleware validates the incoming Authorization bearer token or session
+// cookie by forwarding a GET /permissions request to the denops-auth service.
+// If the upstream returns HTTP 200, the request is allowed through.
+func AuthMiddleware(authBaseURL string) gin.HandlerFunc {
+	return authMiddlewareForPath(authBaseURL, "/permissions")
+}
+
+// MachineAuthMiddleware validates only machine tokens by forwarding to GET /permissions/machine.
+func MachineAuthMiddleware(authBaseURL string) gin.HandlerFunc {
+	return authMiddlewareForPath(authBaseURL, "/permissions/machine")
 }

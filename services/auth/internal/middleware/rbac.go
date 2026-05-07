@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/animalpride/partners/services/auth/internal/repository"
 	"github.com/animalpride/partners/services/auth/internal/services"
@@ -32,16 +33,25 @@ func RBACMiddleware(rbacRepo *repository.RBACRepository, jwtService *services.JW
 			tokenString = cookieToken
 		}
 
-		// Validate token and get user ID
-		userID, err := jwtService.ValidateAccessToken(tokenString)
+		principalType, principalID, err := jwtService.ValidatePrincipalToken(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
 		}
 
-		// Store user ID in context for use in handlers
-		c.Set("user_id", userID)
+		c.Set("principal_type", principalType)
+		if principalType == "user" {
+			userID, err := strconv.Atoi(principalID)
+			if err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+				c.Abort()
+				return
+			}
+			c.Set("user_id", userID)
+		} else {
+			c.Set("client_id", principalID)
+		}
 		c.Next()
 	})
 }
