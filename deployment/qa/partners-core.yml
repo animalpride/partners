@@ -38,7 +38,7 @@ email:
   resend_api_key: "to_be_replaced_with_docker_secret"
   from_email: "noreply@animalpride.com"
   from_name: "Animal Pride"
-  partner_leads_to: "partners@animalpride.com"
+  partner_leads_to: "jeremy@animalpride.com"
   links:
     invite_base_url: "https://partners.octagon.home/accept-invitation"
     reset_base_url: "https://partners.octagon.home/reset-password"
