@@ -5,7 +5,7 @@ import {
 } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getPage, updatePage } from '../api'
+import { getPage, refreshLocations, updatePage } from '../api'
 import {
   CMS_PAGES, CONTAINER_SIZE_OPTIONS, CONTENT_WITH_IMAGE_SUPPORTED_TYPES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
   SECTION_ALIGNMENT_OPTIONS, SECTION_BACKGROUND_OPTIONS, SECTION_TYPES,
@@ -743,6 +743,13 @@ function ContentWithImageEditor({ section, sectionIndex, onChange }) {
 export function AdminPanel() {
   const navigate = useNavigate()
   const [adminSection, setAdminSection] = useState('content')
+  const [refreshingLocations, setRefreshingLocations] = useState(false)
+  const [refreshError, setRefreshError] = useState('')
+  const [refreshSuccess, setRefreshSuccess] = useState('')
+  const [refreshForm, setRefreshForm] = useState({
+    combined_url: '',
+    wait_seconds: '10',
+  })
 
   // Content Editor state
   const [selectedSlug, setSelectedSlug] = useState(CMS_PAGES[0].slug)
@@ -845,6 +852,54 @@ export function AdminPanel() {
     }
   }
 
+  async function runLocationRefresh() {
+    setRefreshError('')
+    setRefreshSuccess('')
+
+    let waitSeconds
+    if (String(refreshForm.wait_seconds || '').trim() !== '') {
+      waitSeconds = Number(refreshForm.wait_seconds)
+      if (!Number.isInteger(waitSeconds) || waitSeconds < 0) {
+        setRefreshError('Wait seconds must be a non-negative whole number.')
+        return
+      }
+    }
+
+    setRefreshingLocations(true)
+    try {
+      const payload = {}
+      if (String(refreshForm.combined_url || '').trim()) {
+        payload.combined_url = String(refreshForm.combined_url).trim()
+      }
+      if (waitSeconds !== undefined) {
+        payload.wait_seconds = waitSeconds
+      }
+
+      await refreshLocations(payload)
+      setRefreshSuccess('Location refresh completed successfully.')
+    } catch (err) {
+      setRefreshError(err.message || 'Failed to refresh location data')
+    } finally {
+      setRefreshingLocations(false)
+    }
+  }
+
+  function submitLocationRefresh(event) {
+    event.preventDefault()
+    if (refreshingLocations) return
+
+    Modal.confirm({
+      title: 'Run location refresh?',
+      content: 'This will reload countries, states, and cities in the database and replace existing lookup records.',
+      okText: 'Run Refresh',
+      cancelText: 'Cancel',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        await runLocationRefresh()
+      },
+    })
+  }
+
   // Add-section dropdown items
   const addSectionItems = {
     items: SECTION_TYPES.map((t) => ({ key: t.value, label: t.label })),
@@ -918,6 +973,7 @@ export function AdminPanel() {
             items={[
               { key: 'content', label: 'Content Editor' },
               { key: 'portals', label: 'Partner Portals' },
+              { key: 'operations', label: 'Operations' },
               { key: 'users', label: 'Users & Roles' },
               { key: 'oauth_clients', label: 'Machine Clients' },
             ]}
@@ -1080,6 +1136,50 @@ export function AdminPanel() {
               Manage partner portal configurations, custom branding, and access settings.
               This section is under construction.
             </Typography.Paragraph>
+          </div>
+        ) : null}
+
+        {adminSection === 'operations' ? (
+          <div className="admin-stub" style={{ maxWidth: 880 }}>
+            <Typography.Title level={3}>Operations</Typography.Title>
+            <Typography.Paragraph type="secondary">
+              Trigger operational tasks for the partners platform.
+            </Typography.Paragraph>
+
+            <Card title="Refresh Locations Database" style={{ marginTop: 12 }}>
+              <Typography.Paragraph type="secondary" style={{ marginBottom: 16 }}>
+                This runs the same location import used by deployment startup and repopulates countries, states, and cities.
+              </Typography.Paragraph>
+
+              <Form layout="vertical" onSubmitCapture={submitLocationRefresh}>
+                <Form.Item label="Combined Dataset URL (optional)">
+                  <Input
+                    placeholder="https://raw.githubusercontent.com/dr5hn/.../countries+states+cities.json"
+                    value={refreshForm.combined_url}
+                    onChange={(e) => setRefreshForm((prev) => ({ ...prev, combined_url: e.target.value }))}
+                  />
+                </Form.Item>
+                <Form.Item label="Lock Wait Seconds (optional)">
+                  <Input
+                    type="number"
+                    min={0}
+                    value={refreshForm.wait_seconds}
+                    onChange={(e) => setRefreshForm((prev) => ({ ...prev, wait_seconds: e.target.value }))}
+                  />
+                </Form.Item>
+
+                {refreshError ? (
+                  <Alert type="error" showIcon style={{ marginBottom: 12 }} message={refreshError} />
+                ) : null}
+                {refreshSuccess ? (
+                  <Alert type="success" showIcon style={{ marginBottom: 12 }} message={refreshSuccess} />
+                ) : null}
+
+                <Button type="primary" htmlType="submit" loading={refreshingLocations}>
+                  Run Location Refresh
+                </Button>
+              </Form>
+            </Card>
           </div>
         ) : null}
 

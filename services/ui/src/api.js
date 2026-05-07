@@ -160,6 +160,26 @@ export async function getLocationCityStates(countryCode, query, limit = 25) {
   return response.json()
 }
 
+export async function refreshLocations(payload = {}) {
+  const csrfToken = getCookie('csrf_token')
+  const response = await authFetch(`${CORE_BASE}/cms/admin/locations/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}))
+    throw new Error(body.error || 'Failed to refresh location data')
+  }
+
+  return response.json()
+}
+
 export async function getComingSoonState() {
   const response = await fetch(`${CORE_BASE}/site/coming-soon`, {
     credentials: 'include',
