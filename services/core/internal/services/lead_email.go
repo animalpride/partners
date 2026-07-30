@@ -36,7 +36,7 @@ func (s *LeadEmailService) SendPartnerLead(app *models.PartnerApplication) error
 		line2 = app.AddressLine2 + "\n"
 	}
 	body := fmt.Sprintf(
-		"A new partner application was submitted.\n\nOrganization: %s\nContact: %s\nEmail: %s\nPhone: %s\nAddress: %s\n%sCity: %s\nState: %s\nPostal Code: %s\nCountry: %s\nWebsite: %s\nMonthly Traffic: %s\nCurrent Store: %s\nGoals: %s\nNotes: %s\nSubmitted At: %s\n",
+		"A new partner application was submitted.\n\nOrganization: %s\nContact: %s\nEmail: %s\nPhone: %s\nAddress: %s\n%sCity: %s\nState: %s\nPostal Code: %s\nCountry: %s\nReferral Source: %s\nReferral Detail: %s\nSubmitted At: %s\n",
 		app.OrganizationName,
 		app.ContactName,
 		app.Email,
@@ -47,11 +47,8 @@ func (s *LeadEmailService) SendPartnerLead(app *models.PartnerApplication) error
 		app.State,
 		app.PostalCode,
 		app.Country,
-		emptyToDash(app.Website),
-		emptyToDash(app.MonthlyTraffic),
-		emptyToDash(app.CurrentStore),
-		emptyToDash(app.Goals),
-		emptyToDash(app.Notes),
+		app.ReferralSource,
+		app.ReferralDetail,
 		app.CreatedAt.UTC().Format("2006-01-02 15:04:05 MST"),
 	)
 
