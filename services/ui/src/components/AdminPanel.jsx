@@ -334,24 +334,28 @@ function ApplicationFormEditor({ section, sectionIndex, onChange }) {
             title={fieldDef?.label || dropdown.field || `Dropdown ${di + 1}`}
             extra={<Button size="small" danger type="text" onClick={() => removeDropdown(di)}>Remove</Button>}
           >
-            <div className="admin-form-row">
-              <Form.Item label="Maps to Field" style={{ flex: 1, marginBottom: 8 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>Maps to Field</Typography.Text>
                 <Select
                   size="small"
+                  style={{ flex: 1 }}
                   value={dropdown.field || undefined}
                   placeholder="Select a field"
                   options={APPLICATION_FORM_DROPDOWN_FIELDS.map((f) => ({ value: f.value, label: f.label }))}
                   onChange={(v) => updateDropdown(di, { field: v })}
                 />
-              </Form.Item>
-              <Form.Item label="Dropdown Heading" style={{ flex: 2, marginBottom: 8 }}>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>Dropdown Heading</Typography.Text>
                 <Input
                   size="small"
+                  style={{ flex: 1 }}
                   value={dropdown.heading || ''}
                   placeholder="e.g. How did you hear about us?"
                   onChange={(e) => updateDropdown(di, { heading: e.target.value })}
                 />
-              </Form.Item>
+              </div>
             </div>
             {(dropdown.options || []).map((opt, oi) => (
               <Card
@@ -361,34 +365,31 @@ function ApplicationFormEditor({ section, sectionIndex, onChange }) {
                 title={opt.label || `Option ${oi + 1}`}
                 extra={<Button size="small" danger type="text" onClick={() => removeOption(di, oi)}>Remove</Button>}
               >
-                <div className="admin-form-row">
-                  <Form.Item label="Display Label" style={{ flex: 2, marginBottom: 6 }}>
-                    <Input size="small" value={opt.label || ''} onChange={(e) => updateOption(di, oi, { label: e.target.value })} />
-                  </Form.Item>
-                  <Form.Item label="Stored Value" style={{ flex: 1, marginBottom: 6 }}>
-                    <Input size="small" value={opt.value || ''} placeholder="e.g. partner" onChange={(e) => updateOption(di, oi, { value: e.target.value })} />
-                  </Form.Item>
-                  {fieldDef?.detail_field ? (
-                    <Form.Item label="Requires Follow-up?" style={{ flex: 1, marginBottom: 6 }}>
+                {[
+                  { key: 'Display Label', control: <Input size="small" style={{ flex: 1 }} value={opt.label || ''} onChange={(e) => updateOption(di, oi, { label: e.target.value })} /> },
+                  { key: 'Stored Value',  control: <Input size="small" style={{ flex: 1 }} value={opt.value || ''} placeholder="e.g. partner" onChange={(e) => updateOption(di, oi, { value: e.target.value })} /> },
+                  fieldDef?.detail_field ? {
+                    key: 'Requires Follow-up?',
+                    control: (
                       <Select
                         size="small"
+                        style={{ flex: 1 }}
                         value={opt.requires_followup ? 'true' : 'false'}
                         options={[{ label: 'No', value: 'false' }, { label: 'Yes', value: 'true' }]}
                         onChange={(v) => updateOption(di, oi, { requires_followup: v === 'true' })}
                       />
-                    </Form.Item>
-                  ) : null}
-                </div>
-                {opt.requires_followup && fieldDef?.detail_field ? (
-                  <Form.Item label="Follow-up Prompt Label" style={{ marginBottom: 0 }}>
-                    <Input
-                      size="small"
-                      value={opt.followup_label || ''}
-                      placeholder="e.g. Please enter the partner name or referral code"
-                      onChange={(e) => updateOption(di, oi, { followup_label: e.target.value })}
-                    />
-                  </Form.Item>
-                ) : null}
+                    ),
+                  } : null,
+                  opt.requires_followup && fieldDef?.detail_field ? {
+                    key: 'Follow-up Prompt',
+                    control: <Input size="small" style={{ flex: 1 }} value={opt.followup_label || ''} placeholder="e.g. Enter the partner name or referral code" onChange={(e) => updateOption(di, oi, { followup_label: e.target.value })} />,
+                  } : null,
+                ].filter(Boolean).map((row) => (
+                  <div key={row.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>{row.key}</Typography.Text>
+                    {row.control}
+                  </div>
+                ))}
               </Card>
             ))}
             <Button size="small" style={{ marginTop: 4 }} onClick={() => addOption(di)}>+ Add Option</Button>
