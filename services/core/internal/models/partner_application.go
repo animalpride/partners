@@ -39,6 +39,8 @@ type PartnerApplication struct {
 	CurrentStore     string    `gorm:"size:255" json:"current_store"`
 	Goals            string    `gorm:"type:text" json:"goals"`
 	Notes            string    `gorm:"type:text" json:"notes"`
+	ReferralSource   string    `gorm:"size:100" json:"referral_source"`
+	ReferralDetail   string    `gorm:"type:text" json:"referral_detail"`
 	DenopsSyncStatus string    `gorm:"size:20;not null;default:pending" json:"denops_sync_status"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`

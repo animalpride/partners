@@ -1,6 +1,7 @@
 import { Alert, AutoComplete, Button, Card, Col, Form, Input, Row, Select, Space, Typography } from 'antd'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { getLocationCityStates, getLocationCountries, getPage, submitApplication } from '../api'
+import { APPLICATION_FORM_DROPDOWN_FIELDS } from '../cmsTypes'
 import { CMSPageView } from './CMSPageView'
 
 const PHONE_REGEX = /^\+?[\d\s\-(). ]{7,20}$/
@@ -22,6 +23,7 @@ const KNOWN_FIELD_NAMES = new Set([
   'address_line1', 'address_line2', 'city_state', 'city', 'state', 'state_code', 'postal_code',
   'country', 'country_code', 'city_lookup_id',
   'website', 'monthly_traffic', 'current_store', 'goals', 'notes',
+  'referral_source', 'referral_detail',
 ])
 
 const HIDDEN_LOCATION_FIELDS = new Set(['city', 'state', 'state_code', 'country_code', 'city_lookup_id'])
@@ -96,6 +98,7 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
       intro: '',
       submitLabel: 'Submit Application',
       fields: [],
+      dynamicDropdowns: [],
       configured: false,
     }),
     [],
@@ -152,6 +155,7 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
               intro: textSection?.body || '',
               submitLabel: 'Submit Application',
               fields: [],
+              dynamicDropdowns: [],
               configured: false,
             })
             setFormValues({})
@@ -164,13 +168,22 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
               : [],
           )
 
+          const dropdowns = Array.isArray(formSection.dynamic_dropdowns) ? formSection.dynamic_dropdowns : []
+          const ddInitial = { country_code: 'US' }
+          dropdowns.forEach((d) => {
+            if (d.field) ddInitial[d.field] = ''
+            const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === d.field)
+            if (fieldDef?.detail_field) ddInitial[fieldDef.detail_field] = ''
+          })
+
           setFormConfig({
             intro: textSection?.body || '',
             submitLabel: formSection.submit_label || 'Submit Application',
             fields: nextFields,
+            dynamicDropdowns: dropdowns,
             configured: true,
           })
-          setFormValues(buildInitialForm(nextFields, { country_code: 'US' }))
+          setFormValues(buildInitialForm(nextFields, ddInitial))
         } catch {
           setFormConfig(emptyConfig)
           setFormValues({})
@@ -203,6 +216,19 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
     if (!String(formValues.city_lookup_id || '').trim()) {
       newErrors.city_state = 'Please choose a city from the suggestions'
     }
+    formConfig.dynamicDropdowns.forEach((dropdown) => {
+      if (!dropdown.field || !(dropdown.options || []).length) return
+      if (!String(formValues[dropdown.field] || '').trim()) {
+        newErrors[dropdown.field] = `${dropdown.heading || 'This field'} is required`
+      }
+      const selectedOpt = (dropdown.options || []).find((o) => o.value === formValues[dropdown.field])
+      const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === dropdown.field)
+      if (selectedOpt?.requires_followup && fieldDef?.detail_field && !String(formValues[fieldDef.detail_field] || '').trim()) {
+        newErrors[fieldDef.detail_field] = selectedOpt.followup_label
+          ? `${selectedOpt.followup_label} is required`
+          : 'Please provide additional detail'
+      }
+    })
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
@@ -233,6 +259,8 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
         current_store: formValues.current_store || '',
         goals: formValues.goals || '',
         notes: formValues.notes || '',
+        referral_source: formValues.referral_source || '',
+        referral_detail: formValues.referral_detail || '',
       }
 
       const extraEntries = Object.entries(formValues).filter(
@@ -248,10 +276,13 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
 
       await submitApplication(payload)
       setStatus('Application submitted successfully.')
-      setFormValues(buildInitialForm(formConfig.fields, {
-        country: formValues.country,
-        country_code: formValues.country_code,
-      }))
+      const ddReset = { country: formValues.country, country_code: formValues.country_code }
+      formConfig.dynamicDropdowns.forEach((d) => {
+        if (d.field) ddReset[d.field] = ''
+        const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === d.field)
+        if (fieldDef?.detail_field) ddReset[fieldDef.detail_field] = ''
+      })
+      setFormValues(buildInitialForm(formConfig.fields, ddReset))
       setCityOptions([])
     } catch (err) {
       setStatus(err.message)
@@ -403,6 +434,55 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
                     </Form.Item>
                   </Col>
                 ))}
+
+                {/* ── Dynamic Dropdowns ── */}
+                {formConfig.dynamicDropdowns.map((dropdown, di) => {
+                  if (!dropdown.field || !(dropdown.options || []).length) return null
+                  const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === dropdown.field)
+                  const selectedOpt = (dropdown.options || []).find((o) => o.value === formValues[dropdown.field])
+                  return (
+                    <>
+                      <Col key={`dd-${di}`} xs={24}>
+                        <Form.Item
+                          label={dropdown.heading || fieldDef?.label || dropdown.field}
+                          required
+                          validateStatus={errors[dropdown.field] ? 'error' : ''}
+                          help={errors[dropdown.field] || undefined}
+                        >
+                          <Select
+                            placeholder="Select an option"
+                            value={formValues[dropdown.field] || undefined}
+                            options={(dropdown.options || []).map((o) => ({ value: o.value, label: o.label }))}
+                            onChange={(val) =>
+                              setFormValues((prev) => {
+                                const next = { ...prev, [dropdown.field]: val }
+                                if (fieldDef?.detail_field) next[fieldDef.detail_field] = ''
+                                return next
+                              })
+                            }
+                          />
+                        </Form.Item>
+                      </Col>
+                      {selectedOpt?.requires_followup && fieldDef?.detail_field ? (
+                        <Col key={`dd-${di}-detail`} xs={24}>
+                          <Form.Item
+                            label={selectedOpt.followup_label || 'Please provide more detail'}
+                            required
+                            validateStatus={errors[fieldDef.detail_field] ? 'error' : ''}
+                            help={errors[fieldDef.detail_field] || undefined}
+                          >
+                            <Input
+                              value={formValues[fieldDef.detail_field] || ''}
+                              onChange={(e) =>
+                                setFormValues((prev) => ({ ...prev, [fieldDef.detail_field]: e.target.value }))
+                              }
+                            />
+                          </Form.Item>
+                        </Col>
+                      ) : null}
+                    </>
+                  )
+                })}
               </Row>
 
               <Button type="primary" htmlType="submit" loading={loading}>

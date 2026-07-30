@@ -60,6 +60,8 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 		CurrentStore     string `json:"current_store"`
 		Goals            string `json:"goals"`
 		Notes            string `json:"notes"`
+		ReferralSource   string `json:"referral_source"`
+		ReferralDetail   string `json:"referral_detail"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -132,6 +134,8 @@ func (h *PartnerHandler) SubmitLead(c *gin.Context) {
 		CurrentStore:     req.CurrentStore,
 		Goals:            req.Goals,
 		Notes:            req.Notes,
+		ReferralSource:   req.ReferralSource,
+		ReferralDetail:   req.ReferralDetail,
 		DenopsSyncStatus: models.PartnerApplicationStatusPending,
 	}
 

@@ -2,7 +2,7 @@ import { Alert, Spin, Typography } from 'antd'
 import { useEffect, useMemo, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { getPage } from '../api'
-import { getContrastTextColor, normalizeContent } from '../cmsTypes'
+import { APPLICATION_FORM_BUILTIN_FIELDS, APPLICATION_FORM_DROPDOWN_FIELDS, getContrastTextColor, normalizeContent } from '../cmsTypes'
 
 const SITE_URL = 'https://partners.animalpride.com'
 const DEFAULT_OG_IMAGE = `${SITE_URL}/Logo-Wordmark-Dog-PartnersPlatform2.png`
@@ -20,19 +20,19 @@ const SLUG_TO_PATH = {
 
 
 const OVERLAY_JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' }
-const BTN_ROW_JUSTIFY  = { left: 'flex-start', center: 'center', right: 'flex-end' }
-const BULLET_ALIGN     = { left: 'flex-start', center: 'center', right: 'flex-end' }
+const BTN_ROW_JUSTIFY = { left: 'flex-start', center: 'center', right: 'flex-end' }
+const BULLET_ALIGN = { left: 'flex-start', center: 'center', right: 'flex-end' }
 const SECTION_INNER_CLS = {
   standard: 'cms-section-inner',
-  wide:     'cms-section-inner cms-section-inner--wide',
-  wider:    'cms-section-inner cms-section-inner--wider',
-  full:     'cms-section-inner cms-section-inner--full',
+  wide: 'cms-section-inner cms-section-inner--wide',
+  wider: 'cms-section-inner cms-section-inner--wider',
+  full: 'cms-section-inner cms-section-inner--full',
 }
 const ASPECT_CLASS_MAP = {
   '16/9': 'cms-img-placeholder--16-9',
-  '4/3':  'cms-img-placeholder--4-3',
-  '3/2':  'cms-img-placeholder--3-2',
-  '1/1':  'cms-img-placeholder--1-1',
+  '4/3': 'cms-img-placeholder--4-3',
+  '3/2': 'cms-img-placeholder--3-2',
+  '1/1': 'cms-img-placeholder--1-1',
 }
 
 // Parse inline markdown (**bold**, *italic*, _italic_) within a single line of text.
@@ -74,7 +74,7 @@ function renderButtons(buttons, alignment, sizeClass) {
           const variantCls = button.variant === 'primary' ? 'cms-cta-btn--primary' : 'cms-cta-btn--ghost'
           const visibilityCls =
             button.visibility === 'desktop' ? ' cms-btn--desktop-only' :
-            button.visibility === 'mobile' ? ' cms-btn--mobile-only' : ''
+              button.visibility === 'mobile' ? ' cms-btn--mobile-only' : ''
           return (
             <a
               key={i}
@@ -158,10 +158,10 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
           ? renderButtons(section.buttons, alignment, 'cms-cta-btn--lg')
           : (section.button_label && section.button_link
             ? <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'center' }}>
-                <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
-                  {section.button_label}
-                </a>
-              </div>
+              <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary cms-cta-btn--lg">
+                {section.button_label}
+              </a>
+            </div>
             : null)
         }
       </>
@@ -170,19 +170,64 @@ function SectionContent({ section, textColor, hasColor, embedded = false }) {
 
   // ── Application Form (preview only) ──────────────────────────────────────
   if (section.type === 'application_form') {
+    const labelStyle = { color: textColor, opacity: 0.55, fontSize: 12, margin: '8px 0 4px' }
     return W(
       <>
         {section.heading ? (
           <h2 className="cms-section-heading" style={{ color: textColor }}>{section.heading}</h2>
         ) : null}
-        <ul className="cms-bullets">
-          {(section.fields || []).map((field, i) => (
-            <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
-              <span className="cms-bullet-icon" style={{ color: bulletAccent }}>✓</span>
-              {field.label || field.name}{field.required ? ' *' : ''}
+
+        <p style={labelStyle}>Built-in fields — always present, not CMS-configurable:</p>
+        <ul className="cms-bullets" style={{ opacity: 0.5 }}>
+          {APPLICATION_FORM_BUILTIN_FIELDS.map((field) => (
+            <li key={field.name} className="cms-bullet-item" style={{ color: textColor }}>
+              <span className="cms-bullet-icon" style={{ color: bulletAccent }}>○</span>
+              {field.label}{field.required ? ' *' : ''}
             </li>
           ))}
         </ul>
+
+        {(section.fields || []).length > 0 ? (
+          <>
+            <p style={labelStyle}>Additional fields — CMS-configured:</p>
+            <ul className="cms-bullets">
+              {(section.fields || []).map((field, i) => (
+                <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
+                  <span className="cms-bullet-icon" style={{ color: bulletAccent }}>✓</span>
+                  {field.label || field.name}{field.required ? ' *' : ''}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
+        {(section.dynamic_dropdowns || []).length > 0
+          ? (section.dynamic_dropdowns || []).map((dropdown, di) => {
+            const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === dropdown.field)
+            return (
+              <div key={di}>
+                <p style={labelStyle}>
+                  {fieldDef?.label || dropdown.field} dropdown
+                  {dropdown.heading ? <em style={{ fontStyle: 'normal', opacity: 0.85 }}> — {dropdown.heading}</em> : null}
+                </p>
+                <ul className="cms-bullets">
+                  {(dropdown.options || []).map((opt, i) => (
+                    <li key={i} className="cms-bullet-item" style={{ color: textColor }}>
+                      <span className="cms-bullet-icon" style={{ color: bulletAccent }}>▾</span>
+                      {opt.label}
+                      {opt.requires_followup && fieldDef?.detail_field ? (
+                        <span style={{ opacity: 0.6, fontSize: 11 }}>
+                          {' → '}{opt.followup_label || '(follow-up required)'}
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )
+          })
+          : <p style={{ ...labelStyle, fontStyle: 'italic', opacity: 0.35 }}>No dynamic dropdowns configured.</p>
+        }
       </>
     )
   }
@@ -380,8 +425,8 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
                     ? <div style={{ marginTop: 16 }}>{renderButtons(section.buttons, alignment)}</div>
                     : (section.button_label && section.button_link
                       ? <div style={{ display: 'flex', justifyContent: BTN_ROW_JUSTIFY[alignment] || 'flex-start', marginTop: 16 }}>
-                          <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">{section.button_label}</a>
-                        </div>
+                        <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">{section.button_label}</a>
+                      </div>
                       : null)
                   }
                 </div>
@@ -459,10 +504,10 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
                 ? <div style={{ marginTop: 20 }}>{renderButtons(section.buttons, section.alignment || 'left')}</div>
                 : (section.button_label && section.button_link
                   ? <div className="cms-btn-row" style={{ alignItems: 'flex-start', marginTop: 20 }}>
-                      <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">
-                        {section.button_label}
-                      </a>
-                    </div>
+                    <a href={section.button_link} className="cms-cta-btn cms-cta-btn--primary">
+                      {section.button_label}
+                    </a>
+                  </div>
                   : null)
               }
             </div>
@@ -538,8 +583,8 @@ export function CMSContentRenderer({ sections, containerSize = 'standard' }) {
         // ── All other types via SectionContent ────────────────────────────
         const typeExtraClass =
           section.type === 'bullets' ? ' cms-section--bullets' :
-          section.type === 'buttons' ? ' cms-section--buttons' :
-          section.type === 'form_cta' ? ' cms-section--cta' : ''
+            section.type === 'buttons' ? ' cms-section--buttons' :
+              section.type === 'form_cta' ? ' cms-section--cta' : ''
         return (
           <section
             key={index}
