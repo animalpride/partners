@@ -275,7 +275,7 @@ export function ApplicationPage({ canEdit, refreshToken = 0 }) {
       }
 
       await submitApplication(payload)
-      setStatus('Application submitted successfully.')
+      setStatus('Application submitted successfully, Thank you and we will be in touch soon!')
       const ddReset = { country: formValues.country, country_code: formValues.country_code }
       formConfig.dynamicDropdowns.forEach((d) => {
         if (d.field) ddReset[d.field] = ''

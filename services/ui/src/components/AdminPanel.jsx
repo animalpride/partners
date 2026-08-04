@@ -367,7 +367,7 @@ function ApplicationFormEditor({ section, sectionIndex, onChange }) {
               >
                 {[
                   { key: 'Display Label', control: <Input size="small" style={{ flex: 1 }} value={opt.label || ''} onChange={(e) => updateOption(di, oi, { label: e.target.value })} /> },
-                  { key: 'Stored Value',  control: <Input size="small" style={{ flex: 1 }} value={opt.value || ''} placeholder="e.g. partner" onChange={(e) => updateOption(di, oi, { value: e.target.value })} /> },
+                  { key: 'Stored Value', control: <Input size="small" style={{ flex: 1 }} value={opt.value || ''} placeholder="e.g. partner" onChange={(e) => updateOption(di, oi, { value: e.target.value })} /> },
                   fieldDef?.detail_field ? {
                     key: 'Requires Follow-up?',
                     control: (
