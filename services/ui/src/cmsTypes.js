@@ -49,9 +49,9 @@ export const SECTION_ALIGNMENT_OPTIONS = [
 
 export const CONTAINER_SIZE_OPTIONS = [
   { label: 'Standard', value: 'standard' },
-  { label: 'Wide',     value: 'wide'     },
-  { label: 'Wider',    value: 'wider'    },
-  { label: 'Full',     value: 'full'     },
+  { label: 'Wide', value: 'wide' },
+  { label: 'Wider', value: 'wider' },
+  { label: 'Full', value: 'full' },
 ]
 
 export const IMAGE_POSITION_OPTIONS = [
@@ -87,6 +87,24 @@ export const FIELD_TYPE_OPTIONS = [
 
 export const ALLOWED_FIELD_TYPES = new Set(FIELD_TYPE_OPTIONS.map((o) => o.value))
 
+export const APPLICATION_FORM_DROPDOWN_FIELDS = [
+  { value: 'referral_source', label: 'Referral Source', detail_field: 'referral_detail' },
+  { value: 'monthly_traffic', label: 'Monthly Website Traffic', detail_field: null },
+  { value: 'current_store', label: 'Current Store / Platform', detail_field: null },
+]
+
+export const APPLICATION_FORM_BUILTIN_FIELDS = [
+  { name: 'organization_name', label: 'Organization Name', required: true },
+  { name: 'contact_name', label: 'Contact Name', required: true },
+  { name: 'email', label: 'Email', required: true },
+  { name: 'phone', label: 'Phone Number', required: true },
+  { name: 'address_line1', label: 'Address Line 1', required: true },
+  { name: 'address_line2', label: 'Address Line 2', required: false },
+  { name: 'country', label: 'Country', required: true },
+  { name: 'city_state', label: 'City / State', required: true },
+  { name: 'postal_code', label: 'Postal Code', required: true },
+]
+
 export function getContrastTextColor(background) {
   if (!background || !background.startsWith('#') || (background.length !== 7 && background.length !== 4)) {
     return '#121212'
@@ -111,6 +129,23 @@ export function normalizeField(field) {
     type: ALLOWED_FIELD_TYPES.has(field?.type) ? field.type : 'text',
     required: Boolean(field?.required),
     placeholder: String(field?.placeholder || '').trim(),
+  }
+}
+
+export function normalizeDropdownOption(opt) {
+  return {
+    value: String(opt?.value || '').trim(),
+    label: String(opt?.label || '').trim(),
+    requires_followup: Boolean(opt?.requires_followup),
+    followup_label: String(opt?.followup_label || '').trim(),
+  }
+}
+
+export function normalizeDropdown(d) {
+  return {
+    field: String(d?.field || '').trim(),
+    heading: String(d?.heading || '').trim(),
+    options: Array.isArray(d?.options) ? d.options.map(normalizeDropdownOption).filter((o) => o.value) : [],
   }
 }
 
@@ -172,6 +207,7 @@ export function makeDefaultSection(type = 'text') {
         { name: 'contact_name', label: 'Contact Name', type: 'text', required: true, placeholder: '' },
         { name: 'email', label: 'Email', type: 'email', required: true, placeholder: '' },
       ],
+      dynamic_dropdowns: [],
     }
   }
   if (type === 'image') {
@@ -248,6 +284,15 @@ export function normalizeSection(section) {
   if (normalized.type === 'application_form') {
     normalized.submit_label = String(normalized.submit_label || 'Submit Application')
     normalized.fields = Array.isArray(normalized.fields) ? normalized.fields.map(normalizeField).filter((f) => f.name) : []
+    // Migrate old referral_options format if dynamic_dropdowns not yet present
+    if (!Array.isArray(normalized.dynamic_dropdowns) || normalized.dynamic_dropdowns.length === 0) {
+      const legacy = Array.isArray(normalized.referral_options) ? normalized.referral_options : []
+      normalized.dynamic_dropdowns = legacy.length > 0
+        ? [{ field: 'referral_source', heading: String(normalized.referral_heading || ''), options: legacy.map(normalizeDropdownOption).filter((o) => o.value) }]
+        : []
+    } else {
+      normalized.dynamic_dropdowns = normalized.dynamic_dropdowns.map(normalizeDropdown).filter((d) => d.field)
+    }
   }
   if (normalized.type === 'image_grid') {
     normalized.items = Array.isArray(normalized.items) ? normalized.items.map(normalizeGridItem) : []

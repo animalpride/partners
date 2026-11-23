@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPage, refreshLocations, updatePage } from '../api'
 import {
-  CMS_PAGES, CONTAINER_SIZE_OPTIONS, CONTENT_WITH_IMAGE_SUPPORTED_TYPES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
+  APPLICATION_FORM_BUILTIN_FIELDS, APPLICATION_FORM_DROPDOWN_FIELDS, CMS_PAGES, CONTAINER_SIZE_OPTIONS, CONTENT_WITH_IMAGE_SUPPORTED_TYPES, FIELD_TYPE_OPTIONS, IMAGE_ASPECT_RATIO_OPTIONS, IMAGE_POSITION_OPTIONS,
   SECTION_ALIGNMENT_OPTIONS, SECTION_BACKGROUND_OPTIONS, SECTION_TYPES,
   TWO_COLUMN_IMAGE_SIDE_OPTIONS, TWO_COLUMN_VARIANT_OPTIONS,
   makeDefaultSection, normalizeComparisonRow, normalizeContent, normalizeField, normalizeGridItem, normalizeIconItem,
@@ -246,6 +246,37 @@ function ButtonsEditor({ section, sectionIndex, onChange }) {
 }
 
 function ApplicationFormEditor({ section, sectionIndex, onChange }) {
+  function addDropdown() {
+    onChange(sectionIndex, { dynamic_dropdowns: [...(section.dynamic_dropdowns || []), { field: '', heading: '', options: [] }] })
+  }
+  function updateDropdown(di, patch) {
+    onChange(sectionIndex, {
+      dynamic_dropdowns: (section.dynamic_dropdowns || []).map((d, i) => (i === di ? { ...d, ...patch } : d)),
+    })
+  }
+  function removeDropdown(di) {
+    onChange(sectionIndex, { dynamic_dropdowns: (section.dynamic_dropdowns || []).filter((_, i) => i !== di) })
+  }
+  function addOption(di) {
+    const next = (section.dynamic_dropdowns || []).map((d, i) =>
+      i === di ? { ...d, options: [...(d.options || []), { value: '', label: '', requires_followup: false, followup_label: '' }] } : d
+    )
+    onChange(sectionIndex, { dynamic_dropdowns: next })
+  }
+  function updateOption(di, oi, patch) {
+    // raw merge — no normalize — so spaces can be typed
+    const next = (section.dynamic_dropdowns || []).map((d, i) =>
+      i === di ? { ...d, options: (d.options || []).map((o, j) => (j === oi ? { ...o, ...patch } : o)) } : d
+    )
+    onChange(sectionIndex, { dynamic_dropdowns: next })
+  }
+  function removeOption(di, oi) {
+    const next = (section.dynamic_dropdowns || []).map((d, i) =>
+      i === di ? { ...d, options: (d.options || []).filter((_, j) => j !== oi) } : d
+    )
+    onChange(sectionIndex, { dynamic_dropdowns: next })
+  }
+
   function addField() {
     onChange(sectionIndex, {
       fields: [...(section.fields || []), { name: '', label: '', type: 'text', required: false, placeholder: '' }],
@@ -262,6 +293,24 @@ function ApplicationFormEditor({ section, sectionIndex, onChange }) {
 
   return (
     <>
+      {/* ── Built-in fields (read-only reference) ── */}
+      <Alert
+        type="info"
+        style={{ marginBottom: 12 }}
+        message={<strong>Built-in Form Fields</strong>}
+        description={
+          <div>
+            <p style={{ marginBottom: 6 }}>These fields are always present in the form and cannot be removed via the CMS:</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {APPLICATION_FORM_BUILTIN_FIELDS.map((f) => (
+                <Tag key={f.name} color="default">{f.label}{f.required ? ' *' : ''}</Tag>
+              ))}
+            </div>
+          </div>
+        }
+      />
+
+      {/* ── Submit label ── */}
       <Form.Item label="Submit Button Label" style={{ marginBottom: 8 }}>
         <Input
           size="small"
@@ -269,6 +318,91 @@ function ApplicationFormEditor({ section, sectionIndex, onChange }) {
           onChange={(e) => onChange(sectionIndex, { submit_label: e.target.value })}
         />
       </Form.Item>
+
+      {/* ── Dynamic Dropdowns ── */}
+      <Divider orientation="left" orientationMargin={0} style={{ marginTop: 4, marginBottom: 8, fontSize: 12 }}>Dynamic Dropdowns</Divider>
+      <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>
+        Configure dropdown fields placed after the form fields above. Each maps to a specific application field.
+      </Typography.Text>
+      {(section.dynamic_dropdowns || []).map((dropdown, di) => {
+        const fieldDef = APPLICATION_FORM_DROPDOWN_FIELDS.find((f) => f.value === dropdown.field)
+        return (
+          <Card
+            key={di}
+            size="small"
+            className="admin-sub-card"
+            title={fieldDef?.label || dropdown.field || `Dropdown ${di + 1}`}
+            extra={<Button size="small" danger type="text" onClick={() => removeDropdown(di)}>Remove</Button>}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>Maps to Field</Typography.Text>
+                <Select
+                  size="small"
+                  style={{ flex: 1 }}
+                  value={dropdown.field || undefined}
+                  placeholder="Select a field"
+                  options={APPLICATION_FORM_DROPDOWN_FIELDS.map((f) => ({ value: f.value, label: f.label }))}
+                  onChange={(v) => updateDropdown(di, { field: v })}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>Dropdown Heading</Typography.Text>
+                <Input
+                  size="small"
+                  style={{ flex: 1 }}
+                  value={dropdown.heading || ''}
+                  placeholder="e.g. How did you hear about us?"
+                  onChange={(e) => updateDropdown(di, { heading: e.target.value })}
+                />
+              </div>
+            </div>
+            {(dropdown.options || []).map((opt, oi) => (
+              <Card
+                key={oi}
+                size="small"
+                className="admin-sub-card"
+                title={opt.label || `Option ${oi + 1}`}
+                extra={<Button size="small" danger type="text" onClick={() => removeOption(di, oi)}>Remove</Button>}
+              >
+                {[
+                  { key: 'Display Label', control: <Input size="small" style={{ flex: 1 }} value={opt.label || ''} onChange={(e) => updateOption(di, oi, { label: e.target.value })} /> },
+                  { key: 'Stored Value', control: <Input size="small" style={{ flex: 1 }} value={opt.value || ''} placeholder="e.g. partner" onChange={(e) => updateOption(di, oi, { value: e.target.value })} /> },
+                  fieldDef?.detail_field ? {
+                    key: 'Requires Follow-up?',
+                    control: (
+                      <Select
+                        size="small"
+                        style={{ flex: 1 }}
+                        value={opt.requires_followup ? 'true' : 'false'}
+                        options={[{ label: 'No', value: 'false' }, { label: 'Yes', value: 'true' }]}
+                        onChange={(v) => updateOption(di, oi, { requires_followup: v === 'true' })}
+                      />
+                    ),
+                  } : null,
+                  opt.requires_followup && fieldDef?.detail_field ? {
+                    key: 'Follow-up Prompt',
+                    control: <Input size="small" style={{ flex: 1 }} value={opt.followup_label || ''} placeholder="e.g. Enter the partner name or referral code" onChange={(e) => updateOption(di, oi, { followup_label: e.target.value })} />,
+                  } : null,
+                ].filter(Boolean).map((row) => (
+                  <div key={row.key} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <Typography.Text type="secondary" style={{ fontSize: 11, minWidth: 110, flexShrink: 0 }}>{row.key}</Typography.Text>
+                    {row.control}
+                  </div>
+                ))}
+              </Card>
+            ))}
+            <Button size="small" style={{ marginTop: 4 }} onClick={() => addOption(di)}>+ Add Option</Button>
+          </Card>
+        )
+      })}
+      <Button size="small" style={{ marginTop: 4, marginBottom: 12 }} onClick={addDropdown}>+ Add Dropdown</Button>
+
+      {/* ── Additional CMS-configured fields ── */}
+      <Divider orientation="left" orientationMargin={0} style={{ marginTop: 0, marginBottom: 8, fontSize: 12 }}>Additional Fields (CMS-configured)</Divider>
+      <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12, marginBottom: 8 }}>
+        These fields appear in the form after the built-in fields above.
+      </Typography.Text>
       {(section.fields || []).map((field, fi) => (
         <Card
           key={fi}
@@ -805,13 +939,13 @@ export function AdminPanel() {
   }
   function moveSectionUp(index) {
     if (index <= 0) return
-    setSectionsDraft((prev) => { const a = [...prev]; [a[index - 1], a[index]] = [a[index], a[index - 1]]; return a })
+    setSectionsDraft((prev) => { const a = [...prev];[a[index - 1], a[index]] = [a[index], a[index - 1]]; return a })
     markDirty()
   }
   function moveSectionDown(index) {
     setSectionsDraft((prev) => {
       if (index >= prev.length - 1) return prev
-      const a = [...prev]; [a[index], a[index + 1]] = [a[index + 1], a[index]]; return a
+      const a = [...prev];[a[index], a[index + 1]] = [a[index + 1], a[index]]; return a
     })
     markDirty()
   }
